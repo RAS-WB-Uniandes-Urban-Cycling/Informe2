@@ -39,7 +39,9 @@ Se propone tener los datos en un servidor (por el momento la carpeta de OneDrive
         * GRAFICOS: Para guardar imágenes y otros resultados de visualización
         * TABLAS: Para almacenar tablas no georeferenciadas
         * GEO-DATA: Almacenamiento de datos georeferenciados particulares al proyecto
+        
   * BASES DE DATOS: La idea es almacenar aca todas las bases de datos que recibamos de parte de SDM, BM y cualquier otra que nosotros consigamos tal cual y la recibimos (original). La propuesta es nunca modificar las cosas sobre las mismas bases, sino construir el código de tal forma que lea los originales, los transforme como sea necesario y almacenar las cosas en la ubicación respectiva dentro de RESULTADOS. Con esto garantizamos que todos podamos acceder a la información de la forma como la recibimos y posteriormente que cuando le entreguemos algo a WB-SDM no vayamos a tener problemas de compatibilidad con el almacenamiento/estructura.
+  
       * Documentation RAS-SDM: Esta carpeta es una joya!, tiene absolutamente de todo incluyendo los manuales para entender las bases de datos, por favor revísenla. Adicionalmente sería muy bueno terminar de desarrollar la tabla de Diana y Jorge sobre la descripción de las bases y luego almacenarla dentro de la carpeta de MANUALES (al parecer Targa ya había hecho un intento de esto, ver: 20171755_Insumos_Info_Ciclistas_RAS.xlsx.
           * 0. MANUALES BASES DE DATOS: Documentos y aclaraciones sobre los datos y las bases
           * 1. BIG DATA MOTIVACION: Información sobre la conferencia que dio pie al contrato RAS
