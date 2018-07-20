@@ -28,9 +28,3 @@ AccidentesBici<-cbind(AccidentesBici,AccidentesCoords)
 
 #Almacenamiento de la tabla de datos----
 save(AccidentesBici,file=paste(carpetaRAS,"/RESULTADOS/SEGURIDAD/Bases de datos/AccidentesCoords.Rdata"))
-
-#Almaceniamiento del Shape geográfico de accidentes----
-pacman::p_load(sf)
-h<-na.omit(AccidentesBici)
-h <- st_as_sf(h, coords = c("lon", "lat"), crs = 4326)
-st_write(h,paste(carpetaRAS,"/RESULTADOS/SEGURIDAD/Bases de datos/GEODATA/AccidentesDespacio2011_2015/AccidentesDespacio.shp",sep=""),layer="Despacio11_15",driver="ESRI Shapefile")

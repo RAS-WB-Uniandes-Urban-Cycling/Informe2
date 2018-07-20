@@ -302,7 +302,7 @@ AccidentesBici$Gravedad[AccidentesBici$Gravedad=="Muerta"]<-"Dead"
 AccidentesBici$Gravedad[AccidentesBici$Gravedad=="Herida"]<-"Injured"
 AccidentesBici$Gravedad[AccidentesBici$Gravedad=="Herido Valorado"]<-"Injured\nNo Hospital\nCare"
 AccidentesBici$Gravedad[AccidentesBici$Gravedad=="Herido Hospitalizado"]<-"Injured\nHospital\nCare"
-AccidentesBici$Gravedad<-factor(AccidentesBici$Gravedad,c("Not injured","Injured","Injured\nNo Hospital\nCare","Injured\nHospital\nCare","Dead"))
+AccidentesBici$Gravedad<-factor(AccidentesBici$Gravedad,c("Not injured","Injured","Injured\nNo Hospital\nCare","Injured\nHospital\nCare","Dead"),ordered = TRUE)
 TotalAccidentesGravedad<-aggregate(AccidentesBici$Accidente,by=list(getYear(AccidentesBici$Accidentes.Fecha),AccidentesBici$Gravedad),FUN=length)
 TotalAccidentesGravedad %<>%
   group_by(Group.1) %>%
@@ -325,8 +325,8 @@ rm(h)
 AccidentesBici$Gravedad2[AccidentesBici$Gravedad=="Not injured"]<-"Not Dead"
 AccidentesBici$Gravedad2[AccidentesBici$Gravedad=="Dead"]<-"Dead"
 AccidentesBici$Gravedad2[AccidentesBici$Gravedad=="Injured"]<-"Not Dead"
-AccidentesBici$Gravedad2[AccidentesBici$Gravedad=="Injured\nNo Hospital Care"]<-"Not Dead"
-AccidentesBici$Gravedad2[AccidentesBici$Gravedad=="Injured\nHospital Care"]<-"Not Dead"
+AccidentesBici$Gravedad2[AccidentesBici$Gravedad=="Injured\nNo Hospital\nCare"]<-"Not Dead"
+AccidentesBici$Gravedad2[AccidentesBici$Gravedad=="Injured\nHospital\nCare"]<-"Not Dead"
 AccidentesBici$Gravedad2<-factor(AccidentesBici$Gravedad2,c("Not Dead","Dead"))
 TotalAccidentesGravedad<-aggregate(AccidentesBici$Accidente,by=list(getYear(AccidentesBici$Accidentes.Fecha),AccidentesBici$Gravedad2),FUN=length)
 TotalAccidentesGravedad %<>%
@@ -513,3 +513,7 @@ AccidentesBici$Accidentes.TipoTiempo[AccidentesBici$Accidentes.TipoTiempo=="Norm
 h<-aggregate(AccidentesBici$Accidente,by=list(AccidentesBici$Accidentes.TipoTiempo),FUN="length")
 h$y<-h$x/sum(h$x)
 h
+
+#-----
+save(AccidentesBici,file=paste(carpetaRAS,"/RESULTADOS/SEGURIDAD/Bases de datos/AccidentesBiciDesp2011_2015_AfterGraphs.Rdata",sep=""))
+
