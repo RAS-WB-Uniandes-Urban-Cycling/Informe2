@@ -100,8 +100,7 @@
 
   #Se guarda la Data (Resultados Consultas Google API)
     
-    save(datos_free_flow,datos_hora_pico_manana,datos_hora_pico_tarde,segmentos_resultantes_ruta_urbana,file="Resultados_Consultas_Google_API.Rdata")
-
+    save(datos_free_flow,datos_hora_pico_manana,datos_hora_pico_tarde,file=paste0(ruta_resultados,"Resultados_Consultas_Google_API.Rdata"))
 
 #Procesamiento resultados consultas Google API----
 
@@ -166,3 +165,11 @@
       
       datos_google_API$Trafico=1-(datos_google_API$TFF/pmin(datos_google_API$THPM,datos_google_API$THPT))
 
+      
+    #Se guarda la Data (Datos Procesados Consultas Google API)
+      
+      save(datos_google_API,file=paste0(ruta_resultados,"Datos_Procesados_Consultas_Google_API.Rdata"))
+      
+    #Se eliminan los datos que no se usaran
+      
+      rm(distancia,hora_pico_manana,hora_pico_tarde,datos_free_flow,datos_hora_pico_manana,datos_hora_pico_tarde)
