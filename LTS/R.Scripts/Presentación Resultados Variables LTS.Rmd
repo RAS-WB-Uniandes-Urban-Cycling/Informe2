@@ -1,0 +1,77 @@
+---
+output: 
+  ioslides_presentation:
+    widescreen: true
+    logo: "/Users/alejandropalacio/Desktop/Logo2.png"
+    template: quarterly-report.html
+    
+    
+
+---
+
+
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = FALSE)
+
+#Preparación del entorno de trabajo----
+
+library(tmaptools)
+library(tmap)
+library(sf)
+library(dplyr)
+
+ruta_resultados <-"/Users/alejandropalacio/Documents/GitHub/proBikePolicies/LTS/Resultados/"
+load(paste0(ruta_resultados,"Variables_LTS.Rdata"))
+
+#Se generan los mapas de cada variable
+
+mapa_Velocidad<-tm_shape(capa_variables_LTS)+tm_lines(col="Vprom",style ="pretty" ,scale=5 ,palette = get_brewer_pal("Reds",6,plot = F) ,title.col ="Velocidad Promedio", textNA = "No", colorNA = "Red")+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
+
+
+
+```
+---
+title: "LTS"
+author: "Alejandro Palacio & Marcelo Botero"
+date: "21/7/2018"
+
+
+---
+
+
+
+## Agenda
+
+- Variable Velocidad
+- Variable Trafico
+- Variable Ancho de la via
+- Variable Numero de Carriles
+- Variable CicloRuta
+- Variable SITP
+
+```{r,echo = FALSE}
+
+htmltools::img(src = knitr::image_uri("/Users/alejandropalacio/Desktop/Logo.png"), alt = 'logo', style = 'position:absolute; top:0; right:0;padding:40px',width="200px")
+```
+
+
+## Variable Velocidad
+
+```{r,echo = FALSE,fig.align="center"}
+
+htmltools::img(src = knitr::image_uri("/Users/alejandropalacio/Desktop/Logo.png"), alt = 'logo', style = 'position:absolute; top:0; right:0;padding:40px',width="200px")
+mapa_Velocidad
+
+```
+
+## Variable Velocidad
+
+```{r,echo = FALSE,fig.align="center"}
+
+htmltools::img(src = knitr::image_uri("/Users/alejandropalacio/Desktop/Logo.png"), alt = 'logo', style = 'position:absolute; top:0; right:0;padding:40px',width="200px")
+summary(capa_variables_LTS$Vprom)
+boxplot(capa_variables_LTS$Vprom, col = "lightskyblue", main="Velocidad", ylab="Velocidad")
+
+```

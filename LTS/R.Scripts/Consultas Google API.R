@@ -16,7 +16,7 @@
 
   #Se crean los Data Frame para almacenar los resultados de las consultas
     
-    numero_registros <- nrow(malla_vial)
+    numero_registros <- nrow(capa_malla_vial)
     
     datos_free_flow<-as.data.frame(matrix(nrow=numero_registros,ncol=6))
     datos_hora_pico_manana<-as.data.frame(matrix(nrow=numero_registros,ncol=3))
@@ -32,8 +32,8 @@
       
       #Se define el origen y destino de la consulta
       
-        origen=paste(toString(malla_vial$Latitud_Inicio[i]) ,"+", toString(malla_vial$Longitud_Inicio [i]))
-        destino=paste(toString(malla_vial$Latitud_Fin[i]) ,"+", toString(malla_vial$Longitud_Fin[i]))
+        origen=paste(toString(capa_malla_vial$Latitud_Inicio[i]) ,"+", toString(capa_malla_vial$Longitud_Inicio [i]))
+        destino=paste(toString(capa_malla_vial$Latitud_Fin[i]) ,"+", toString(capa_malla_vial$Longitud_Fin[i]))
       
       #Consultas Free Flow
       

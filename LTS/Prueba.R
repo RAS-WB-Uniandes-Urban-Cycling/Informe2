@@ -351,8 +351,6 @@ library(lwgeom)
         
         capa_malla_vial$SITP[is.na(capa_malla_vial$SITP)] <- 0
         
-        
-            
 #Clustering 
       
         library(cluster)
@@ -615,7 +613,7 @@ barplot(ciclo_resumen,col=c("white","lightskyblue"))
 
 #CalAncho
 
-estadisticas_ancho<-st_set_geometry(capa_LTS,NULL)  %>% transmute(CalAncho)%>% summary()
+estadisticas_ancho<-
 estadisticas_ancho
 
 boxplot(capa_LTS$CalAncho, col = "lightskyblue", main="Ancho de la Vía", ylab="Ancho (m)")
