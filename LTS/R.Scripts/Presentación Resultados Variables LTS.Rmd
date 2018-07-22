@@ -1,10 +1,9 @@
 ---
-output: 
-  ioslides_presentation:
-    widescreen: true
+    title: "LTS"
+    author: "Alejandro Palacio & Marcelo Botero"
+    date: "21/7/2018"
     logo: "/Users/alejandropalacio/Desktop/Logo2.png"
-    template: quarterly-report.html
-    
+    output: ioslides_presentation
 
 ---
 
@@ -20,28 +19,26 @@ library(tmaptools)
 library(tmap)
 library(sf)
 library(dplyr)
-library(googleway)
 
 
 ruta_resultados <-"/Users/alejandropalacio/Documents/GitHub/proBikePolicies/LTS/Resultados/"
 load(paste0(ruta_resultados,"Variables_LTS.Rdata"))
 
+
 #Se generan los mapas de cada variable
 
-mapa_Velocidad<-tm_shape(capa_variables_LTS)+tm_lines(col="Vprom",style ="pretty" ,scale=5 ,palette = get_brewer_pal("Reds",6,plot = F) ,title.col ="Velocidad Promedio", textNA = "No", colorNA = "Red")+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
+mapa_Velocidad<-tm_shape(capa_variables_LTS)+tm_lines(col="Vprom",style ="pretty" ,scale=5 ,palette = "Reds" ,title.col ="Velocidad Promedio", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
 
+mapa_Trafico<-tm_shape(capa_variables_LTS)+tm_lines(col="Trafico",style ="pretty" ,scale=5 ,palette = "Reds" ,title.col ="Velocidad Promedio", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
 
+mapa_Ancho<-tm_shape(capa_variables_LTS)+tm_lines(col="Ancho",style ="pretty" ,scale=5 ,palette = "-RdYlGn" ,title.col ="Velocidad Promedio", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
 
+mapa_Carriles<-tm_shape(capa_variables_LTS)+tm_lines(col="Ancho",style ="pretty" ,scale=5 ,palette = "-RdYlGn" ,title.col ="Velocidad Promedio", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
+
+mapa_CicloRuta<-tm_shape(capa_variables_LTS)+tm_lines(col="Ancho",style ="pretty" ,scale=5 ,palette = "RdYlGn" ,title.col ="Velocidad Promedio", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
+
+mapa_SITP<-tm_shape(capa_variables_LTS)+tm_lines(col="Vprom",style ="pretty" ,scale=5 ,palette = get_brewer_pal("RdYlGn",6,plot = F) ,title.col ="Velocidad Promedio", textNA = "No", colorNA = "Red")+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
 ```
----
-title: "LTS"
-author: "Alejandro Palacio & Marcelo Botero"
-date: "21/7/2018"
-
-
----
-
-
 
 ## Agenda
 
@@ -52,28 +49,59 @@ date: "21/7/2018"
 - Variable CicloRuta
 - Variable SITP
 
-```{r,echo = FALSE}
-
-htmltools::img(src = knitr::image_uri("/Users/alejandropalacio/Desktop/Logo.png"), alt = 'logo', style = 'position:absolute; top:0; right:0;padding:40px',width="200px")
-```
-
 
 ## Variable Velocidad
 
-```{r,echo = FALSE,fig.align="center"}
+```{r,echo = FALSE,fig.align='right'}
 
-htmltools::img(src = knitr::image_uri("/Users/alejandropalacio/Desktop/Logo.png"), alt = 'logo', style = 'position:absolute; top:0; right:0;padding:40px',width="200px")
 mapa_Velocidad
 
-
 ```
 
 ## Variable Velocidad
 
 ```{r,echo = FALSE,fig.align="center"}
 
-htmltools::img(src = knitr::image_uri("/Users/alejandropalacio/Desktop/Logo.png"), alt = 'logo', style = 'position:absolute; top:0; right:0;padding:40px',width="200px")
 summary(capa_variables_LTS$Vprom)
 boxplot(capa_variables_LTS$Vprom, col = "lightskyblue", main="Velocidad", ylab="Velocidad")
 
 ```
+
+## Variable Velocidad
+
+```{r,echo = FALSE,fig.align="center"}
+
+hist(capa_variables_LTS$Vprom, col = "lightskyblue", xlab="Velocidad",ylab="Frecuencia", main = "Velocidad Promedio") 
+
+```
+
+## Variable Trafico
+
+```{r,echo = FALSE,fig.align="center"}
+
+mapa_Trafico
+
+```
+
+## Variable Trafico
+
+```{r,echo = FALSE,fig.align="center"}
+
+summary(capa_variables_LTS$Trafico)
+boxplot(capa_variables_LTS$Trafico, col = "lightskyblue", main="Trafico", ylab="Trafico")
+
+```
+
+## Variable Trafico
+
+```{r,echo = FALSE,fig.align="center"}
+
+hist(capa_variables_LTS$Trafico, col = "lightskyblue", xlab="Trafico",ylab="Frecuencia", main = "Trafico") 
+
+```
+
+
+
+
+
+
