@@ -18,6 +18,7 @@ library(tmaptools)
 library(tmap)
 library(sf)
 library(dplyr)
+library(knitr)
 
 #Alejandro
 #ruta_resultados <-"/Users//Documents/GitHub/proBikePolicies/LTS/Resultados/"
@@ -66,7 +67,7 @@ mapa_Velocidad
 ```{r,echo = FALSE,fig.align="center"}
 
 summary(capa_variables_LTS$Vprom)
-boxplot(capa_variables_LTS$Vprom, col = "lightskyblue", main="Velocidad", ylab="Velocidad")
+boxplot(capa_variables_LTS$Vprom, col = "lightskyblue", main="Velocidad", ylab="Velocidad (km/h)")
 
 ```
 
@@ -78,7 +79,7 @@ hist(capa_variables_LTS$Vprom, col = "lightskyblue", xlab="Velocidad",ylab="Frec
 
 ```
 
-## Variable Trafico
+## Variable Tráfico
 
 ```{r,echo = FALSE,fig.align="center"}
 
@@ -86,23 +87,47 @@ mapa_Trafico
 
 ```
 
-## Variable Trafico
+## Variable Tráfico
 
 ```{r,echo = FALSE,fig.align="center"}
 
 summary(capa_variables_LTS$Trafico)
-boxplot(capa_variables_LTS$Trafico, col = "lightskyblue", main="Trafico", ylab="Trafico")
+boxplot(capa_variables_LTS$Trafico, col = "lightskyblue", main="Tráfico", ylab="Índice Tráfico")
 
 ```
 
-## Variable Trafico
+## Variable Tráfico
 
 ```{r,echo = FALSE,fig.align="center"}
 
-hist(capa_variables_LTS$Trafico, col = "lightskyblue", xlab="Trafico",ylab="Frecuencia", main = "Trafico") 
+hist(capa_variables_LTS$Trafico, col = "lightskyblue", xlab="Tráfico",ylab="Frecuencia", main = "Tráfico") 
 
 ```
 
+## Variable Ancho de la Vía
+
+```{r,echo = FALSE,fig.align="center"}
+
+mapa_Ancho
+
+```
+
+## Variable Ancho de la Vía
+
+```{r,echo = FALSE,fig.align="center"}
+
+summary(capa_variables_LTS$Ancho)
+boxplot(capa_variables_LTS$Ancho, col = "lightskyblue", main="Ancho Vía", ylab="Ancho (m)")
+
+```
+
+## Variable Ancho de Vía
+
+```{r,echo = FALSE,fig.align="center"}
+
+hist(capa_variables_LTS$Ancho, col = "lightskyblue", xlab="Ancho",ylab="Frecuencia", main = "Tráfico") 
+
+```
 
 
 
