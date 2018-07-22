@@ -2,7 +2,7 @@
     title: "LTS"
     author: "Alejandro Palacio & Marcelo Botero"
     date: "21/7/2018"
-    logo: "/Users/alejandropalacio/Desktop/Logo2.png"
+    #logo: "/Users/alejandropalacio/Desktop/Logo2.png"
     output: ioslides_presentation
 
 ---
@@ -19,7 +19,12 @@ library(tmap)
 library(sf)
 library(dplyr)
 
-ruta_resultados <-"/Users/alejandropalacio/Documents/GitHub/proBikePolicies/LTS/Resultados/"
+#Alejandro
+#ruta_resultados <-"/Users//Documents/GitHub/proBikePolicies/LTS/Resultados/"
+
+#Marcelo  
+ruta_resultados <-"C:/Users/marce/Documents/GitHub/proBikePolicies/LTS/Resultados/"
+
 load(paste0(ruta_resultados,"Variables_LTS.Rdata"))
 
 #Se generan los mapas de cada variable
