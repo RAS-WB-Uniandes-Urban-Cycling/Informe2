@@ -5,7 +5,6 @@ output:
     logo: "/Users/alejandropalacio/Desktop/Logo2.png"
     template: quarterly-report.html
     
-    
 
 ---
 
@@ -21,6 +20,8 @@ library(tmaptools)
 library(tmap)
 library(sf)
 library(dplyr)
+library(googleway)
+
 
 ruta_resultados <-"/Users/alejandropalacio/Documents/GitHub/proBikePolicies/LTS/Resultados/"
 load(paste0(ruta_resultados,"Variables_LTS.Rdata"))
@@ -63,6 +64,7 @@ htmltools::img(src = knitr::image_uri("/Users/alejandropalacio/Desktop/Logo.png"
 
 htmltools::img(src = knitr::image_uri("/Users/alejandropalacio/Desktop/Logo.png"), alt = 'logo', style = 'position:absolute; top:0; right:0;padding:40px',width="200px")
 mapa_Velocidad
+
 
 ```
 
