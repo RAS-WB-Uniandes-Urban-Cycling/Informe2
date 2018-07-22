@@ -8,7 +8,6 @@
 ---
 
 
-
 ```{r setup, include=FALSE}
 
 knitr::opts_chunk$set(echo = FALSE)
@@ -20,10 +19,8 @@ library(tmap)
 library(sf)
 library(dplyr)
 
-
 ruta_resultados <-"/Users/alejandropalacio/Documents/GitHub/proBikePolicies/LTS/Resultados/"
 load(paste0(ruta_resultados,"Variables_LTS.Rdata"))
-
 
 #Se generan los mapas de cada variable
 
@@ -38,6 +35,7 @@ mapa_Carriles<-tm_shape(capa_variables_LTS)+tm_lines(col="Ancho",style ="pretty"
 mapa_CicloRuta<-tm_shape(capa_variables_LTS)+tm_lines(col="Ancho",style ="pretty" ,scale=5 ,palette = "RdYlGn" ,title.col ="Velocidad Promedio", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
 
 mapa_SITP<-tm_shape(capa_variables_LTS)+tm_lines(col="Vprom",style ="pretty" ,scale=5 ,palette = get_brewer_pal("RdYlGn",6,plot = F) ,title.col ="Velocidad Promedio", textNA = "No", colorNA = "Red")+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
+
 ```
 
 ## Agenda
