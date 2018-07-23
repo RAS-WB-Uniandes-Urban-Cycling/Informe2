@@ -1,0 +1,197 @@
+---
+    title: "LTS"
+    author: "Alejandro Palacio & Marcelo Botero"
+    date: "21/7/2018"
+    #logo: "/Users/alejandropalacio/Desktop/Logo2.png"
+    output: ioslides_presentation
+
+---
+
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = FALSE)
+
+#Preparación del entorno de trabajo----
+
+library(tmaptools)
+library(tmap)
+library(sf)
+library(dplyr)
+library(knitr)
+library(plotrix)
+
+#Alejandro
+ruta_resultados <-"/Users/alejandropalacio/Documents/GitHub/proBikePolicies/LTS/Resultados/"
+
+#Marcelo  
+#ruta_resultados <-"C:/Users/marce/Documents/GitHub/proBikePolicies/LTS/Resultados/"
+
+load(paste0(ruta_resultados,"Variables_LTS.Rdata"))
+
+#Se generan los mapas de cada variable
+
+mapa_Velocidad<-tm_shape(capa_variables_LTS)+tm_lines(col="Vprom",style ="pretty" ,scale=5 ,palette = "Reds" ,title.col ="Velocidad Promedio", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
+
+mapa_Trafico<-tm_shape(capa_variables_LTS)+tm_lines(col="Trafico",style ="pretty" ,scale=5 ,palette = "YlOrRd" ,title.col ="Tráfico", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
+
+mapa_Ancho<-tm_shape(capa_variables_LTS)+tm_lines(col="Ancho",style ="pretty" ,scale=5 ,palette = "BuGn" ,title.col ="Ancho de la Vía", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
+
+mapa_Carriles<-tm_shape(capa_variables_LTS)+tm_lines(col="Carriles",style ="cat" ,scale=5 ,palette = "PuRd" ,title.col ="Número de Carriles", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
+
+mapa_CicloRuta<-tm_shape(capa_variables_LTS)+tm_lines(col="CicloRuta",style ="cat" ,scale=5 ,palette ="-Set1",title.col ="Presencia de Cicloruta", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
+
+mapa_SITP<-tm_shape(capa_variables_LTS)+tm_lines(col="SITP",style ="cat" ,scale=5 ,palette ="-Set1",title.col ="Presencia de SITP", textNA = "No", colorNA = "Red")+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
+
+```
+
+## Agenda
+
+- Variable Velocidad
+- Variable Tráfico
+- Variable Ancho de la vía
+- Variable Número de Carriles
+- Variable CicloRuta
+- Variable SITP
+
+
+## Variable Velocidad
+
+```{r,echo = FALSE,fig.align='right'}
+
+mapa_Velocidad
+
+```
+
+## Variable Velocidad
+
+```{r,echo = FALSE,fig.align="center"}
+
+summary(capa_variables_LTS$Vprom)
+boxplot(capa_variables_LTS$Vprom, col = "lightskyblue", main="Velocidad", ylab="Velocidad (km/h)")
+
+```
+
+## Variable Velocidad
+
+```{r,echo = FALSE,fig.align="center"}
+
+hist(capa_variables_LTS$Vprom, col = "lightskyblue", xlab="Velocidad",ylab="Frecuencia", main = "Histograma Velocidad Promedio") 
+
+```
+
+## Variable Tráfico
+
+```{r,echo = FALSE,fig.align="center"}
+
+mapa_Trafico
+
+```
+
+## Variable Tráfico
+
+```{r,echo = FALSE,fig.align="center"}
+
+summary(capa_variables_LTS$Trafico)
+boxplot(capa_variables_LTS$Trafico, col = "lightskyblue", main="Tráfico", ylab="Índice Tráfico")
+
+```
+
+## Variable Tráfico
+
+```{r,echo = FALSE,fig.align="center"}
+
+hist(capa_variables_LTS$Trafico, col = "lightskyblue", xlab="Tráfico",ylab="Frecuencia", main = "Histograma Tráfico") 
+
+```
+
+## Variable Ancho de la Vía
+
+```{r,echo = FALSE,fig.align="center"}
+
+mapa_Ancho
+
+```
+
+## Variable Ancho de la Vía
+
+```{r,echo = FALSE,fig.align="center"}
+
+summary(capa_variables_LTS$Ancho)
+boxplot(capa_variables_LTS$Ancho, col = "lightskyblue", main="Ancho Vía", ylab="Ancho (m)")
+
+```
+
+## Variable Ancho de Vía
+
+```{r,echo = FALSE,fig.align="center"}
+
+hist(capa_variables_LTS$Ancho, col = "lightskyblue", xlab="Ancho",ylab="Frecuencia", main = "Histograma Ancho de la Vía") 
+
+```
+
+## Variable Número Carriles
+
+```{r,echo = FALSE,fig.align='right'}
+
+mapa_Carriles
+
+```
+
+## Variable Número Carriles
+
+```{r,echo = FALSE,fig.align="center"}
+
+summary(capa_variables_LTS$Carriles)
+boxplot(capa_variables_LTS$Carriles, col = "lightskyblue", main="Número de Carriles", ylab="Número de Carriles")
+
+```
+
+## Variable Número Carriles
+
+```{r,echo = FALSE,fig.align="center"}
+
+hist(capa_variables_LTS$Carriles, col = "lightskyblue", xlab="Número de Carriles",ylab="Frecuencia", main = "Histograma Número de Carriles") 
+
+```
+
+## Variable Presencia CicloRuta
+
+```{r,echo = FALSE,fig.align='right'}
+
+mapa_CicloRuta
+
+```
+
+## Variable Presencia CicloRuta
+
+```{r,include=FALSE}
+resultados_CicloRuta <- as.data.frame(table(capa_variables_LTS$CicloRuta))
+```
+
+```{r,echo = FALSE,fig.align="center"}
+
+pie3D(resultados_CicloRuta$Freq,labels = c(paste("No: ",resultados_CicloRuta$Freq[1]),paste("Si: ",resultados_CicloRuta$Freq[2])))
+
+```
+
+## Variable Presencia SITP
+
+```{r,echo = FALSE,fig.align='right'}
+
+mapa_SITP
+
+```
+
+## Variable Presencia SITP
+
+```{r,include=FALSE}
+resultados_SITP <- as.data.frame(table(capa_variables_LTS$SITP))
+```
+
+```{r,echo = FALSE,fig.align="center"}
+
+pie3D(resultados_CicloRuta$Freq,labels = c(paste("No: ",resultados_SITP$Freq[1]),paste("Si: ",resultados_SITP$Freq[2])))
+
+```
+
