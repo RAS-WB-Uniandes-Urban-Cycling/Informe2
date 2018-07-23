@@ -32,24 +32,25 @@ load(paste0(ruta_resultados,"Variables_LTS.Rdata"))
 
 mapa_Velocidad<-tm_shape(capa_variables_LTS)+tm_lines(col="Vprom",style ="pretty" ,scale=5 ,palette = "Reds" ,title.col ="Velocidad Promedio", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
 
-mapa_Trafico<-tm_shape(capa_variables_LTS)+tm_lines(col="Trafico",style ="pretty" ,scale=5 ,palette = "Reds" ,title.col ="Velocidad Promedio", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
+mapa_Trafico<-tm_shape(capa_variables_LTS)+tm_lines(col="Trafico",style ="pretty" ,scale=5 ,palette = "YlOrRd" ,title.col ="Tráfico", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
 
-mapa_Ancho<-tm_shape(capa_variables_LTS)+tm_lines(col="Ancho",style ="pretty" ,scale=5 ,palette = "-RdYlGn" ,title.col ="Velocidad Promedio", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
+mapa_Ancho<-tm_shape(capa_variables_LTS)+tm_lines(col="Ancho",style ="pretty" ,scale=5 ,palette = "BuGn" ,title.col ="Ancho de la Vía", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
 
-mapa_Carriles<-tm_shape(capa_variables_LTS)+tm_lines(col="Ancho",style ="pretty" ,scale=5 ,palette = "-RdYlGn" ,title.col ="Velocidad Promedio", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
+mapa_Carriles<-tm_shape(capa_variables_LTS)+tm_lines(col="Carriles",style ="pretty" ,scale=5 ,palette = "PuRd" ,title.col ="Número de Carriles", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
 
-mapa_CicloRuta<-tm_shape(capa_variables_LTS)+tm_lines(col="Ancho",style ="pretty" ,scale=5 ,palette = "RdYlGn" ,title.col ="Velocidad Promedio", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
+mapa_CicloRuta<-tm_shape(capa_variables_LTS)+tm_lines(col="CicloRuta",style ="pretty" ,scale=5 ,palette = get_brewer_pal("-Set1",2,plot = F) ,title.col ="Presencia de Cicloruta", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
 
-mapa_SITP<-tm_shape(capa_variables_LTS)+tm_lines(col="Vprom",style ="pretty" ,scale=5 ,palette = get_brewer_pal("RdYlGn",6,plot = F) ,title.col ="Velocidad Promedio", textNA = "No", colorNA = "Red")+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
+mapa_SITP<-tm_shape(capa_variables_LTS)+tm_lines(col="SITP",style ="pretty" ,scale=5 ,palette = get_brewer_pal("Dark2",2,plot = F) ,title.col ="Presencia de SITP", textNA = "No", colorNA = "Red")+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
 
-```
+  ```
+
 
 ## Agenda
 
 - Variable Velocidad
-- Variable Trafico
-- Variable Ancho de la via
-- Variable Numero de Carriles
+- Variable Tráfico
+- Variable Ancho de la vía
+- Variable Número de Carriles
 - Variable CicloRuta
 - Variable SITP
 
@@ -75,7 +76,7 @@ boxplot(capa_variables_LTS$Vprom, col = "lightskyblue", main="Velocidad", ylab="
 
 ```{r,echo = FALSE,fig.align="center"}
 
-hist(capa_variables_LTS$Vprom, col = "lightskyblue", xlab="Velocidad",ylab="Frecuencia", main = "Velocidad Promedio") 
+hist(capa_variables_LTS$Vprom, col = "lightskyblue", xlab="Velocidad",ylab="Frecuencia", main = "Histograma Velocidad Promedio") 
 
 ```
 
@@ -100,7 +101,7 @@ boxplot(capa_variables_LTS$Trafico, col = "lightskyblue", main="Tráfico", ylab="
 
 ```{r,echo = FALSE,fig.align="center"}
 
-hist(capa_variables_LTS$Trafico, col = "lightskyblue", xlab="Tráfico",ylab="Frecuencia", main = "Tráfico") 
+hist(capa_variables_LTS$Trafico, col = "lightskyblue", xlab="Tráfico",ylab="Frecuencia", main = "Histograma Tráfico") 
 
 ```
 
@@ -125,11 +126,34 @@ boxplot(capa_variables_LTS$Ancho, col = "lightskyblue", main="Ancho Vía", ylab="
 
 ```{r,echo = FALSE,fig.align="center"}
 
-hist(capa_variables_LTS$Ancho, col = "lightskyblue", xlab="Ancho",ylab="Frecuencia", main = "Tráfico") 
+hist(capa_variables_LTS$Ancho, col = "lightskyblue", xlab="Ancho",ylab="Frecuencia", main = "Histograma Ancho de la Vía") 
 
 ```
 
+## Variable Número Carriles
 
+```{r,echo = FALSE,fig.align='right'}
+
+mapa_CicloRuta
+
+```
+
+## Variable Velocidad
+
+```{r,echo = FALSE,fig.align="center"}
+
+summary(capa_variables_LTS$Vprom)
+boxplot(capa_variables_LTS$Vprom, col = "lightskyblue", main="Velocidad", ylab="Velocidad (km/h)")
+
+```
+
+## Variable Velocidad
+
+```{r,echo = FALSE,fig.align="center"}
+
+hist(capa_variables_LTS$Vprom, col = "lightskyblue", xlab="Velocidad",ylab="Frecuencia", main = "Histograma Velocidad Promedio") 
+
+```
 
 
 
