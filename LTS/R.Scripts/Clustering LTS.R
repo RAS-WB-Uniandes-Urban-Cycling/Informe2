@@ -5,6 +5,7 @@
     library(cluster)
     library(tidyverse)
     library(sf)
+    library(tmap)
 
   #Se define las ruta de las bases de datos
 
@@ -43,6 +44,9 @@
     
     capa_LTS_Kmeans<- cbind.data.frame(capa_variables_LTS,data.frame(clusters_Kmeans)) %>% st_as_sf
  
+    mapa<-tm_shape(capa_LTS_Kmeans)+tm_lines(col="clusters_Kmeans",style ="cat" ,scale=5 ,palette = "Accent" ,title.col ="Cluster", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
+    mapa
+    
 #Clustering PAM Algorithm----
     
   #Numero de clusters por el metodo Silhoutte   
@@ -51,9 +55,9 @@
     
     for(i in 2:10){
       
-      resultados_clusters_PAM <- pam(dist,diss = TRUE,k = i)
+      clusters_PAM <- pam(dist,diss = TRUE,k = i)
       
-      silhouette_with[i] <- resultados_clusters_PAM$silinfo$avg.width
+      silhouette_with[i] <-clusters_PAM$silinfo$avg.width
       
     }
     
@@ -66,11 +70,20 @@
     
     clusters_PAM <- pam(dist,diss = TRUE, k = 4) 
     
-    clusters_PAM <- as.data.frame(clusters_PAM$clustering) %>% transmute(cluster_PAM=clusters_PAM$clustering)
+    clusters_PAM <- as.data.frame(clusters_PAM$clustering) %>% transmute(clusters_PAM=clusters_PAM$clustering)
     
     capa_LTS_PAM<- cbind.data.frame(capa_variables_LTS,clusters_PAM) %>% st_as_sf
     
-    mapa_Velocidad<-tm_shape(capa_Clusters)+tm_lines(col="resultados_clusters",style ="cat" ,scale=5 ,palette = "Accent" ,title.col ="Velocidad Promedio", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
-    mapa_Velocidad
+    mapa<-tm_shape(capa_LTS_PAM)+tm_lines(col="clusters_PAM",style ="cat" ,scale=5 ,palette = "Accent" ,title.col ="Cluster", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
+    mapa
+
+#Se alamcenan los resultados----
     
+  #Se guarda la Data (Resutados Clustering)
     
+    save(capa_LTS_Kmeans,capa_LTS_PAM,silhouette_with,file=paste0(ruta_resultados,"Resultados_CLustering.Rdata"))
+    
+  #Se eliminan los datos que no se usaran  
+    
+    rm(capa_clusters,capa_variables_LTS,clusters_Kmeans,clusters_PAM,mapa, ruta_resultados)
+  

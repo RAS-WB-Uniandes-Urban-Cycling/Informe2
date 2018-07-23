@@ -28,6 +28,7 @@ ruta_resultados <-"/Users/alejandropalacio/Documents/GitHub/proBikePolicies/LTS/
 #ruta_resultados <-"C:/Users/marce/Documents/GitHub/proBikePolicies/LTS/Resultados/"
 
 load(paste0(ruta_resultados,"Variables_LTS.Rdata"))
+load(paste0(ruta_resultados,"Resultados_CLustering.Rdata"))
 
 #Se generan los mapas de cada variable
 
@@ -53,6 +54,7 @@ mapa_SITP<-tm_shape(capa_variables_LTS)+tm_lines(col="SITP",style ="cat" ,scale=
 - Variable Número de Carriles
 - Variable CicloRuta
 - Variable SITP
+- Clustering
 
 
 ## Variable Velocidad
@@ -195,3 +197,17 @@ pie3D(resultados_CicloRuta$Freq,labels = c(paste("No: ",resultados_SITP$Freq[1])
 
 ```
 
+## Clustering
+
+Se aplico el metodo de gower para generar la matriz de distancias
+
+
+```{r,include=FALSE}
+resultados_SITP <- as.data.frame(table(capa_variables_LTS$SITP))
+```
+
+```{r,echo = FALSE,fig.align="center"}
+
+pie3D(resultados_CicloRuta$Freq,labels = c(paste("No: ",resultados_SITP$Freq[1]),paste("Si: ",resultados_SITP$Freq[2])))
+
+```

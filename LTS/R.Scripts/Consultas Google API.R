@@ -101,7 +101,7 @@
   #Se guarda la Data (Resultados Consultas Google API)
     
     save(datos_free_flow,datos_hora_pico_manana,datos_hora_pico_tarde,file=paste0(ruta_resultados,"Resultados_Consultas_Google_API.Rdata"))
-
+    
 #Procesamiento resultados consultas Google API----
 
   #Se crean el Data Frame para almacenar los resultados
