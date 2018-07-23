@@ -34,17 +34,16 @@
     
     dist<-daisy(capa_clusters, metric = "gower", stand=FALSE)
     
-#Clustering Kmeans   
+#Clustering Kmeans----   
     
-    resultados_clusters_Kmeans <- hclust(dist,method ="single")
-    plot(resultados_clusters_Kmeans)
-    resultados_clusters_Kmeans <- cutree(resultados_clusters_Kmeans, 4) 
-    table(resultados_clusters_Kmeans)
+    clusters_Kmeans <- hclust(dist,method ="single")
+    plot(clusters_Kmeans)
+    clusters_Kmeans <- cutree(clusters_Kmeans, 4) 
+    table(clusters_Kmeans)
     
-    capa_LTS<- cbind.data.frame(capa_variables_LTS,data.frame(resultados_clusters_Kmeans)) %>% st_as_sf
-
+    capa_LTS_Kmeans<- cbind.data.frame(capa_variables_LTS,data.frame(clusters_Kmeans)) %>% st_as_sf
  
-#Clustering PAM Algorithm
+#Clustering PAM Algorithm----
     
   #Numero de clusters por el metodo Silhoutte   
     
@@ -58,18 +57,18 @@
       
     }
     
-  # Se plotea silhouette width
+  #Se plotea silhouette width
     
     plot(1:10, silhouette_with,xlab = "Number of clusters",ylab = "Silhouette Width")
     lines(1:10, silhouette_with)
     
-    pam_fit <- pam(dist,diss = TRUE, k = 4)
-    pam_fit <- as.data.frame(pam_fit$clustering) %>% mutate(ID=row_number()) %>% rename(c("pam_fit$clustering"="cluster"))
+  #Se hace hace clustering
     
-    capa_LTS2<- st_set_geometry(capa_malla_vial,NULL) %>% left_join(pam_fit,By=ID)  %>% transmute(Vprom,Ancho_Calzada,Numero_Carriles,Trafico)
+    clusters_PAM <- pam(dist,diss = TRUE, k = 4) 
     
+    clusters_PAM <- as.data.frame(clusters_PAM$clustering) %>% transmute(cluster_PAM=clusters_PAM$clustering)
     
-    
+    capa_LTS_PAM<- cbind.data.frame(capa_variables_LTS,clusters_PAM) %>% st_as_sf
     
     mapa_Velocidad<-tm_shape(capa_Clusters)+tm_lines(col="resultados_clusters",style ="cat" ,scale=5 ,palette = "Accent" ,title.col ="Velocidad Promedio", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
     mapa_Velocidad
