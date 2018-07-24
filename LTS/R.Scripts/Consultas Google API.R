@@ -41,7 +41,7 @@
         
           distancia <- google_distance(origins = c(origen) ,destinations = c(destino) ,
                               mode="driving",  departure_time =as.POSIXct("09-10-2018 00:00:00", format = "%m-%d-%Y %H:%M:%S"),
-                              traffic_model="best_guess",  key="AIzaSyCB484vIOsEMKJoKAK8Lp4OO4sd6EtM6bk",simplify = TRUE )
+                              traffic_model="best_guess",  key="AIzaSyDZ_Q8oLaAfogbrq5__nzNqdabbPL0QCvo",simplify = TRUE )
         
           #Se almacenan los resultados de la consulta
           
@@ -54,7 +54,7 @@
         
           distancia <- google_distance(origins = c(destino) ,destinations = c(origen) ,
                             mode="driving",  departure_time =as.POSIXct("09-10-2018 00:00:00", format = "%m-%d-%Y %H:%M:%S"),
-                            traffic_model="best_guess",  key="AIzaSyCB484vIOsEMKJoKAK8Lp4OO4sd6EtM6bk",simplify = TRUE )
+                            traffic_model="best_guess",  key="AIzaSyDZ_Q8oLaAfogbrq5__nzNqdabbPL0QCvo",simplify = TRUE )
       
           #Se almacenan los resultados de la consulta
           
@@ -70,21 +70,21 @@
           
           hora_pico_manana <- google_distance(origins = c(origen) ,destinations = c(destino) ,
                                               mode="driving",  departure_time =as.POSIXct("09-04-2018 7:30:00", format = "%m-%d-%Y %H:%M:%S"),
-                                              traffic_model="best_guess",  key="AIzaSyCB484vIOsEMKJoKAK8Lp4OO4sd6EtM6bk",simplify = TRUE )
+                                              traffic_model="best_guess",  key="AIzaSyDZ_Q8oLaAfogbrq5__nzNqdabbPL0QCvo",simplify = TRUE )
           
           hora_pico_tarde <- google_distance(origins = c(origen) ,destinations = c(destino) ,
                                              mode="driving",  departure_time =as.POSIXct("09-04-2018 18:00:00", format = "%m-%d-%Y %H:%M:%S"),
-                                             traffic_model="best_guess",  key="AIzaSyCB484vIOsEMKJoKAK8Lp4OO4sd6EtM6bk",simplify = TRUE )
+                                             traffic_model="best_guess",  key="AIzaSyDZ_Q8oLaAfogbrq5__nzNqdabbPL0QCvo",simplify = TRUE )
           
         } else {
           
           hora_pico_manana <- google_distance(origins = c(destino) ,destinations = c(origen) ,
                                               mode="driving",  departure_time =as.POSIXct("09-04-2018 7:30:00", format = "%m-%d-%Y %H:%M:%S"),
-                                              traffic_model="best_guess",  key="AIzaSyCB484vIOsEMKJoKAK8Lp4OO4sd6EtM6bk",simplify = TRUE )
+                                              traffic_model="best_guess",  key="AIzaSyDZ_Q8oLaAfogbrq5__nzNqdabbPL0QCvo",simplify = TRUE )
           
           hora_pico_tarde <- google_distance(origins = c(destino) ,destinations = c(origen) ,
                                              mode="driving",  departure_time =as.POSIXct("09-04-2018 18:00:00", format = "%m-%d-%Y %H:%M:%S"),
-                                             traffic_model="best_guess",  key="AIzaSyCB484vIOsEMKJoKAK8Lp4OO4sd6EtM6bk",simplify = TRUE )
+                                             traffic_model="best_guess",  key="AIzaSyDZ_Q8oLaAfogbrq5__nzNqdabbPL0QCvo",simplify = TRUE )
         }        
         
         

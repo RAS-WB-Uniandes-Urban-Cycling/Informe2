@@ -30,7 +30,7 @@
     layer_zats<-st_read(paste0(ruta_base_datos,"Mapas de Referencia IDECA/MR0318.gdb"),layer = "SCAT",stringsAsFactors = FALSE) %>% filter(SCaNombre %in% c("DOCE DE OCTUBRE","CIUDAD SALITRE NOR-ORIENTAL","CIUDAD SALITRE SUR-ORIENTAL", "EL RETIRO", "EL NOGAL", "LOS ROSALES","ESPARTILLAL")) %>%
       st_transform(4326)
     layer_calzadas<-st_read(paste0(ruta_base_datos,"Mapas de Referencia IDECA/MR0318.gdb"),layer = "Calz",stringsAsFactors = FALSE,promote_to_multi = FALSE) %>% st_transform(4326) %>% filter(st_is_valid(.))
-    layer_ruta_urbana <- st_read(paste0(ruta_base_datos,"RutasSitp.gdb"),layer = "Ruta_Urbana",stringsAsFactors = FALSE) %>% st_transform(4326) 
+    #layer_ruta_urbana <- st_read(paste0(ruta_base_datos,"RutasSitp.gdb"),layer = "Ruta_Urbana",stringsAsFactors = FALSE) %>% st_transform(4326) 
     
 #Procesamiento Capa Malla Vial----
     
@@ -78,7 +78,7 @@
   
   #Se unen los datos procesados de Google API con la capa malla vial  
     
-    capa_malla_vial<- capa_malla_vial%>% transmute(ID,Ancho,Carriles, lanes) %>% left_join(select(datos_google_API, Vprom, Trafico,ID))
+    capa_malla_vial<- capa_malla_vial%>% transmute(ID,Ancho,Carriles, lanes,ZAT) %>% left_join(select(datos_google_API, Vprom, Trafico,ID))
 
 #Segmentación capa_malla_vial----      
     
@@ -89,13 +89,13 @@
     
   #Se hace un Join espacial entre capa_malla_vial y segmentos_resultantes
     
-    capa_malla_vial<-segmentos_resultantes %>% mutate(ID=row_number()) %>% st_join(select(capa_malla_vial, Vprom, Trafico, Ancho, Carriles, lanes), largest=TRUE)
+    capa_malla_vial<-segmentos_resultantes %>% mutate(ID=row_number()) %>% st_join(select(capa_malla_vial, Vprom, Trafico, Ancho, Carriles, lanes,ZAT), largest=TRUE)
     
   #Se hace un Join espacial entre capa_malla_vial y shape_calzadas
     
     capa_malla_vial<-capa_malla_vial %>% st_join(select(layer_calzadas,CalAncho, CalNCarril),left = TRUE, largest=TRUE)  %>% 
       transmute(ID,Vprom,Trafico,Ancho=if_else(!is.na(CalAncho),as.numeric(CalAncho),as.numeric(Ancho)),
-      Carriles=if_else(is.na(lanes),if_else(is.na(CalNCarril),as.numeric(Carriles),as.numeric(CalNCarril)),as.numeric(lanes)))
+      Carriles=if_else(is.na(lanes),if_else(is.na(CalNCarril),as.numeric(Carriles),as.numeric(CalNCarril)),as.numeric(lanes)),ZAT)
     
   #Se obtienen las coordenadas (Lat/Long) de punto inicial de cada segmento de la capa_malla_vial
     
@@ -232,7 +232,7 @@
   
   #Se crea la capa LTS
     
-    capa_variables_LTS<-capa_malla_vial %>% transmute (ID,Vprom,Trafico,Ancho,Carriles,CicloRuta,SITP)
+    capa_variables_LTS<-capa_malla_vial %>% transmute (ID,Vprom,Trafico,Ancho,Carriles,CicloRuta,SITP,ZAT)
     
   #Se guarda la Data de capa_variables_LTS (Variables LTS)
 
