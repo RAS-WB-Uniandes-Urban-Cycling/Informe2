@@ -1,7 +1,16 @@
 
 #Ruta de los archivos
-ruta_resultados <-"C:/Users/marce/Documents/GitHub/proBikePolicies/LTS/Resultados/"
-load(paste0(ruta_resultados,"Resultados_CLustering.Rdata"))
+
+  #Alejandro
+
+    ruta_resultados <-"/Users/alejandropalacio/Documents/GitHub/proBikePolicies/LTS/Resultados/"
+
+  #Marcelo
+
+    #ruta_resultados <-"C:/Users/marce/Documents/GitHub/proBikePolicies/LTS/Resultados/"
+
+
+load(paste0(ruta_resultados,"Resultados_Clustering.Rdata"))
 
 #Librerías a utilizar
 library(nnet)

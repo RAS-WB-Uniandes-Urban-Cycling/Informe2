@@ -26,10 +26,10 @@
   #Se almacena los layer en cada variable definida
     
     layer_malla_vial<-st_read(paste0(ruta_base_datos,"OpenStreetMaps/Malla Vial Bogotá/MVI.shp"), stringsAsFactors = FALSE)%>% filter(!(highway %in% c("cycleway","service","steps","footway"))) %>% st_transform(4326) 
-    layer_ciclo_rutas<-st_read(paste0(ruta_base_datos,"IDECA_0318.gdb"),layer = "RBic",stringsAsFactors = FALSE) %>% st_transform(4326) 
-    layer_zats<-st_read(paste0(ruta_base_datos,"IDECA_0318.gdb"),layer = "SCAT",stringsAsFactors = FALSE) %>% filter(SCaNombre %in% c("DOCE DE OCTUBRE","CIUDAD SALITRE NOR-ORIENTAL","CIUDAD SALITRE SUR-ORIENTAL")) %>%
+    layer_ciclo_rutas<-st_read(paste0(ruta_base_datos,"Mapas de Referencia IDECA/MR0318.gdb"),layer = "RBic",stringsAsFactors = FALSE) %>% st_transform(4326) 
+    layer_zats<-st_read(paste0(ruta_base_datos,"Mapas de Referencia IDECA/MR0318.gdb"),layer = "SCAT",stringsAsFactors = FALSE) %>% filter(SCaNombre %in% c("DOCE DE OCTUBRE","CIUDAD SALITRE NOR-ORIENTAL","CIUDAD SALITRE SUR-ORIENTAL", "EL RETIRO", "EL NOGAL", "LOS ROSALES","ESPARTILLAL")) %>%
       st_transform(4326)
-    layer_calzadas<-st_read(paste0(ruta_base_datos,"IDECA_0318.gdb"),layer = "Calz",stringsAsFactors = FALSE,promote_to_multi = FALSE) %>% st_transform(4326) %>% filter(st_is_valid(.))
+    layer_calzadas<-st_read(paste0(ruta_base_datos,"Mapas de Referencia IDECA/MR0318.gdb"),layer = "Calz",stringsAsFactors = FALSE,promote_to_multi = FALSE) %>% st_transform(4326) %>% filter(st_is_valid(.))
     layer_ruta_urbana <- st_read(paste0(ruta_base_datos,"RutasSitp.gdb"),layer = "Ruta_Urbana",stringsAsFactors = FALSE) %>% st_transform(4326) 
     
 #Procesamiento Capa Malla Vial----

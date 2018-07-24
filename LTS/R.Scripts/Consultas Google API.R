@@ -40,7 +40,7 @@
         #Dirección 1
         
           distancia <- google_distance(origins = c(origen) ,destinations = c(destino) ,
-                              mode="driving",  departure_time =as.POSIXct("09-04-2018 00:00:00", format = "%m-%d-%Y %H:%M:%S"),
+                              mode="driving",  departure_time =as.POSIXct("09-10-2018 00:00:00", format = "%m-%d-%Y %H:%M:%S"),
                               traffic_model="best_guess",  key="AIzaSyCB484vIOsEMKJoKAK8Lp4OO4sd6EtM6bk",simplify = TRUE )
         
           #Se almacenan los resultados de la consulta
@@ -53,7 +53,7 @@
         #Diracción 2
         
           distancia <- google_distance(origins = c(destino) ,destinations = c(origen) ,
-                            mode="driving",  departure_time =as.POSIXct("09-04-2018 00:00:00", format = "%m-%d-%Y %H:%M:%S"),
+                            mode="driving",  departure_time =as.POSIXct("09-10-2018 00:00:00", format = "%m-%d-%Y %H:%M:%S"),
                             traffic_model="best_guess",  key="AIzaSyCB484vIOsEMKJoKAK8Lp4OO4sd6EtM6bk",simplify = TRUE )
       
           #Se almacenan los resultados de la consulta
