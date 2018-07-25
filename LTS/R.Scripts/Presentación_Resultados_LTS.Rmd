@@ -30,6 +30,8 @@ ruta_resultados <-"/Users/alejandropalacio/Documents/GitHub/proBikePolicies/LTS/
 load(paste0(ruta_resultados,"Variables_LTS.Rdata"))
 load(paste0(ruta_resultados,"Resultados_CLustering.Rdata"))
 
+
+
 #Se generan los mapas de cada variable
 
 mapa_Velocidad<-tm_shape(capa_variables_LTS)+tm_lines(col="Vprom",style ="cont" ,scale=5 ,palette = "Reds" ,title.col ="Velocidad Promedio", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
@@ -42,8 +44,7 @@ mapa_Carriles<-tm_shape(capa_variables_LTS)+tm_lines(col="Carriles",style ="cat"
 
 mapa_CicloRuta<-tm_shape(capa_variables_LTS)+tm_lines(col="CicloRuta",style ="cat" ,scale=5 ,palette ="-Set1",title.col ="Presencia de Cicloruta", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
 
-mapa_SITP<-tm_shape(capa_variables_LTS)+tm_lines(col="SITP",style ="cat" ,scale=5 ,palette ="-Set1",title.col ="Presencia de SITP", textNA = "No", colorNA = "Red")+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
-
+mapa_SITP<-tm_shape(capa_variables_LTS)+tm_lines(col="SITP",style ="cat" ,scale=5 ,palette ="-Set1",title.col ="Presencia de SITP", textNA = "No", colorNA = "Red",popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
 ```
 
 ## Agenda

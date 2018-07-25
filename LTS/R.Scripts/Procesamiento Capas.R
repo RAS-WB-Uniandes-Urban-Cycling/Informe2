@@ -30,7 +30,10 @@
     layer_zats<-st_read(paste0(ruta_base_datos,"Mapas de Referencia IDECA/MR0318.gdb"),layer = "SCAT",stringsAsFactors = FALSE) %>% filter(SCaNombre %in% c("DOCE DE OCTUBRE","CIUDAD SALITRE NOR-ORIENTAL","CIUDAD SALITRE SUR-ORIENTAL", "EL RETIRO", "EL NOGAL", "LOS ROSALES","ESPARTILLAL")) %>%
       st_transform(4326)
     layer_calzadas<-st_read(paste0(ruta_base_datos,"Mapas de Referencia IDECA/MR0318.gdb"),layer = "Calz",stringsAsFactors = FALSE,promote_to_multi = FALSE) %>% st_transform(4326) %>% filter(st_is_valid(.))
-    #layer_ruta_urbana <- st_read(paste0(ruta_base_datos,"RutasSitp.gdb"),layer = "Ruta_Urbana",stringsAsFactors = FALSE) %>% st_transform(4326) 
+    layer_ruta_urbana <- st_read(paste0(ruta_base_datos,"Rutas SITP.gdb"),layer = "Ruta_Urbana",stringsAsFactors = FALSE) %>% st_transform(4326) %>% st_cast( 'LINESTRING')  
+    layer_ruta_alimentadora <- st_read(paste0(ruta_base_datos,"Rutas SITP.gdb"),layer = "Ruta_Alimentadora",stringsAsFactors = FALSE) %>% st_transform(4326) %>% st_cast('LINESTRING')  
+    layer_ruta_complementaria<- st_read(paste0(ruta_base_datos,"Rutas SITP.gdb"),layer = "Ruta_Complementaria",stringsAsFactors = FALSE) %>% st_transform(4326) %>% st_cast('LINESTRING')  
+    layer_ruta_especial<- st_read(paste0(ruta_base_datos,"Rutas SITP.gdb"),layer = "Ruta_Especial",stringsAsFactors = FALSE) %>% st_transform(4326) %>% st_cast('LINESTRING')  
     
 #Procesamiento Capa Malla Vial----
     
@@ -78,7 +81,7 @@
   
   #Se unen los datos procesados de Google API con la capa malla vial  
     
-    capa_malla_vial<- capa_malla_vial%>% transmute(ID,Ancho,Carriles, lanes,ZAT) %>% left_join(select(datos_google_API, Vprom, Trafico,ID))
+    capa_malla_vial<- capa_malla_vial %>% transmute(ID,Ancho,Carriles, lanes,ZAT) %>% left_join(select(datos_google_API, Vprom, Trafico,ID)) 
 
 #Segmentación capa_malla_vial----      
     
@@ -166,7 +169,7 @@
     
   #Se comvierte de MultiLinesting a Lingstring
     
-    #layer_ruta_urbana<- st_cast(layer_ruta_urbana, 'LINESTRING')   
+    layer_ruta_urbana<- st_cast(layer_ruta_urbana, 'LINESTRING')   
   
   #Se divide cada ruta del SITP deacuerdo a su vertices
     

@@ -17,14 +17,10 @@
     
 #Matriz de distancia metodo Gower----
     
-  #Se normalizan las variables de la capa_variables_LTS  
-  
-    capa_variables_LTS <-capa_variables_LTS %>% filter(ZAT %in% c("DOCE DE OCTUBRE","CIUDAD SALITRE NOR-ORIENTAL","CIUDAD SALITRE SUR-ORIENTAL"))
+  #Se normalizan las variables de la capa_variables_LTS 
     
     capa_clusters<-st_set_geometry(capa_variables_LTS,NULL) %>% transmute(CicloRuta,SITP,Vprom=scale(as.matrix(capa_variables_LTS$Vprom)),
       Trafico=scale(as.matrix(capa_variables_LTS$Trafico)),Ancho=scale(as.matrix(capa_variables_LTS$Ancho)),Carriles=scale(as.matrix(capa_variables_LTS$Carriles)))
-    
-    
     
   #Se define el tipo de cada variables as.factor o as.numeric
     
