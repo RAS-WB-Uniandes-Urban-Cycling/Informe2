@@ -2,8 +2,8 @@
     title: "LTS"
     author: "Alejandro Palacio & Marcelo Botero"
     date: "21/7/2018"
-    #logo: "/Users/alejandropalacio/Desktop/Logo2.png"
     output: ioslides_presentation
+    logo: "/Users/alejandropalacio/Desktop/Logo2.png"
 
 ---
 
@@ -32,11 +32,11 @@ load(paste0(ruta_resultados,"Resultados_CLustering.Rdata"))
 
 #Se generan los mapas de cada variable
 
-mapa_Velocidad<-tm_shape(capa_variables_LTS)+tm_lines(col="Vprom",style ="pretty" ,scale=5 ,palette = "Reds" ,title.col ="Velocidad Promedio", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
+mapa_Velocidad<-tm_shape(capa_variables_LTS)+tm_lines(col="Vprom",style ="cont" ,scale=5 ,palette = "Reds" ,title.col ="Velocidad Promedio", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
 
-mapa_Trafico<-tm_shape(capa_variables_LTS)+tm_lines(col="Trafico",style ="pretty" ,scale=5 ,palette = "YlOrRd" ,title.col ="Tráfico", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
+mapa_Trafico<-tm_shape(capa_variables_LTS)+tm_lines(col="Trafico",style ="cont" ,scale=5 ,palette = "YlOrRd" ,title.col ="Tráfico", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
 
-mapa_Ancho<-tm_shape(capa_variables_LTS)+tm_lines(col="Ancho",style ="pretty" ,scale=5 ,palette = "BuGn" ,title.col ="Ancho de la Vía", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
+mapa_Ancho<-tm_shape(capa_variables_LTS)+tm_lines(col="Ancho",style ="pretty"  ,scale=5 ,palette = "BuGn" ,title.col ="Ancho de la Vía", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
 
 mapa_Carriles<-tm_shape(capa_variables_LTS)+tm_lines(col="Carriles",style ="cat" ,scale=5 ,palette = "PuRd" ,title.col ="Número de Carriles", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
 
