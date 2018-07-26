@@ -82,24 +82,23 @@
   
   #Se unen los datos procesados de Google API con la capa malla vial  
     
-    capa_malla_vial<- capa_malla_vial %>% transmute(ID,Ancho,Carriles, lanes,ZAT) %>% left_join(select(datos_google_API, Vprom, Trafico,ID)) 
+    capa_malla_vial<- capa_malla_vial %>% filter(!(highway %in% c("bus_stop","pedestrian")))%>% transmute(ID,Ancho,Carriles, lanes,ZAT)  %>% left_join(datos_google_API ,By=ID) %>% filter(Longitud1 !=0 | Longitud2 !=0)
 
 #Segmentación capa_malla_vial----      
     
   #Se divide cada segmento deacuerdo a su vertices
     
-    segmentos_resultantes<- capa_malla_vial %>% st_split(st_combine(st_cast(capa_malla_vial, 'POINT') )) %>% st_collection_extract( type = c("LINESTRING")) 
+    capa_malla_vial<- capa_malla_vial %>% st_split(st_combine(st_cast(capa_malla_vial, 'POINT') )) %>% st_collection_extract( type = c("LINESTRING")) 
   
-    
-  #Se hace un Join espacial entre capa_malla_vial y segmentos_resultantes
-    
-    capa_malla_vial<-segmentos_resultantes %>% mutate(ID=row_number()) %>% st_join(select(capa_malla_vial, Vprom, Trafico, Ancho, Carriles, lanes,ZAT), largest=TRUE)
-    
   #Se hace un Join espacial entre capa_malla_vial y shape_calzadas
     
     capa_malla_vial<-capa_malla_vial %>% st_join(select(layer_calzadas,CalAncho, CalNCarril),left = TRUE, largest=TRUE)  %>% 
-      transmute(ID,Vprom,Trafico,Ancho=if_else(!is.na(CalAncho),as.numeric(CalAncho),as.numeric(Ancho)),
-      Carriles=if_else(is.na(lanes),if_else(is.na(CalNCarril),as.numeric(Carriles),as.numeric(CalNCarril)),as.numeric(lanes)),ZAT)
+      transmute(ID=row_number(),Ancho=if_else(!is.na(CalAncho),as.numeric(CalAncho),as.numeric(Ancho)),
+      Carriles=if_else(is.na(lanes),if_else(is.na(CalNCarril),as.numeric(Carriles),as.numeric(CalNCarril)),as.numeric(lanes)),ZAT,
+      Longitud1,TProm1,TFF1,Vprom1, VpromFF1,Longitud2,TProm2,TFF2,Vprom2, VpromFF2)
+    
+    capa_malla_vial$Ancho<-ifelse(is.na(capa_malla_vial$Ancho),mean(capa_malla_vial$Ancho, na.rm = TRUE), capa_malla_vial$Ancho)
+    capa_malla_vial$Carriles<-ifelse(is.na(capa_malla_vial$Carriles),round(mean(capa_malla_vial$Carriles, na.rm = TRUE),0), capa_malla_vial$Carriles) 
     
   #Se obtienen las coordenadas (Lat/Long) de punto inicial de cada segmento de la capa_malla_vial
     
@@ -115,7 +114,16 @@
     
   #Se eliminan los datos que no se usaran
     
-    rm(segmentos_resultantes,coordenadas_incio_seg,coordenadas_fin_seg)
+    rm(coordenadas_incio_seg,coordenadas_fin_seg)
+    
+#Calculo indicador trafico----
+    
+    capa_malla_vial<-capa_malla_vial  %>% mutate(Trafico=(ifelse(Longitud1==Longitud2,pmax((VpromFF1-Vprom1)*ceiling(Carriles/2), (VpromFF2-Vprom2)*ceiling(Carriles/2)),
+                                                                ifelse(Longitud1<Longitud2, (VpromFF1-Vprom1)*Carriles, (VpromFF2-Vprom2)*Carriles))))   
+    
+    mapa_Trafico<-tm_shape(capa_malla_vial)+tm_lines(col="Trafico",style ="cont" ,scale=5 ,palette = "YlOrRd" ,title.col ="Tráfico", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
+    
+    mapa_Trafico    
     
 #Procesamiento Red Ciclorutas----
     
@@ -170,17 +178,15 @@
     
   #Se comvierte de MultiLinesting a Lingstring
     
-    rutas_transporte <- rbind(layer_ruta_urbana,layer_ruta_alimentadora, layer_ruta_complementaria, layer_ruta_especial)
-    
-    layer_ruta_urbana<- st_cast(rutas_, 'LINESTRING')   
+    #rutas_transporte <- rbind(layer_ruta_urbana,layer_ruta_alimentadora, layer_ruta_complementaria, layer_ruta_especial)
   
   #Se divide cada ruta del SITP deacuerdo a su vertices
     
-    capa_SITP<-rutas_transporte %>% st_split(st_combine(st_cast(rutas_transporte, 'POINT')))%>% st_collection_extract( type = c("LINESTRING")) 
+    #capa_SITP<-rutas_transporte %>% st_split(st_combine(st_cast(rutas_transporte, 'POINT')))%>% st_collection_extract( type = c("LINESTRING")) 
     
   #Se guarda la Data de capa_SITP (RutaSITP Segmentada)
     
-    save(capa_SITP,file=paste0(ruta_resultados,"RutaSITP_Segmentada.Rdata"))
+    #save(capa_SITP,file=paste0(ruta_resultados,"RutaSITP_Segmentada.Rdata"))
   
   #Se carga la Data de capa_SITP (RutaSITP Segmentada)
     
@@ -237,7 +243,7 @@
   
   #Se crea la capa LTS
     
-    capa_variables_LTS<-capa_malla_vial %>% transmute (ID,Vprom,Trafico,Ancho,Carriles,CicloRuta,SITP,ZAT)
+    capa_variables_LTS<-capa_malla_vial %>% transmute (ID,Vprom=ifelse(Longitud1==Longitud2,pmax(Vprom1,Vprom2),ifelse(Longitud1<Longitud2, Vprom1, Vprom2)),Trafico,Ancho,Carriles,CicloRuta,SITP,ZAT)
     
   #Se guarda la Data de capa_variables_LTS (Variables LTS)
 
