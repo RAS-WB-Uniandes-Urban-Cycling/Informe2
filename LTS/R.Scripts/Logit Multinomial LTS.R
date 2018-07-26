@@ -3,14 +3,18 @@
 
   #Alejandro
 
-    ruta_resultados <-"/Users/alejandropalacio/Documents/GitHub/proBikePolicies/LTS/Resultados/"
+    #ruta_resultados <-"/Users/alejandropalacio/Documents/GitHub/proBikePolicies/LTS/Resultados/"
 
   #Marcelo
 
-    #ruta_resultados <-"C:/Users/marce/Documents/GitHub/proBikePolicies/LTS/Resultados/"
-
-
+    ruta_resultados <-"C:/Users/marce/Documents/GitHub/proBikePolicies/LTS/Resultados/"
+    
+#Se cargan los resultados
 load(paste0(ruta_resultados,"Resultados_Clustering.Rdata"))
+load(paste0(ruta_resultados, "Variables_LTS.Rdata"))
+
+capa_variables_LTS <-capa_variables_LTS %>% filter(!(ZAT %in% c("DOCE DE OCTUBRE","CIUDAD SALITRE NOR-ORIENTAL","CIUDAD SALITRE SUR-ORIENTAL")))
+LTS_sin_geo<-capa_variables_LTS[-c(1,8)] %>% st_set_geometry(NULL)
 
 #Librerías a utilizar
 library(nnet)
@@ -47,7 +51,11 @@ expanded=expand.grid(Vprom=c(20,30,35,50),
 head(expanded)
 
 #Se predice la probabilidad de que uno de los datos sea de un LTS determinado
+
 predicted=predict(logit_Multi,expanded,type="probs")
+predicted
+
+predicted=predict(logit_Multi,LTS_sin_geo,type="probs")
 predicted
 
 #--------------------------------------------------------------------------------------------
