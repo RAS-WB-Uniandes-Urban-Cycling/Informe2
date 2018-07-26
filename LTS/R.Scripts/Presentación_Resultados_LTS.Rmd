@@ -1,0 +1,440 @@
+---
+    title: "LTS"
+    author: "Alejandro Palacio & Marcelo Botero"
+    date: "21/7/2018"
+    output: ioslides_presentation
+    #logo: "/Users/alejandropalacio/Desktop/Logo2.png"
+
+---
+
+
+```{r setup, include=FALSE}
+
+knitr::opts_chunk$set(echo = FALSE)
+
+#Preparación del entorno de trabajo----
+
+library(tmaptools)
+library(tmap)
+library(sf)
+library(dplyr)
+library(knitr)
+library(plotrix)
+library(ggplot2)
+
+#Alejandro
+#ruta_resultados <-"/Users/alejandropalacio/Documents/GitHub/proBikePolicies/LTS/Resultados/"
+
+#Marcelo  
+ruta_resultados <-"C:/Users/marce/Documents/GitHub/proBikePolicies/LTS/Resultados/"
+
+load(paste0(ruta_resultados,"Variables_LTS.Rdata"))
+load(paste0(ruta_resultados,"Resultados_Clustering.Rdata"))
+
+#Se agrupan los ZATs elegidos
+capa_variables_LTS<-mutate(capa_variables_LTS,Clasificacion=ifelse(ZAT=="CIUDAD SALITRE NOR-ORIENTAL"|ZAT=="CIUDAD SALITRE SUR-ORIENTAL","Salitre",ifelse(ZAT=="DOCE DE OCTUBRE","Doce","Rosa")))
+
+#Se generan los mapas de cada variable
+
+mapa_Velocidad<-tm_shape(capa_variables_LTS)+tm_lines(col="Vprom",style ="cont" ,scale=5 ,palette = "Reds" ,title.col ="Velocidad Promedio", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
+
+mapa_Ancho<-tm_shape(capa_variables_LTS)+tm_lines(col="Ancho",style ="pretty"  ,scale=5 ,palette = "BuGn" ,title.col ="Ancho de la Vía", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
+
+mapa_Carriles<-tm_shape(capa_variables_LTS)+tm_lines(col="Carriles",style ="cat" ,scale=5 ,palette = "PuRd" ,title.col ="Número de Carriles", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
+
+mapa_CicloRuta<-tm_shape(capa_variables_LTS)+tm_lines(col="CicloRuta",style ="cat" ,scale=5 ,palette ="-Set1",title.col ="Presencia de Cicloruta", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
+
+mapa_SITP<-tm_shape(capa_variables_LTS)+tm_lines(col="SITP",style ="cat" ,scale=5 ,palette ="Dark2",title.col ="Presencia de SITP", textNA = "No", colorNA = "Red",popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
+
+mapa_Trafico<-tm_shape(capa_variables_LTS)+tm_lines(col="Trafico",style ="cont" ,scale=5 ,palette = "YlOrRd" ,title.col ="Tráfico", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
+
+mapa_SITP<-tm_shape(capa_variables_LTS)+tm_lines(col="SITP",style ="cat" ,scale=5 ,palette ="-Set1",title.col ="Presencia de SITP", textNA = "No", colorNA = "Red",popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
+
+mapa_LTS_Hclust <-tm_shape(capa_LTS_Hclust)+tm_lines(col="clusters_Hclust",style ="cat" ,scale=5 ,palette ="-Set1",title.col ="Cluster", textNA = "No", colorNA = "Red",popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
+
+```
+
+## Agenda
+
+1. Variables consideradas
+    * Recapitulación
+    * Correcciones de tráfico
+2. Clustering
+    * Métodos
+    * Resultados
+3. Modelo Predictivo
+    * Regresión Logística Multinomial
+    * Predicciones
+4. Conclusiones
+
+
+
+## Variable Velocidad
+
+```{r,echo = FALSE,fig.align='right'}
+
+mapa_Velocidad
+
+```
+
+## Estadísticas Generales
+
+```{r,echo = FALSE,fig.align="center"}
+
+summary((capa_variables_LTS$Vprom))
+
+boxplot(capa_variables_LTS$Vprom, col = "lightskyblue", main="Velocidad", ylab="Velocidad (km/h)")
+
+```
+
+##Estadísticas por ZAT
+
+Doce de Octubre
+```{r,echo = FALSE,fig.align="center"}
+
+summary((capa_variables_LTS%>% filter(ZAT %in% c("DOCE DE OCTUBRE")))$Vprom)
+
+```
+
+Salitre
+```{r,echo = FALSE,fig.align="center"}
+
+summary((capa_variables_LTS%>% filter(ZAT %in% c("CIUDAD SALITRE NOR-ORIENTAL","CIUDAD SALITRE SUR-ORIENTAL")))$Vprom)
+
+```
+
+Zona Rosa
+```{r,echo = FALSE,fig.align="center"}
+
+summary((capa_variables_LTS%>% filter(ZAT %in% c("EL RETIRO", "EL NOGAL", "LOS ROSALES","ESPARTILLAL")))$Vprom)
+
+```
+
+## Estadísticas Generales
+```{r,echo = FALSE,fig.align="center"}
+
+ggplot(data = capa_variables_LTS, aes(x=Clasificacion, y=Vprom)) + geom_boxplot(aes(fill=Clasificacion))
+
+```
+
+
+## Variable Velocidad
+```{r,echo = FALSE,fig.align="center"}
+
+hist(capa_variables_LTS$Vprom, col = "lightskyblue", xlab="Velocidad",ylab="Frecuencia", main = "Histograma Velocidad Promedio") 
+
+```
+
+
+
+
+
+
+
+
+## Variable Tráfico - Correcciones
+
+bla bla bla
+
+## Variable Tráfico - Resultados
+
+```{r,echo = FALSE,fig.align='right'}
+
+mapa_Trafico
+
+```
+
+## Estadísticas Generales
+
+```{r,echo = FALSE,fig.align="center"}
+
+summary((capa_variables_LTS$Trafico))
+
+boxplot(capa_variables_LTS$Trafico, col = "lightskyblue", main="Tráfico", ylab="Q")
+
+```
+
+##Estadísticas por ZAT
+
+Doce de Octubre
+```{r,echo = FALSE,fig.align="center"}
+
+summary((capa_variables_LTS%>% filter(ZAT %in% c("DOCE DE OCTUBRE")))$Trafico)
+
+```
+
+Salitre
+```{r,echo = FALSE,fig.align="center"}
+
+summary((capa_variables_LTS%>% filter(ZAT %in% c("CIUDAD SALITRE NOR-ORIENTAL","CIUDAD SALITRE SUR-ORIENTAL")))$Trafico)
+
+```
+
+Zona Rosa
+```{r,echo = FALSE,fig.align="center"}
+
+summary((capa_variables_LTS%>% filter(ZAT %in% c("EL RETIRO", "EL NOGAL", "LOS ROSALES","ESPARTILLAL")))$Trafico)
+
+```
+
+## Estadísticas Generales
+```{r,echo = FALSE,fig.align="center"}
+ggplot(data = capa_variables_LTS, aes(x=Clasificacion, y=Trafico)) + geom_boxplot(aes(fill=Clasificacion))
+
+```
+
+
+## Variable Tráfico
+```{r,echo = FALSE,fig.align="center"}
+
+hist(capa_variables_LTS$Trafico, col = "lightskyblue", xlab="Tráfico",ylab="Frecuencia", main = "Histograma Índice de Tráfico") 
+
+```
+
+
+
+
+
+
+
+
+
+
+
+## Variable Ancho de la Vía
+
+```{r,echo = FALSE,fig.align='right'}
+
+mapa_Ancho
+
+```
+
+## Estadísticas Generales
+
+```{r,echo = FALSE,fig.align="center"}
+
+summary((capa_variables_LTS$Ancho))
+
+boxplot(capa_variables_LTS$Ancho, col = "lightskyblue", main="Ancho", ylab="(m)")
+
+```
+
+##Estadísticas por ZAT
+
+Doce de Octubre
+```{r,echo = FALSE,fig.align="center"}
+
+summary((capa_variables_LTS%>% filter(ZAT %in% c("DOCE DE OCTUBRE")))$Ancho)
+
+```
+
+Salitre
+```{r,echo = FALSE,fig.align="center"}
+
+summary((capa_variables_LTS%>% filter(ZAT %in% c("CIUDAD SALITRE NOR-ORIENTAL","CIUDAD SALITRE SUR-ORIENTAL")))$Ancho)
+
+```
+
+Zona Rosa
+```{r,echo = FALSE,fig.align="center"}
+
+summary((capa_variables_LTS%>% filter(ZAT %in% c("EL RETIRO", "EL NOGAL", "LOS ROSALES","ESPARTILLAL")))$Ancho)
+
+```
+
+## Estadísticas Generales
+```{r,echo = FALSE,fig.align="center",warning=FALSE}
+
+ggplot(data = capa_variables_LTS, aes(x=Clasificacion, y=Ancho)) + geom_boxplot(aes(fill=Clasificacion))
+
+```
+
+
+## Variable Ancho
+```{r,echo = FALSE,fig.align="center"}
+
+hist(capa_variables_LTS$Ancho, col = "lightskyblue", xlab="Ancho",ylab="Frecuencia", main = "Histograma Ancho de la Vía") 
+
+```
+
+
+
+
+
+
+
+
+
+## Variable Número de Carriles
+
+```{r,echo = FALSE,fig.align='right'}
+
+mapa_Carriles
+
+```
+
+## Estadísticas Generales
+
+```{r,echo = FALSE,fig.align="center"}
+
+summary((capa_variables_LTS$Carriles))
+
+boxplot(capa_variables_LTS$Carriles, col = "lightskyblue", main="Número de Carriles", ylab="Cantidad")
+
+```
+
+##Estadísticas por ZAT
+
+Doce de Octubre
+```{r,echo = FALSE,fig.align="center"}
+
+summary((capa_variables_LTS%>% filter(ZAT %in% c("DOCE DE OCTUBRE")))$Carriles)
+
+```
+
+Salitre
+```{r,echo = FALSE,fig.align="center"}
+
+summary((capa_variables_LTS%>% filter(ZAT %in% c("CIUDAD SALITRE NOR-ORIENTAL","CIUDAD SALITRE SUR-ORIENTAL")))$Carriles)
+
+```
+
+Zona Rosa
+```{r,echo = FALSE,fig.align="center"}
+
+summary((capa_variables_LTS%>% filter(ZAT %in% c("EL RETIRO", "EL NOGAL", "LOS ROSALES","ESPARTILLAL")))$Carriles)
+
+```
+
+## Estadísticas Generales
+```{r,echo = FALSE,fig.align="center", warning=FALSE}
+
+ggplot(data = capa_variables_LTS, aes(x=Clasificacion, y=Carriles)) + geom_boxplot(aes(fill=Clasificacion))
+
+```
+
+
+## Variable Número de Carriles
+```{r,echo = FALSE,fig.align="center"}
+
+hist(capa_variables_LTS$Carriles, col = "lightskyblue", xlab="Carriles",ylab="Frecuencia", main = "Histograma Número de Carriles") 
+
+```
+
+
+
+
+
+## Variable Presencia CicloRuta
+
+```{r,echo = FALSE,fig.align='right'}
+
+mapa_CicloRuta
+
+```
+
+## Estadísticas por ZAT
+
+```{r,include=FALSE}
+resultados_CicloRuta_Doce <- as.data.frame(table((capa_variables_LTS%>% filter(ZAT %in% c("DOCE DE OCTUBRE")))$CicloRuta))
+
+resultados_CicloRuta_Salitre <- as.data.frame(table((capa_variables_LTS%>% filter(ZAT %in% c("CIUDAD SALITRE NOR-ORIENTAL","CIUDAD SALITRE SUR-ORIENTAL")))$CicloRuta))
+
+resultados_CicloRuta_Rosa <- as.data.frame(table((capa_variables_LTS%>% filter(ZAT %in% c("EL RETIRO", "EL NOGAL", "LOS ROSALES","ESPARTILLAL")))$CicloRuta))
+```
+
+```{r,echo = FALSE,fig.align="center"}
+
+pie3D(resultados_CicloRuta_Doce$Freq, labels = c(paste("No: ",resultados_CicloRuta_Doce$Freq[1]),paste("Si: ",resultados_CicloRuta_Doce$Freq[2])), main="Presencia de SITP - Doce de Octubre")
+
+pie3D(resultados_CicloRuta_Salitre$Freq, labels = c(paste("No: ",resultados_CicloRuta_Salitre$Freq[1]),paste("Si: ",resultados_CicloRuta_Salitre$Freq[2])), main="Presencia de SITP - Salitre")
+
+pie3D(resultados_CicloRuta_Rosa$Freq, labels = c(paste("No: ",resultados_CicloRuta_Rosa$Freq[1]),paste("Si: ",resultados_CicloRuta_Rosa$Freq[2])), main="Presencia de SITP - Zona Rosa")
+
+```
+
+Estadísticas Generales
+
+```{r,include=FALSE}
+resultados_CicloRuta <- as.data.frame(table((capa_variables_LTS)$CicloRuta))
+
+pie3D(resultados_CicloRuta$Freq, labels = c(paste("No: ",resultados_CicloRuta$Freq[1]),paste("Si: ",resultados_CicloRuta$Freq[2])), main="Presencia de Cicloruta")
+
+```
+
+
+
+
+
+## Variable Presencia SITP
+
+```{r,echo = FALSE,fig.align='right'}
+
+mapa_SITP
+
+```
+
+## Variable Presencia SITP
+
+```{r,include=FALSE}
+resultados_SITP_Doce <- as.data.frame(table((capa_variables_LTS%>% filter(ZAT %in% c("DOCE DE OCTUBRE")))$SITP))
+
+resultados_SITP_Salitre <- as.data.frame(table((capa_variables_LTS%>% filter(ZAT %in% c("CIUDAD SALITRE NOR-ORIENTAL","CIUDAD SALITRE SUR-ORIENTAL")))$SITP))
+
+resultados_SITP_Rosa <- as.data.frame(table((capa_variables_LTS%>% filter(ZAT %in% c("EL RETIRO", "EL NOGAL", "LOS ROSALES","ESPARTILLAL")))$SITP))
+```
+
+```{r,echo = FALSE,fig.align="center"}
+
+pie3D(resultados_SITP_Doce$Freq, labels = c(paste("No: ",resultados_SITP_Doce$Freq[1]),paste("Si: ",resultados_SITP_Doce$Freq[2])), main="Presencia de SITP - Doce de Octubre")
+
+pie3D(resultados_SITP_Salitre$Freq, labels = c(paste("No: ",resultados_SITP_Salitre$Freq[1]),paste("Si: ",resultados_SITP_Salitre$Freq[2])), main="Presencia de SITP - Ciudad Salitre")
+
+pie3D(resultados_SITP_Rosa$Freq, labels = c(paste("No: ",resultados_SITP_Rosa$Freq[1]),paste("Si: ",resultados_SITP_Rosa$Freq[2])), main="Presencia de SITP - Zona Rosa")
+
+
+```
+Estadísticas Generales
+
+```{r,include=FALSE}
+resultados_SITP <- as.data.frame(table((capa_variables_LTS)$SITP))
+
+pie3D(resultados_SITP$Freq, labels = c(paste("No: ",resultados_SITP$Freq[1]),paste("Si: ",resultados_SITP$Freq[2])), main="Presencia de SITP")
+
+```
+
+
+
+## Clustering - Métodos
+
+- Matriz de Gower:
+    * Este método permite generar una matriz de distancias entre datos multidimensionales, incluso cuando hay presencia de variables cualitativas y binarias.
+
+- PAM Fit
+    * Este método es similar al algoritmo de Kmeans, pero utiliza medioides de Clusters en vez de centroides.
+
+- HClust
+    * asdlfkj
+    
+    
+
+## Clustering - Resultados
+
+
+
+
+
+
+
+
+## Modelo Predictivo
+
+- Se consideraron varios métodos de "devolución" desde el Clustering
+    * LDA (Linear Discriminant Analysis)
+    * Finite Mixture Modelling 
+    * Regesión Logística Multinomial
+
+
+## Regresión Logística Multinomial
+
+
