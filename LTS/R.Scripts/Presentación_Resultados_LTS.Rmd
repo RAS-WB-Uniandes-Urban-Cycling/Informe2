@@ -3,7 +3,7 @@
     author: "Alejandro Palacio & Marcelo Botero"
     date: "21/7/2018"
     output: ioslides_presentation
-    #logo: "/Users/alejandropalacio/Desktop/Logo2.png"
+    logo: "/Users/alejandropalacio/Desktop/Logo2.png"
 
 ---
 
@@ -24,10 +24,10 @@ library(ggplot2)
 library(nnet)
 
 #Alejandro
-#ruta_resultados <-"/Users/alejandropalacio/Documents/GitHub/proBikePolicies/LTS/Resultados/"
+ruta_resultados <-"/Users/alejandropalacio/Documents/GitHub/proBikePolicies/LTS/Resultados/"
 
 #Marcelo  
-ruta_resultados <-"C:/Users/marce/Documents/GitHub/proBikePolicies/LTS/Resultados/"
+#ruta_resultados <-"C:/Users/marce/Documents/GitHub/proBikePolicies/LTS/Resultados/"
 
 load(paste0(ruta_resultados,"Variables_LTS.Rdata"))
 load(paste0(ruta_resultados,"Resultados_Clustering.Rdata"))
@@ -62,6 +62,24 @@ capa_LTS_Hclust$clusters_Hclust <- ifelse(capa_LTS_Hclust$clusters_Hclust==3, 1,
 mapa_LTS_Hclust <-tm_shape(capa_LTS_Hclust)+tm_lines(col="clusters_Hclust",style ="cat" ,scale=5 ,palette ="-Set1",title.col ="LTS", textNA = "No", colorNA = "Red",popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
 
 mapa_LTS_PAM <-tm_shape(capa_LTS_PAM)+tm_lines(col="clusters_PAM",style ="cat" ,scale=5 ,palette ="-Set1",title.col ="LTS", textNA = "No", colorNA = "Red",popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
+
+
+load(paste0(ruta_resultados,"Capa_Predicción_LTS_Logit.Rdata"))
+
+capa_LTS_PAM$clusters_PAM <-   as.numeric(capa_LTS_PAM$clusters_PAM)
+
+capa_variables_LTS_model <-capa_LTS_PAM %>% filter((ZAT %in% c("DOCE DE OCTUBRE","CIUDAD SALITRE NOR-ORIENTAL","CIUDAD SALITRE SUR-ORIENTAL")))
+
+logit_Multi<-multinom(capa_variables_LTS_model$clusters_PAM~Vprom+Trafico+Ancho+Carriles+CicloRuta+SITP+
+                        Vprom:Trafico+Vprom:Ancho+Trafico:Ancho+Vprom:Carriles+Trafico:Carriles+
+                        Ancho:Carriles+Vprom:CicloRuta+Trafico:CicloRuta+Ancho:CicloRuta+Carriles:CicloRuta+
+                        Vprom:SITP+Trafico:SITP+Ancho:SITP+Carriles:SITP+CicloRuta:SITP, data=capa_variables_LTS_model)
+
+
+capa_LTS_estimado <- mutate(Capa_Variables_Prediccion, LTS_Estimado=ifelse(X4>=0.5,3,ifelse(X3>=0.5,1,ifelse(X2>=0.5,2,4))))
+
+mapa_LTS_estimado<-tm_shape(capa_LTS_estimado)+tm_lines(col="LTS_Estimado",style ="cat" ,scale=5 ,palette = "-Set1" ,title.col ="LTS Estimado", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
+
 
 
 ```
@@ -461,33 +479,11 @@ mapa_LTS_PAM
 - Es imporante resaltar que el modelo se estima solo con los datos de los ZATs Doce de Octubre y Ciudad Salitre
 
 
-## Regresión Logística Multinomial
-
-```{r,echo = FALSE,fig.align="center"}
-
-load(paste0(ruta_resultados,"Capa_Predicción_LTS_Logit.Rdata"))
-
-capa_LTS_PAM$clusters_PAM <-   as.numeric(capa_LTS_PAM$clusters_PAM)
-
-capa_variables_LTS_model <-capa_LTS_PAM %>% filter((ZAT %in% c("DOCE DE OCTUBRE","CIUDAD SALITRE NOR-ORIENTAL","CIUDAD SALITRE SUR-ORIENTAL")))
-
-logit_Multi<-multinom(capa_variables_LTS_model$clusters_PAM~Vprom+Trafico+Ancho+Carriles+CicloRuta+SITP+
-                        Vprom:Trafico+Vprom:Ancho+Trafico:Ancho+Vprom:Carriles+Trafico:Carriles+
-                        Ancho:Carriles+Vprom:CicloRuta+Trafico:CicloRuta+Ancho:CicloRuta+Carriles:CicloRuta+
-                        Vprom:SITP+Trafico:SITP+Ancho:SITP+Carriles:SITP+CicloRuta:SITP, data=capa_variables_LTS_model)
-
-
-summary(aov(logit_Multi))
-
-```
-
 ## Predicción Capa LTS 
 
 ```{r,echo = FALSE,fig.align="center"}
 
-capa_LTS_estimado <- mutate(Capa_Variables_Prediccion, LTS_Estimado=ifelse(X4>=0.5,3,ifelse(X3>=0.5,1,ifelse(X2>=0.5,2,4))))
 
-mapa_LTS_estimado<-tm_shape(capa_LTS_estimado)+tm_lines(col="LTS_Estimado",style ="cat" ,scale=5 ,palette = "-Set1" ,title.col ="LTS Estimado", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
 
 mapa_LTS_estimado
 
