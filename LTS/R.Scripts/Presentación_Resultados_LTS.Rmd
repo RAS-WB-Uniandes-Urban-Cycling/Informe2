@@ -28,7 +28,7 @@ ruta_resultados <-"/Users/alejandropalacio/Documents/GitHub/proBikePolicies/LTS/
 #ruta_resultados <-"C:/Users/marce/Documents/GitHub/proBikePolicies/LTS/Resultados/"
 
 load(paste0(ruta_resultados,"Variables_LTS.Rdata"))
-load(paste0(ruta_resultados,"Resultados_CLustering.Rdata"))
+load(paste0(ruta_resultados,"Resultados_Clustering.Rdata"))
 
 
 
@@ -45,6 +45,8 @@ mapa_Carriles<-tm_shape(capa_variables_LTS)+tm_lines(col="Carriles",style ="cat"
 mapa_CicloRuta<-tm_shape(capa_variables_LTS)+tm_lines(col="CicloRuta",style ="cat" ,scale=5 ,palette ="-Set1",title.col ="Presencia de Cicloruta", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
 
 mapa_SITP<-tm_shape(capa_variables_LTS)+tm_lines(col="SITP",style ="cat" ,scale=5 ,palette ="-Set1",title.col ="Presencia de SITP", textNA = "No", colorNA = "Red",popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
+
+mapa_LTS_Hclust <-tm_shape(capa_LTS_Hclust)+tm_lines(col="clusters_Hclust",style ="cat" ,scale=5 ,palette ="-Set1",title.col ="Cluster", textNA = "No", colorNA = "Red",popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
 ```
 
 ## Agenda
@@ -202,13 +204,9 @@ pie3D(resultados_CicloRuta$Freq,labels = c(paste("No: ",resultados_SITP$Freq[1])
 
 Se aplico el metodo de gower para generar la matriz de distancias
 
+## Clustering - HClust
 
 ```{r,include=FALSE}
-resultados_SITP <- as.data.frame(table(capa_variables_LTS$SITP))
+mapa_LTS_Hclust
 ```
 
-```{r,echo = FALSE,fig.align="center"}
-
-pie3D(resultados_CicloRuta$Freq,labels = c(paste("No: ",resultados_SITP$Freq[1]),paste("Si: ",resultados_SITP$Freq[2])))
-
-```

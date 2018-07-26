@@ -30,11 +30,12 @@
     layer_zats<-st_read(paste0(ruta_base_datos,"Mapas de Referencia IDECA/MR0318.gdb"),layer = "SCAT",stringsAsFactors = FALSE) %>% filter(SCaNombre %in% c("DOCE DE OCTUBRE","CIUDAD SALITRE NOR-ORIENTAL","CIUDAD SALITRE SUR-ORIENTAL", "EL RETIRO", "EL NOGAL", "LOS ROSALES","ESPARTILLAL")) %>%
       st_transform(4326)
     layer_calzadas<-st_read(paste0(ruta_base_datos,"Mapas de Referencia IDECA/MR0318.gdb"),layer = "Calz",stringsAsFactors = FALSE,promote_to_multi = FALSE) %>% st_transform(4326) %>% filter(st_is_valid(.))
-    layer_ruta_urbana <- st_read(paste0(ruta_base_datos,"Rutas SITP.gdb"),layer = "Ruta_Urbana",stringsAsFactors = FALSE) %>% st_transform(4326) %>% st_cast( 'LINESTRING')  
-    layer_ruta_alimentadora <- st_read(paste0(ruta_base_datos,"Rutas SITP.gdb"),layer = "Ruta_Alimentadora",stringsAsFactors = FALSE) %>% st_transform(4326) %>% st_cast('LINESTRING')  
-    layer_ruta_complementaria<- st_read(paste0(ruta_base_datos,"Rutas SITP.gdb"),layer = "Ruta_Complementaria",stringsAsFactors = FALSE) %>% st_transform(4326) %>% st_cast('LINESTRING')  
-    layer_ruta_especial<- st_read(paste0(ruta_base_datos,"Rutas SITP.gdb"),layer = "Ruta_Especial",stringsAsFactors = FALSE) %>% st_transform(4326) %>% st_cast('LINESTRING')  
-    
+    layer_ruta_urbana <- st_read(paste0(ruta_base_datos,"Rutas SITP.gdb"),layer = "Ruta_Urbana",stringsAsFactors = FALSE) %>% st_transform(4326) %>% st_cast( 'LINESTRING')  %>% transmute(Tipo="SITP")
+    layer_ruta_alimentadora <- st_read(paste0(ruta_base_datos,"Rutas SITP.gdb"),layer = "Ruta_Alimentadora",stringsAsFactors = FALSE) %>% st_transform(4326) %>% st_cast('LINESTRING')  %>% transmute(Tipo="Alimentador")
+    layer_ruta_complementaria<- st_read(paste0(ruta_base_datos,"Rutas SITP.gdb"),layer = "Ruta_Complementaria",stringsAsFactors = FALSE) %>% st_transform(4326) %>% st_cast('LINESTRING')  %>% transmute(Tipo="Complementaria")
+    layer_ruta_especial<- st_read(paste0(ruta_base_datos,"Rutas SITP.gdb"),layer = "Ruta_Especial",stringsAsFactors = FALSE) %>% st_transform(4326) %>% st_cast('LINESTRING')   %>% transmute(Tipo="Especial")
+
+   
 #Procesamiento Capa Malla Vial----
     
   #Se hace un Join espacial entre shape_malla_vial y shape_zats
@@ -87,8 +88,8 @@
     
   #Se divide cada segmento deacuerdo a su vertices
     
-    segmentos_resultantes<- capa_malla_vial$geometry %>% st_split(st_combine(st_cast(capa_malla_vial, 'POINT') )) %>% st_collection_extract( type = c("LINESTRING")) %>%
-      as.data.frame() %>% st_as_sf()
+    segmentos_resultantes<- capa_malla_vial %>% st_split(st_combine(st_cast(capa_malla_vial, 'POINT') )) %>% st_collection_extract( type = c("LINESTRING")) 
+  
     
   #Se hace un Join espacial entre capa_malla_vial y segmentos_resultantes
     
@@ -169,16 +170,17 @@
     
   #Se comvierte de MultiLinesting a Lingstring
     
-    layer_ruta_urbana<- st_cast(layer_ruta_urbana, 'LINESTRING')   
+    rutas_transporte <- rbind(layer_ruta_urbana,layer_ruta_alimentadora, layer_ruta_complementaria, layer_ruta_especial)
+    
+    layer_ruta_urbana<- st_cast(rutas_, 'LINESTRING')   
   
   #Se divide cada ruta del SITP deacuerdo a su vertices
     
-    #capa_SITP<- layer_ruta_urbana$geometry %>% st_split(st_combine(st_cast(layer_ruta_urbana, 'POINT')))%>% st_collection_extract( type = c("LINESTRING")) %>%
-      # as.data.frame() %>% st_as_sf()
+    capa_SITP<-rutas_transporte %>% st_split(st_combine(st_cast(rutas_transporte, 'POINT')))%>% st_collection_extract( type = c("LINESTRING")) 
     
   #Se guarda la Data de capa_SITP (RutaSITP Segmentada)
     
-    #save(capa_SITP,file=paste0(ruta_resultados,"RutaSITP_Segmentada.Rdata"))
+    save(capa_SITP,file=paste0(ruta_resultados,"RutaSITP_Segmentada.Rdata"))
   
   #Se carga la Data de capa_SITP (RutaSITP Segmentada)
     
