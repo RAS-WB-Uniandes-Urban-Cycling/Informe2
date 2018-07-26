@@ -448,8 +448,41 @@ mapa_LTS_PAM
     * LDA (Linear Discriminant Analysis)
     * Finite Mixture Modelling 
     * Regesión Logística Multinomial
+    
+- Se escogió la última opción (Logit multinomial) como la mejor opción
+
+- Es imporante resaltar que el modelo se estima solo con los datos de los ZATs Doce de Octubre y Ciudad Salitre
 
 
 ## Regresión Logística Multinomial
 
+```{r,echo = FALSE,fig.align="center"}
 
+load(paste0(ruta_resultados,"Capa_Predicción_LTS_Logit.Rdata"))
+load(paste0(ruta_resultados,"Modelo_Análisis_Estadístico_LTS.Rdata"))
+load(paste0(ruta_resultados,"Capa_Calculo_Logit.Rdata"))
+
+summary(logit_Multi)
+
+summary(aov(logit_Multi))
+
+```
+
+## Predicción Capa LTS 
+
+```{r,echo = FALSE,fig.align="center"}
+
+capa_LTS_estimado <- mutate(Capa_Variables_Prediccion, LTS_Estimado=ifelse(X4>=0.5,4,ifelse(X3>=0.5,3,ifelse(X2>0.5,2,1))))
+
+mapa_LTS_estimado<-tm_shape(capa_LTS_estimado)+tm_lines(col="LTS_Estimado",style ="cat" ,scale=5 ,palette = "-Set1" ,title.col ="LTS Estimado", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
+
+mapa_LTS_estimado
+
+```
+
+
+## Conclusiones
+
+- Con las correcciones realizadas, las estimaciones se acercan más a las variables definidas en la literatura
+- El Clustering parece dar resultados consistentes con la realidad
+- El modelo Logit es relativamente robusto para el cálculo del LTS. Se recomienda tener un input mayor a la hora de su cálculo, para aumentar la precisión al estimar nuevos ZATs.
