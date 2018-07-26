@@ -77,31 +77,11 @@
     mapa<-tm_shape(capa_LTS_PAM)+tm_lines(col="clusters_PAM",style ="cat" ,scale=5 ,palette = "Accent" ,title.col ="Cluster", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
     mapa
     
-#Clustering Kmeans Algorithm----    
-    
-    clusters_Kmeans <- kmeans(dist, 8)
-    
-    clusters_Kmeans <- as.data.frame(clusters_Kmeans$cluster) %>% transmute(clusters_Kmeans=clusters_Kmeans$cluster)
-
-    capa_LTS_Kmens<- cbind.data.frame(capa_variables_LTS,clusters_Kmeans) %>% st_as_sf
-    
-    Errores <- c(NA)
-    
-    for (i in 1:20){
-      Errores[i] <- sum(kmeans(dist,i)$withinss)
-    }
-    
-    plot(1:20, Errores,xlab = "Number of clusters",ylab = "Silhouette Width")
-    lines(1:20, Errores)
-    
-    mapa<-tm_shape(capa_LTS_Kmens)+tm_lines(col="clusters_Kmeans",style ="cat" ,scale=5 ,palette = "Accent" ,title.col ="Cluster", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
-    mapa
-    
 #Se alamcenan los resultados----
     
   #Se guarda la Data (Resutados Clustering)
     
-    save(capa_LTS_Hclust,capa_LTS_PAM,capa_LTS_Kmens,silhouette_with,file=paste0(ruta_resultados,"Resultados_Clustering.Rdata"))
+    save(capa_LTS_Hclust,capa_LTS_PAM,silhouette_with,file=paste0(ruta_resultados,"Resultados_Clustering.Rdata"))
     
   #Se eliminan los datos que no se usaran  
     

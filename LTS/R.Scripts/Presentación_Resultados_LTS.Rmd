@@ -23,10 +23,10 @@ library(plotrix)
 library(ggplot2)
 
 #Alejandro
-#ruta_resultados <-"/Users/alejandropalacio/Documents/GitHub/proBikePolicies/LTS/Resultados/"
+ruta_resultados <-"/Users/alejandropalacio/Documents/GitHub/proBikePolicies/LTS/Resultados/"
 
 #Marcelo  
-ruta_resultados <-"C:/Users/marce/Documents/GitHub/proBikePolicies/LTS/Resultados/"
+#ruta_resultados <-"C:/Users/marce/Documents/GitHub/proBikePolicies/LTS/Resultados/"
 
 load(paste0(ruta_resultados,"Variables_LTS.Rdata"))
 load(paste0(ruta_resultados,"Resultados_Clustering.Rdata"))
