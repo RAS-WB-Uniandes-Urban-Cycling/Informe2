@@ -38,14 +38,16 @@
 #Clustering Hierarchical Clustering----   
     
     clusters_Hclust <- hclust(dist,method ="single")
-    plot(clusters_Hclust)
+    grafico_HClust <- clusters_Hclust
     clusters_Hclust <- cutree(clusters_Hclust, 4) 
     table(clusters_Hclust)
     
-    capa_LTS_Hclust<- cbind.data.frame(capa_variables_LTS,data.frame(clusters_Hclust)) %>% st_as_sf
+    capa_LTS_Hclust<- cbind.data.frame(capa_variables_LTS,data.frame(clusters_Hclust)) %>% st_as_sf %>% mutate(LTS="")
  
     mapa<-tm_shape(capa_LTS_Hclust)+tm_lines(col="clusters_Hclust",style ="cat" ,scale=5 ,palette = "Accent" ,title.col ="Cluster", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
     mapa
+    
+    capa_LTS_Hclust$clusters_Hclust <- ifelse(capa_LTS_Hclust$clusters_Hclust==3, 1, ifelse(capa_LTS_Hclust$clusters_Hclust==2, 2,ifelse(capa_LTS_Hclust$clusters_Hclust==4, 3,4)))
     
 #Clustering PAM Algorithm----
     
@@ -72,18 +74,20 @@
     
     clusters_PAM <- as.data.frame(clusters_PAM$clustering) %>% transmute(clusters_PAM=clusters_PAM$clustering)
     
-    capa_LTS_PAM<- cbind.data.frame(capa_variables_LTS,clusters_PAM) %>% st_as_sf
+    capa_LTS_PAM<- cbind.data.frame(capa_variables_LTS,clusters_PAM) %>% st_as_sf %>% mutate(LTS="")
     
     mapa<-tm_shape(capa_LTS_PAM)+tm_lines(col="clusters_PAM",style ="cat" ,scale=5 ,palette = "Accent" ,title.col ="Cluster", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
     mapa
+    
+    capa_LTS_PAM$clusters_PAM <- ifelse(capa_LTS_PAM$clusters_PAM==3, 1, ifelse(capa_LTS_PAM$clusters_PAM, 2,ifelse(capa_LTS_PAM$clusters_PAM==4, 3,4)))
     
 #Se alamcenan los resultados----
     
   #Se guarda la Data (Resutados Clustering)
     
-    save(capa_LTS_Hclust,capa_LTS_PAM,silhouette_with,file=paste0(ruta_resultados,"Resultados_Clustering.Rdata"))
+    save(capa_LTS_Hclust,capa_LTS_PAM,silhouette_with,grafico_HClust,file=paste0(ruta_resultados,"Resultados_Clustering.Rdata"))
     
   #Se eliminan los datos que no se usaran  
     
-    rm(capa_clusters,capa_variables_LTS,clusters_PAM,mapa, ruta_resultados)
+    rm(capa_clusters,capa_variables_LTS,clusters_PAM,mapa, ruta_resultados,silhouette_with,grafico_HClust)
   
