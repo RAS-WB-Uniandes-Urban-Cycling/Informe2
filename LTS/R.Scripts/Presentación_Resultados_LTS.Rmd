@@ -164,7 +164,12 @@ hist(capa_variables_LTS$Vprom, col = "lightskyblue", xlab="Velocidad",ylab="Frec
 
 ## Variable Tráfico - Correcciones
 
-bla bla bla
+- El flujo de vehículos en la ciudad se asemeja a un caudal
+
+- La diferencia entre el caudal Free Flow y el Caudal Promedio puede interpretarse como el tráfico de la vía
+    *Esta medida corresponde a una pérdida de flujo vehicular por razón del tráfico
+    
+
 
 ## Variable Tráfico - Resultados
 
