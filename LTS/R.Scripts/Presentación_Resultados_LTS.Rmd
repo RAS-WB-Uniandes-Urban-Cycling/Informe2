@@ -52,6 +52,12 @@ mapa_SITP<-tm_shape(capa_variables_LTS)+tm_lines(col="SITP",style ="cat" ,scale=
 
 mapa_LTS_Hclust <-tm_shape(capa_LTS_Hclust)+tm_lines(col="clusters_Hclust",style ="cat" ,scale=5 ,palette ="-Set1",title.col ="Cluster", textNA = "No", colorNA = "Red",popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
 
+
+capa_LTS_PAM$clusters_PAM <- ifelse(capa_LTS_PAM$clusters_PAM==3, 1, ifelse(capa_LTS_PAM$clusters_PAM==2, 2,ifelse(capa_LTS_PAM$clusters_PAM==4, 3,4)))
+
+capa_LTS_Hclust$clusters_Hclust <- ifelse(capa_LTS_Hclust$clusters_Hclust==3, 1, ifelse(capa_LTS_Hclust$clusters_Hclust==2, 2,ifelse(capa_LTS_Hclust$clusters_Hclust==4, 3,4)))
+
+
 mapa_LTS_Hclust <-tm_shape(capa_LTS_Hclust)+tm_lines(col="clusters_Hclust",style ="cat" ,scale=5 ,palette ="-Set1",title.col ="LTS", textNA = "No", colorNA = "Red",popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
 
 mapa_LTS_PAM <-tm_shape(capa_LTS_PAM)+tm_lines(col="clusters_PAM",style ="cat" ,scale=5 ,palette ="-Set1",title.col ="LTS", textNA = "No", colorNA = "Red",popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
@@ -472,7 +478,7 @@ summary(aov(logit_Multi))
 
 ```{r,echo = FALSE,fig.align="center"}
 
-capa_LTS_estimado <- mutate(Capa_Variables_Prediccion, LTS_Estimado=ifelse(X4>=0.5,4,ifelse(X3>=0.5,3,ifelse(X2>0.5,2,1))))
+capa_LTS_estimado <- mutate(Capa_Variables_Prediccion, LTS_Estimado=ifelse(X4>=0.5,3,ifelse(X3>=0.5,1,ifelse(X2>=0.5,2,4))))
 
 mapa_LTS_estimado<-tm_shape(capa_LTS_estimado)+tm_lines(col="LTS_Estimado",style ="cat" ,scale=5 ,palette = "-Set1" ,title.col ="LTS Estimado", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
 

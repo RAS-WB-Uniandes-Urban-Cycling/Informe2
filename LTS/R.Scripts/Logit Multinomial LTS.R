@@ -35,6 +35,9 @@ logit_Multi<-multinom(capa_variables_LTS_model$clusters_PAM~Vprom+Trafico+Ancho+
                         Ancho:Carriles+Vprom:CicloRuta+Trafico:CicloRuta+Ancho:CicloRuta+Carriles:CicloRuta+
                         Vprom:SITP+Trafico:SITP+Ancho:SITP+Carriles:SITP+CicloRuta:SITP, data=capa_variables_LTS_model)
 
+logit_Multi<-multinom(capa_variables_LTS_model$clusters_PAM~Vprom+Trafico+Ancho+Carriles+CicloRuta+SITP, data=capa_variables_LTS_model)
+
+
 
 #Resultados Logit Multinomial con base en LTS 1
 summary(logit_Multi)
