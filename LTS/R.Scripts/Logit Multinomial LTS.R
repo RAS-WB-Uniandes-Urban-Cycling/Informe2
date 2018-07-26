@@ -13,8 +13,8 @@
 load(paste0(ruta_resultados,"Resultados_Clustering.Rdata"))
 load(paste0(ruta_resultados, "Variables_LTS.Rdata"))
 
-capa_variables_LTS_model <-capa_variables_LTS %>% filter(!(ZAT %in% c("DOCE DE OCTUBRE","CIUDAD SALITRE NOR-ORIENTAL","CIUDAD SALITRE SUR-ORIENTAL")))
-capa_variables_LTS <-capa_variables_LTS[-c(1,8)] %>% st_set_geometry(NULL)
+capa_variables_LTS_model <-capa_LTS_PAM %>% filter(!(ZAT %in% c("DOCE DE OCTUBRE","CIUDAD SALITRE NOR-ORIENTAL","CIUDAD SALITRE SUR-ORIENTAL")))
+#capa_variables_LTS <-capa_variables_LTS[-c(1,8)] %>% st_set_geometry(NULL)
 
 #Librerías a utilizar
 library(nnet)
@@ -23,11 +23,19 @@ library(ggplot2)
 
 #Se declara la regresion Logit Multinomial con un método de clustering elegido
 
-#logit_Multi<-multinom(capa_LTS_Kmeans$clusters_Kmeans~Vprom+Trafico+Ancho+Carriles+CicloRuta+SITP, data=capa_LTS_Kmeans)
-logit_Multi<-multinom(capa_LTS_PAM$clusters_PAM~Vprom+Trafico+Ancho+Carriles+CicloRuta+SITP, data=capa_LTS_PAM)
+logit_Multi<-multinom(capa_variables_LTS_model$clusters_PAM~Vprom*Trafico*Ancho*Carriles*CicloRuta*SITP, data=capa_variables_LTS_model)
+
+logit_Multi<-multinom(capa_variables_LTS_model$clusters_PAM~Vprom+Trafico+Ancho+Carriles+CicloRuta+SITP+
+                        Vprom:Trafico+Vprom:Ancho+Trafico:Ancho+Vprom:Carriles+Trafico:Carriles+
+                        Ancho:Carriles+Vprom:CicloRuta+Trafico:CicloRuta+Ancho:CicloRuta+Carriles:CicloRuta+
+                        Vprom:SITP+Trafico:SITP+Ancho:SITP+Carriles:SITP+CicloRuta:SITP, data=capa_variables_LTS_model)
+
 
 #Resultados Logit Multinomial con base en LTS 1
 summary(logit_Multi)
+
+#Se revisa la significancia de las variables
+summary(aov(logit_Multi))
 
 #Se crea una matriz de fitted values para cada una de las observaciones
 LTS_Estimado_Model<-as.matrix(fitted(logit_Multi))
@@ -54,10 +62,16 @@ predicted
 predicted=predict(logit_Multi,capa_variables_LTS,type="probs")
 predicted
 
+Capa_Variables_Prediccion <- cbind(capa_variables_LTS,predicted)
+
 
 #Se guardan los resultados
 
-save(capa_variables_LTS,file=paste0(ruta_resultados,"Variables_LTS.Rdata"))
+save(logit_Multi,file=paste0(ruta_resultados,"Modelo_Análisis_Estadístico_LTS.Rdata"))
+save(Capa_Variables_Prediccion,file=paste0(ruta_resultados,"Capa_Predicción_LTS_Logit.Rdata"))
+save(capa_variables_LTS_model,file=paste0(ruta_resultados,"Capa_Calculo_Logit.Rdata"))
+
+
 
 #--------------------------------------------------------------------------------------------
 #Pruebas
