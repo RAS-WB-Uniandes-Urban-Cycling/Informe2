@@ -8,18 +8,23 @@
   #Marcelo
 
     ruta_resultados <-"C:/Users/marce/Documents/GitHub/proBikePolicies/LTS/Resultados/"
+   
     
+#Librerías a utilizar
+library(nnet)
+library(reshape2)
+library(ggplot2)  
+library(tidyverse)
+
+
 #Se cargan los resultados
 load(paste0(ruta_resultados,"Resultados_Clustering.Rdata"))
 load(paste0(ruta_resultados, "Variables_LTS.Rdata"))
 
-capa_variables_LTS_model <-capa_LTS_PAM %>% filter(!(ZAT %in% c("DOCE DE OCTUBRE","CIUDAD SALITRE NOR-ORIENTAL","CIUDAD SALITRE SUR-ORIENTAL")))
-#capa_variables_LTS <-capa_variables_LTS[-c(1,8)] %>% st_set_geometry(NULL)
+capa_LTS_PAM$clusters_PAM <-   as.numeric(capa_LTS_PAM$clusters_PAM)
 
-#Librerías a utilizar
-library(nnet)
-library(reshape2)
-library(ggplot2)
+capa_variables_LTS_model <-capa_LTS_PAM %>% filter((ZAT %in% c("DOCE DE OCTUBRE","CIUDAD SALITRE NOR-ORIENTAL","CIUDAD SALITRE SUR-ORIENTAL")))
+#capa_variables_LTS <-capa_variables_LTS[-c(1,8)] %>% st_set_geometry(NULL)
 
 #Se declara la regresion Logit Multinomial con un método de clustering elegido
 
@@ -38,7 +43,7 @@ summary(logit_Multi)
 summary(aov(logit_Multi))
 
 #Se crea una matriz de fitted values para cada una de las observaciones
-LTS_Estimado_Model<-as.matrix(fitted(logit_Multi))
+LTS_Estimado_Model<-(fitted(logit_Multi))
 head(LTS_Estimado_Model)
 
 
