@@ -1,6 +1,6 @@
 ---
     title: "LTS"
-    author: "Alejandro Palacio & Marcelo Botero"
+    author: "Alejandro Palacio, Marcelo Botero, Jorge Huertas, Pablo Uriza, Gemán Carvajal, Sergio Cabrales, Olga Lucía Sarmiennto, Andrés L. Medaglia"
     date: "21/7/2018"
     output: ioslides_presentation
     logo: "/Users/alejandropalacio/Desktop/Logo2.png"
@@ -168,8 +168,7 @@ hist(capa_variables_LTS$Vprom, col = "lightskyblue", xlab="Velocidad",ylab="Frec
 
 - La diferencia entre el caudal Free Flow y el Caudal Promedio puede interpretarse como el tráfico de la vía
     *Esta medida corresponde a una pérdida de flujo vehicular por razón del tráfico
-    
-
+  
 
 ## Variable Tráfico - Resultados
 
@@ -425,11 +424,10 @@ pie3D(resultados_SITP$Freq, labels = c(paste("No: ",resultados_SITP$Freq[1]),pas
 - Matriz de Gower:
     * Este método permite generar una matriz de distancias entre datos multidimensionales, incluso cuando hay presencia de variables cualitativas y binarias.
 
-- Partitioning Around Medoids (PAM)
+- Partición alrededor de medioides (PAM)
     * Este método es similar al algoritmo de Kmeans, pero utiliza medioides de Clusters en vez de centroides.
 
 - Hierarchical cluster (HClust)
-    * asdlfkj
     
     
 ## Clustering - Resultados - HCLust
