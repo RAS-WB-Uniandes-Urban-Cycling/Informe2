@@ -52,6 +52,11 @@ mapa_SITP<-tm_shape(capa_variables_LTS)+tm_lines(col="SITP",style ="cat" ,scale=
 
 mapa_LTS_Hclust <-tm_shape(capa_LTS_Hclust)+tm_lines(col="clusters_Hclust",style ="cat" ,scale=5 ,palette ="-Set1",title.col ="Cluster", textNA = "No", colorNA = "Red",popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
 
+mapa_LTS_Hclust <-tm_shape(capa_LTS_Hclust)+tm_lines(col="clusters_Hclust",style ="cat" ,scale=5 ,palette ="-Set1",title.col ="LTS", textNA = "No", colorNA = "Red",popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
+
+mapa_LTS_PAM <-tm_shape(capa_LTS_PAM)+tm_lines(col="clusters_PAM",style ="cat" ,scale=5 ,palette ="-Set1",title.col ="LTS", textNA = "No", colorNA = "Red",popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
+
+
 ```
 
 ## Agenda
@@ -194,13 +199,6 @@ hist(capa_variables_LTS$Trafico, col = "lightskyblue", xlab="Tráfico",ylab="Fre
 
 
 
-
-
-
-
-
-
-
 ## Variable Ancho de la Vía
 
 ```{r,echo = FALSE,fig.align='right'}
@@ -256,13 +254,6 @@ ggplot(data = capa_variables_LTS, aes(x=Clasificacion, y=Ancho)) + geom_boxplot(
 hist(capa_variables_LTS$Ancho, col = "lightskyblue", xlab="Ancho",ylab="Frecuencia", main = "Histograma Ancho de la Vía") 
 
 ```
-
-
-
-
-
-
-
 
 
 ## Variable Número de Carriles
@@ -322,9 +313,6 @@ hist(capa_variables_LTS$Carriles, col = "lightskyblue", xlab="Carriles",ylab="Fr
 ```
 
 
-
-
-
 ## Variable Presencia CicloRuta
 
 ```{r,echo = FALSE,fig.align='right'}
@@ -361,9 +349,6 @@ resultados_CicloRuta <- as.data.frame(table((capa_variables_LTS)$CicloRuta))
 pie3D(resultados_CicloRuta$Freq, labels = c(paste("No: ",resultados_CicloRuta$Freq[1]),paste("Si: ",resultados_CicloRuta$Freq[2])), main="Presencia de Cicloruta")
 
 ```
-
-
-
 
 
 ## Variable Presencia SITP
@@ -410,21 +395,51 @@ pie3D(resultados_SITP$Freq, labels = c(paste("No: ",resultados_SITP$Freq[1]),pas
 - Matriz de Gower:
     * Este método permite generar una matriz de distancias entre datos multidimensionales, incluso cuando hay presencia de variables cualitativas y binarias.
 
-- PAM Fit
+- Partitioning Around Medoids (PAM)
     * Este método es similar al algoritmo de Kmeans, pero utiliza medioides de Clusters en vez de centroides.
 
-- HClust
+- Hierarchical cluster (HClust)
     * asdlfkj
     
     
+## Clustering - Resultados - HCLust
 
-## Clustering - Resultados
+```{r,echo = FALSE,fig.align='right'}
+
+plot(grafico_HClust)
+
+```
 
 
+## Clustering - Resultados - HCLust
 
 
+```{r,echo = FALSE,fig.align='right'}
+
+mapa_LTS_Hclust
+
+```
 
 
+## Clustering - Resultados - PAM
+
+
+```{r,echo = FALSE,fig.align='right'}
+
+plot(1:10, silhouette_with,xlab = "Number of clusters",ylab = "Silhouette Width")
+lines(1:10, silhouette_with)
+
+```
+
+
+## Clustering - Resultados - PAM
+
+
+```{r,echo = FALSE,fig.align='right'}
+
+mapa_LTS_PAM
+
+```
 
 
 ## Modelo Predictivo

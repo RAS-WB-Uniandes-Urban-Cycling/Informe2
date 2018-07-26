@@ -82,7 +82,7 @@
   
   #Se unen los datos procesados de Google API con la capa malla vial  
     
-    capa_malla_vial<- capa_malla_vial %>% filter(!(highway %in% c("bus_stop","pedestrian")))%>% transmute(ID,Ancho,Carriles, lanes,ZAT)  %>% left_join(datos_google_API ,By=ID) %>% filter(Longitud1 !=0 | Longitud2 !=0)
+    capa_malla_vial<- capa_malla_vial %>% filter(!(highway %in% c("bus_stop","pedestrian")))%>% transmute(ID,Ancho,Carriles, lanes)  %>% left_join(datos_google_API ,By=ID) %>% filter(Longitud1 !=0 | Longitud2 !=0)
 
 #Segmentación capa_malla_vial----      
     
@@ -92,7 +92,7 @@
   
   #Se hace un Join espacial entre capa_malla_vial y shape_calzadas
     
-    capa_malla_vial<-capa_malla_vial %>% st_join(select(layer_calzadas,CalAncho, CalNCarril),left = TRUE, largest=TRUE)  %>% 
+    capa_malla_vial<-capa_malla_vial %>% st_join(select(layer_zats,SCaNombre),left = FALSE, largest=TRUE) %>% rename(c(SCaNombre="ZAT")) %>%   st_join(select(layer_calzadas,CalAncho, CalNCarril),left = TRUE, largest=TRUE)  %>% 
       transmute(ID=row_number(),Ancho=if_else(!is.na(CalAncho),as.numeric(CalAncho),as.numeric(Ancho)),
       Carriles=if_else(is.na(lanes),if_else(is.na(CalNCarril),as.numeric(Carriles),as.numeric(CalNCarril)),as.numeric(lanes)),ZAT,
       Longitud1,TProm1,TFF1,Vprom1, VpromFF1,Longitud2,TProm2,TFF2,Vprom2, VpromFF2)
@@ -119,10 +119,7 @@
 #Calculo indicador trafico----
     
     capa_malla_vial<-capa_malla_vial  %>% mutate(Trafico=(ifelse(Longitud1==Longitud2,pmax((VpromFF1-Vprom1)*ceiling(Carriles/2), (VpromFF2-Vprom2)*ceiling(Carriles/2)),
-                                                                ifelse(Longitud1<Longitud2, (VpromFF1-Vprom1)*Carriles, (VpromFF2-Vprom2)*Carriles))))   
-    mapa_Trafico<-tm_shape(capa_malla_vial)+tm_lines(col="Trafico",style ="cont" ,scale=5 ,palette = "YlOrRd" ,title.col ="Tráfico", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
-    
-    mapa_Trafico    
+                                                                ifelse(Longitud1<Longitud2, (VpromFF1-Vprom1)*Carriles, (VpromFF2-Vprom2)*Carriles))))
     
 #Procesamiento Red Ciclorutas----
     
