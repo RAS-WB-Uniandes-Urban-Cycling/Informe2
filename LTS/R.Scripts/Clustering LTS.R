@@ -47,7 +47,7 @@
     mapa<-tm_shape(capa_LTS_Hclust)+tm_lines(col="clusters_Hclust",style ="cat" ,scale=5 ,palette = "Accent" ,title.col ="Cluster", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
     mapa
     
-    capa_LTS_Hclust$clusters_Hclust <- ifelse(capa_LTS_Hclust$clusters_Hclust==3, 1, ifelse(capa_LTS_Hclust$clusters_Hclust==2, 2,ifelse(capa_LTS_Hclust$clusters_Hclust==4, 3,4)))
+    #capa_LTS_Hclust$clusters_Hclust <- ifelse(capa_LTS_Hclust$clusters_Hclust==3, 1, ifelse(capa_LTS_Hclust$clusters_Hclust==2, 2,ifelse(capa_LTS_Hclust$clusters_Hclust==4, 3,4)))
     
 #Clustering PAM Algorithm----
     
@@ -79,7 +79,7 @@
     mapa<-tm_shape(capa_LTS_PAM)+tm_lines(col="clusters_PAM",style ="cat" ,scale=5 ,palette = "Accent" ,title.col ="Cluster", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
     mapa
     
-    capa_LTS_PAM$clusters_PAM <- ifelse(capa_LTS_PAM$clusters_PAM==3, 1, ifelse(capa_LTS_PAM$clusters_PAM==2, 2,ifelse(capa_LTS_PAM$clusters_PAM==4, 3,4)))
+   #capa_LTS_PAM$clusters_PAM <- ifelse(capa_LTS_PAM$clusters_PAM==3, 1, ifelse(capa_LTS_PAM$clusters_PAM==2, 2,ifelse(capa_LTS_PAM$clusters_PAM==4, 3,4)))
     
 #Se alamcenan los resultados----
     
