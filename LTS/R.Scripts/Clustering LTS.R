@@ -85,5 +85,5 @@
     
   #Se eliminan los datos que no se usaran  
     
-    rm(capa_clusters,capa_variables_LTS,clusters_Kmeans,clusters_PAM,mapa, ruta_resultados)
+    rm(capa_clusters,capa_variables_LTS,clusters_PAM,mapa, ruta_resultados)
   
