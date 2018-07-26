@@ -42,7 +42,7 @@
     clusters_Hclust <- cutree(clusters_Hclust, 4) 
     table(clusters_Hclust)
     
-    capa_LTS_Hclust<- cbind.data.frame(capa_variables_LTS,data.frame(clusters_Hclust)) %>% st_as_sf %>% mutate(LTS="")
+    capa_LTS_Hclust<- cbind.data.frame(capa_variables_LTS,data.frame(clusters_Hclust)) %>% st_as_sf 
  
     mapa<-tm_shape(capa_LTS_Hclust)+tm_lines(col="clusters_Hclust",style ="cat" ,scale=5 ,palette = "Accent" ,title.col ="Cluster", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
     mapa
@@ -74,7 +74,7 @@
     
     clusters_PAM <- as.data.frame(clusters_PAM$clustering) %>% transmute(clusters_PAM=clusters_PAM$clustering)
     
-    capa_LTS_PAM<- cbind.data.frame(capa_variables_LTS,clusters_PAM) %>% st_as_sf %>% mutate(LTS="")
+    capa_LTS_PAM<- cbind.data.frame(capa_variables_LTS,clusters_PAM) %>% st_as_sf 
     
     mapa<-tm_shape(capa_LTS_PAM)+tm_lines(col="clusters_PAM",style ="cat" ,scale=5 ,palette = "Accent" ,title.col ="Cluster", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
     mapa
