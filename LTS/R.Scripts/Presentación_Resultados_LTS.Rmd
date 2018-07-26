@@ -21,6 +21,7 @@ library(dplyr)
 library(knitr)
 library(plotrix)
 library(ggplot2)
+library(nnet)
 
 #Alejandro
 #ruta_resultados <-"/Users/alejandropalacio/Documents/GitHub/proBikePolicies/LTS/Resultados/"
@@ -465,10 +466,16 @@ mapa_LTS_PAM
 ```{r,echo = FALSE,fig.align="center"}
 
 load(paste0(ruta_resultados,"Capa_Predicción_LTS_Logit.Rdata"))
-load(paste0(ruta_resultados,"Modelo_Análisis_Estadístico_LTS.Rdata"))
-load(paste0(ruta_resultados,"Capa_Calculo_Logit.Rdata"))
 
-summary(logit_Multi)
+capa_LTS_PAM$clusters_PAM <-   as.numeric(capa_LTS_PAM$clusters_PAM)
+
+capa_variables_LTS_model <-capa_LTS_PAM %>% filter((ZAT %in% c("DOCE DE OCTUBRE","CIUDAD SALITRE NOR-ORIENTAL","CIUDAD SALITRE SUR-ORIENTAL")))
+
+logit_Multi<-multinom(capa_variables_LTS_model$clusters_PAM~Vprom+Trafico+Ancho+Carriles+CicloRuta+SITP+
+                        Vprom:Trafico+Vprom:Ancho+Trafico:Ancho+Vprom:Carriles+Trafico:Carriles+
+                        Ancho:Carriles+Vprom:CicloRuta+Trafico:CicloRuta+Ancho:CicloRuta+Carriles:CicloRuta+
+                        Vprom:SITP+Trafico:SITP+Ancho:SITP+Carriles:SITP+CicloRuta:SITP, data=capa_variables_LTS_model)
+
 
 summary(aov(logit_Multi))
 
