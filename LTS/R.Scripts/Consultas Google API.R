@@ -24,7 +24,7 @@
     
   #Se realizan las consultas de Google API
 
-    for(i in 1:numero_registros){
+    for(i in 1:10000){
       
       #Se define el origen y destino de la consulta
       
@@ -37,7 +37,7 @@
         
           distancia <- google_distance(origins = c(origen) ,destinations = c(destino) ,
                               mode="driving",  departure_time =as.POSIXct("09-4-2018 00:00:00", format = "%m-%d-%Y %H:%M:%S"),
-                              traffic_model="best_guess",  key="AIzaSyDZ_Q8oLaAfogbrq5__nzNqdabbPL0QCvo",simplify = TRUE )
+                              traffic_model="best_guess",  key="AIzaSyDwg38QJIog7fJF2qXxnlj9ae54t8xTWTU",simplify = TRUE )
         
           #Se almacenan los resultados de la consulta
           
@@ -50,7 +50,7 @@
         
           distancia <- google_distance(origins = c(destino) ,destinations = c(origen) ,
                             mode="driving",  departure_time =as.POSIXct("09-4-2018 00:00:00", format = "%m-%d-%Y %H:%M:%S"),
-                            traffic_model="best_guess",  key="AIzaSyDZ_Q8oLaAfogbrq5__nzNqdabbPL0QCvo",simplify = TRUE )
+                            traffic_model="best_guess",  key="AIzaSyDwg38QJIog7fJF2qXxnlj9ae54t8xTWTU",simplify = TRUE )
       
           #Se almacenan los resultados de la consulta
           

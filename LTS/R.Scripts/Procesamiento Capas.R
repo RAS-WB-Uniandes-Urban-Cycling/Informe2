@@ -25,26 +25,24 @@
     
   #Se almacena los layer en cada variable definida
     
-    layer_malla_vial<-st_read(paste0(ruta_base_datos,"OpenStreetMaps/Malla Vial Bogotá/MVI.shp"), stringsAsFactors = FALSE)%>% filter(!(highway %in% c("cycleway","service","steps","footway"))) %>% st_transform(4326) 
+    layer_malla_vial<-st_read(paste0(ruta_base_datos,"OpenStreetMaps/Malla Vial Bogotá/MVI.shp"), stringsAsFactors = FALSE)%>% filter(!(highway %in% c("cycleway","service","steps","footway","bus_stop","pedestrian","path","bridleway","proposed","raceway","construction","track"))) %>% st_transform(4326) 
     layer_ciclo_rutas<-st_read(paste0(ruta_base_datos,"Mapas de Referencia IDECA/MR0318.gdb"),layer = "RBic",stringsAsFactors = FALSE) %>% st_transform(4326) 
-    layer_zats<-st_read(paste0(ruta_base_datos,"Mapas de Referencia IDECA/MR0318.gdb"),layer = "SCAT",stringsAsFactors = FALSE) %>% filter(SCaNombre %in% c("DOCE DE OCTUBRE","CIUDAD SALITRE NOR-ORIENTAL","CIUDAD SALITRE SUR-ORIENTAL", "EL RETIRO", "EL NOGAL", "LOS ROSALES","ESPARTILLAL")) %>%
-      st_transform(4326)
+    layer_zats<-st_read(paste0(ruta_base_datos,"Mapas de Referencia IDECA/MR0318.gdb"),layer = "SCAT",stringsAsFactors = FALSE) %>% st_transform(4326)
     layer_calzadas<-st_read(paste0(ruta_base_datos,"Mapas de Referencia IDECA/MR0318.gdb"),layer = "Calz",stringsAsFactors = FALSE,promote_to_multi = FALSE) %>% st_transform(4326) %>% filter(st_is_valid(.))
     layer_ruta_urbana <- st_read(paste0(ruta_base_datos,"Rutas SITP.gdb"),layer = "Ruta_Urbana",stringsAsFactors = FALSE) %>% st_transform(4326) %>% st_cast( 'LINESTRING')  %>% transmute(Tipo="SITP")
     layer_ruta_alimentadora <- st_read(paste0(ruta_base_datos,"Rutas SITP.gdb"),layer = "Ruta_Alimentadora",stringsAsFactors = FALSE) %>% st_transform(4326) %>% st_cast('LINESTRING')  %>% transmute(Tipo="Alimentador")
     layer_ruta_complementaria<- st_read(paste0(ruta_base_datos,"Rutas SITP.gdb"),layer = "Ruta_Complementaria",stringsAsFactors = FALSE) %>% st_transform(4326) %>% st_cast('LINESTRING')  %>% transmute(Tipo="Complementaria")
     layer_ruta_especial<- st_read(paste0(ruta_base_datos,"Rutas SITP.gdb"),layer = "Ruta_Especial",stringsAsFactors = FALSE) %>% st_transform(4326) %>% st_cast('LINESTRING')   %>% transmute(Tipo="Especial")
 
-   
 #Procesamiento Capa Malla Vial----
     
   #Se hace un Join espacial entre shape_malla_vial y shape_zats
     
-    capa_malla_vial<-layer_malla_vial %>% st_join(select(layer_zats,SCaNombre),left = FALSE, largest=TRUE)  %>% mutate(ID=row_number())%>% rename(c(SCaNombre="ZAT"))
+    capa_malla_vial<-layer_malla_vial %>% st_join(select(layer_zats,SCaNombre),left = FALSE, largest=TRUE)  %>% mutate(ID=row_number())%>% rename(c(SCaNombre="SCatastral"))
     
   #Se dividen cada segmento en uno o mas segmentos
     
-    capa_malla_vial <-tibble(gsection(capa_malla_vial)) %>%st_as_sf() %>% st_join(capa_malla_vial,largest=TRUE) %>% mutate(ID=row_number()) 
+    capa_malla_vial <-tibble(gsection(capa_malla_vial))%>%st_as_sf() %>% st_join(capa_malla_vial,largest=TRUE) %>% mutate(ID=row_number()) 
     
   #Se hace un Join espacial entre capa_malla_vial y shape_calzadas
     
