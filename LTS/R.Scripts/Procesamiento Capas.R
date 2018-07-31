@@ -40,13 +40,29 @@
     
     capa_malla_vial<-layer_malla_vial %>% st_join(select(layer_zats,SCaNombre),left = FALSE, largest=TRUE)  %>% mutate(ID=row_number())%>% rename(c(SCaNombre="SCatastral"))
     
+  #Se completan los datos faltantes de numero de carriles.
+    
+    capa_malla_vial$lanes <- as.numeric(capa_malla_vial$lanes)
+    capa_malla_vial$lanes <- ifelse(is.na(capa_malla_vial$lanes) & capa_malla_vial$highway=="residential", round(mean(as.numeric(capa_malla_vial$lanes)[capa_malla_vial$highway=="residential"],na.rm = TRUE),0) ,capa_malla_vial$lanes)
+    capa_malla_vial$lanes <- ifelse(is.na(capa_malla_vial$lanes) & capa_malla_vial$highway=="primary", round(mean(as.numeric(capa_malla_vial$lanes)[capa_malla_vial$highway=="primary"],na.rm = TRUE),0) ,capa_malla_vial$lanes)
+    capa_malla_vial$lanes <- ifelse(is.na(capa_malla_vial$lanes) & capa_malla_vial$highway=="primary_link", round(mean(as.numeric(capa_malla_vial$lanes)[capa_malla_vial$highway=="primary_link"],na.rm = TRUE),0) ,capa_malla_vial$lanes)
+    capa_malla_vial$lanes <- ifelse(is.na(capa_malla_vial$lanes) & capa_malla_vial$highway=="secondary", round(mean(as.numeric(capa_malla_vial$lanes)[capa_malla_vial$highway=="secondary"],na.rm = TRUE),0) ,capa_malla_vial$lanes)
+    capa_malla_vial$lanes <- ifelse(is.na(capa_malla_vial$lanes) & capa_malla_vial$highway=="secondary_link", round(mean(as.numeric(capa_malla_vial$lanes)[capa_malla_vial$highway=="secondary_link"],na.rm = TRUE),0) ,capa_malla_vial$lanes)
+    capa_malla_vial$lanes <- ifelse(is.na(capa_malla_vial$lanes) & capa_malla_vial$highway=="tertiary", round(mean(as.numeric(capa_malla_vial$lanes)[capa_malla_vial$highway=="tertiary"],na.rm = TRUE),0) ,capa_malla_vial$lanes)
+    capa_malla_vial$lanes <- ifelse(is.na(capa_malla_vial$lanes) & capa_malla_vial$highway=="tertiary_link", round(mean(as.numeric(capa_malla_vial$lanes)[capa_malla_vial$highway=="tertiary_link"],na.rm = TRUE),0) ,capa_malla_vial$lanes)
+    capa_malla_vial$lanes <- ifelse(is.na(capa_malla_vial$lanes) & capa_malla_vial$highway=="road", round(mean(as.numeric(capa_malla_vial$lanes)[capa_malla_vial$highway=="road"],na.rm = TRUE),0) ,capa_malla_vial$lanes)
+    capa_malla_vial$lanes <- ifelse(is.na(capa_malla_vial$lanes) & capa_malla_vial$highway=="trunk", round(mean(as.numeric(capa_malla_vial$lanes)[capa_malla_vial$highway=="trunk"],na.rm = TRUE),0) ,capa_malla_vial$lanes)
+    capa_malla_vial$lanes <- ifelse(is.na(capa_malla_vial$lanes) & capa_malla_vial$highway=="trunk_link", round(mean(as.numeric(capa_malla_vial$lanes)[capa_malla_vial$highway=="trunk_link"],na.rm = TRUE),0) ,capa_malla_vial$lanes)
+    capa_malla_vial$lanes <- ifelse(is.na(capa_malla_vial$lanes) & capa_malla_vial$highway=="unclassified", round(mean(as.numeric(capa_malla_vial$lanes)[capa_malla_vial$highway=="unclassified"],na.rm = TRUE),0) ,capa_malla_vial$lanes)
+    capa_malla_vial$lanes <- ifelse(is.na(capa_malla_vial$lanes) & capa_malla_vial$highway=="living_street", round(mean(as.numeric(capa_malla_vial$lanes)[capa_malla_vial$highway=="living_street"],na.rm = TRUE),0) ,capa_malla_vial$lanes)
+    
   #Se dividen cada segmento en uno o mas segmentos
     
     capa_malla_vial <-tibble(gsection(capa_malla_vial))%>%st_as_sf() %>% st_join(capa_malla_vial,largest=TRUE) %>% mutate(ID=row_number()) 
     
   #Se hace un Join espacial entre capa_malla_vial y shape_calzadas
     
-    capa_malla_vial<-capa_malla_vial %>% st_join(select(layer_calzadas,CalAncho, CalNCarril),left = TRUE, largest=TRUE)   %>% rename(c(CalAncho="Ancho", CalNCarril="Carriles"))
+    capa_malla_vial<-capa_malla_vial %>% st_join(select(layer_calzadas,CalAncho),left = TRUE, largest=TRUE)   %>% rename(c(CalAncho="Ancho"))
     
   #Se obtienen las coordenadas (Lat/Long) de punto inicial de cada segmento la capa_malla_vial
     
@@ -63,10 +79,10 @@
   #Se eliminan los datos que no se usaran
     
     rm(coordenadas_incio_seg,coordenadas_fin_seg)
-    
+
   #Se guarda la Data de capa_malla_vial (Input consultas Google API)
     
-    save(capa_malla_vial,file=paste0(ruta_resultados,"Input_Consultas_Google_API.Rdata"))
+    #save(capa_malla_vial,file=paste0(ruta_resultados,"Input_Consultas_Google_API.Rdata"))
     
 #Consultas Google API---- 
     
@@ -78,9 +94,9 @@
     
     load(paste0(ruta_resultados, "Datos_Procesados_Consultas_Google_API.Rdata"))
   
-  #Se unen los datos procesados de Google API con la capa malla vial  
+  #Se unen los datos procesados de Google API con la capa malla vial
     
-    capa_malla_vial<- capa_malla_vial %>% filter(!(highway %in% c("bus_stop","pedestrian")))%>% transmute(ID,Ancho,Carriles, lanes)  %>% left_join(datos_google_API ,By=ID) %>% filter(Longitud1 !=0 | Longitud2 !=0)
+    capa_malla_vial<- capa_malla_vial %>% filter(highway!="corridor") %>%  transmute(ID,Ancho,Carriles, lanes)  %>% left_join(datos_google_API ,By=ID) %>% filter(Longitud1 !=0 | Longitud2 !=0)
 
 #Segmentación capa_malla_vial----      
     
@@ -90,14 +106,20 @@
   
   #Se hace un Join espacial entre capa_malla_vial y shape_calzadas
     
-    capa_malla_vial<-capa_malla_vial %>% st_join(select(layer_zats,SCaNombre),left = FALSE, largest=TRUE) %>% rename(c(SCaNombre="ZAT")) %>%   st_join(select(layer_calzadas,CalAncho, CalNCarril),left = TRUE, largest=TRUE)  %>% 
+    capa_malla_vial<-capa_malla_vial %>% st_join(select(layer_zats,SCaNombre),left = FALSE, largest=TRUE) %>% rename(c(SCaNombre="SCatastral")) %>%   st_join(select(layer_calzadas,CalAncho),left = TRUE, largest=TRUE)  %>% 
       transmute(ID=row_number(),Ancho=if_else(!is.na(CalAncho),as.numeric(CalAncho),as.numeric(Ancho)),
-      Carriles=if_else(is.na(lanes),if_else(is.na(CalNCarril),as.numeric(Carriles),as.numeric(CalNCarril)),as.numeric(lanes)),ZAT,
-      Longitud1,TProm1,TFF1,Vprom1, VpromFF1,Longitud2,TProm2,TFF2,Vprom2, VpromFF2)
+      Carriles=lanes,SCatastral,Longitud1,TProm1,TFF1,Vprom1, VpromFF1,Longitud2,TProm2,TFF2,Vprom2, VpromFF2)
     
-    capa_malla_vial$Ancho<-ifelse(is.na(capa_malla_vial$Ancho),mean(capa_malla_vial$Ancho, na.rm = TRUE), capa_malla_vial$Ancho)
-    capa_malla_vial$Carriles<-ifelse(is.na(capa_malla_vial$Carriles),round(mean(capa_malla_vial$Carriles, na.rm = TRUE),0), capa_malla_vial$Carriles) 
+  #Se corrigen los datos de ancho de la via
     
+    capa_malla_vial$Ancho<-ifelse(capa_malla_vial$Ancho>=(capa_malla_vial$Carriles*1.8) & capa_malla_vial$Ancho<=(capa_malla_vial$Carriles*7),capa_malla_vial$Ancho,NA)
+    capa_malla_vial$Ancho<-ifelse(is.na(capa_malla_vial$Ancho) & capa_malla_vial$Carriles==1 , mean(capa_malla_vial$Ancho[capa_malla_vial$Carriles==1], na.rm = TRUE), capa_malla_vial$Ancho)
+    capa_malla_vial$Ancho<-ifelse(is.na(capa_malla_vial$Ancho) & capa_malla_vial$Carriles==2 , mean(capa_malla_vial$Ancho[capa_malla_vial$Carriles==2], na.rm = TRUE), capa_malla_vial$Ancho)
+    capa_malla_vial$Ancho<-ifelse(is.na(capa_malla_vial$Ancho) & capa_malla_vial$Carriles==3 , mean(capa_malla_vial$Ancho[capa_malla_vial$Carriles==3], na.rm = TRUE), capa_malla_vial$Ancho)
+    capa_malla_vial$Ancho<-ifelse(is.na(capa_malla_vial$Ancho) & capa_malla_vial$Carriles==4 , mean(capa_malla_vial$Ancho[capa_malla_vial$Carriles==4], na.rm = TRUE), capa_malla_vial$Ancho)
+    capa_malla_vial$Ancho<-ifelse(is.na(capa_malla_vial$Ancho) & capa_malla_vial$Carriles==5 , mean(capa_malla_vial$Ancho[capa_malla_vial$Carriles==5], na.rm = TRUE), capa_malla_vial$Ancho)
+    
+
   #Se obtienen las coordenadas (Lat/Long) de punto inicial de cada segmento de la capa_malla_vial
     
     coordenadas_incio_seg<-st_coordinates(capa_malla_vial) %>% as_tibble()%>% group_by(L1)%>% filter(row_number()==1) %>% 
@@ -115,6 +137,17 @@
     rm(coordenadas_incio_seg,coordenadas_fin_seg)
     
 #Calculo indicador trafico----
+    
+    capa_malla_vial <- capa_malla_vial %>% mutate(Trafico_1=ifelse(Longitud1==Longitud2,pmax((VpromFF1-Vprom1)/VpromFF1,(VpromFF2-Vprom2)/VpromFF2),ifelse(Longitud1<Longitud2, (VpromFF1-Vprom1)/VpromFF1,(VpromFF2-Vprom2)/VpromFF2)))
+
+    
+    
+    capa_malla_vial$Trafico_1 <- ifelse(capa_malla_vial$Trafico_1<0,0,capa_malla_vial$Trafico_1)
+    
+    save(capa_malla_vial,file=paste0(ruta_resultados,"Variables_LTS.Rdata"))
+    
+    mapa_Trafico<-tm_shape(capa_malla_vial)+tm_lines(col="Trafico_1",style ="cont" ,scale=5 ,palette = "YlOrRd" ,title.col ="Tráfico", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
+    mapa_Trafico
     
     capa_malla_vial<-capa_malla_vial  %>% mutate(Trafico=(ifelse(Longitud1==Longitud2,pmax((VpromFF1-Vprom1)*ceiling(Carriles/2), (VpromFF2-Vprom2)*ceiling(Carriles/2)),
                                                                 ifelse(Longitud1<Longitud2, (VpromFF1-Vprom1)*Carriles, (VpromFF2-Vprom2)*Carriles))))
@@ -165,7 +198,7 @@
     capa_malla_vial$CicloRuta<-ifelse(is.na(capa_malla_vial$CicloRuta),0,capa_malla_vial$CicloRuta)
     
   #Se eliminan los datos que no se usaran
-    
+
     rm(coordenadas_incio_seg,coordenadas_fin_seg,buffer_ciclo_rutas,union_malla_vial_ciclo_rutas)
     
 #Procesamiento Rutas SITP----
