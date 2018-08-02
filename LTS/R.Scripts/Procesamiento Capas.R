@@ -139,18 +139,25 @@
 #Calculo indicador trafico----
     
     capa_malla_vial <- capa_malla_vial %>% mutate(Trafico_1=ifelse(Longitud1==Longitud2,pmax((VpromFF1-Vprom1)/VpromFF1,(VpromFF2-Vprom2)/VpromFF2),ifelse(Longitud1<Longitud2, (VpromFF1-Vprom1)/VpromFF1,(VpromFF2-Vprom2)/VpromFF2)))
-
+    capa_malla_vial <- capa_malla_vial %>% mutate(Trafico_2=ifelse(Longitud1==Longitud2,pmax(1-VpromFF1/Vprom1,1-VpromFF2/Vprom2),ifelse(Longitud1<Longitud2, 1-VpromFF1/Vprom1,1-VpromFF2/Vprom2)))
+    
+    write_shape(mapa_Trafico, "Hola1.shp")
+    
+    a <- capa_malla_vial %>% transmute(Trafico_1)
     
     
     capa_malla_vial$Trafico_1 <- ifelse(capa_malla_vial$Trafico_1<0,0,capa_malla_vial$Trafico_1)
     
-    save(capa_malla_vial,file=paste0(ruta_resultados,"Variables_LTS.Rdata"))
+    save(capa_malla_vial,file=paste0(ruta_resultados,"capa.rds"))
     
-    mapa_Trafico<-tm_shape(capa_malla_vial)+tm_lines(col="Trafico_1",style ="cont" ,scale=5 ,palette = "YlOrRd" ,title.col ="Tráfico", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
+    mapa_Trafico<-tm_shape(a)+tm_lines(col="Trafico_1",style ="cont" ,scale=5 ,palette = "YlOrRd" ,title.col ="Tráfico")+tmap_mode("view")+tm_view(
+      basemaps = "OpenStreetMap.BlackAndWhite")
     mapa_Trafico
     
     capa_malla_vial<-capa_malla_vial  %>% mutate(Trafico=(ifelse(Longitud1==Longitud2,pmax((VpromFF1-Vprom1)*ceiling(Carriles/2), (VpromFF2-Vprom2)*ceiling(Carriles/2)),
                                                                 ifelse(Longitud1<Longitud2, (VpromFF1-Vprom1)*Carriles, (VpromFF2-Vprom2)*Carriles))))
+    
+    
     
 #Procesamiento Red Ciclorutas----
     

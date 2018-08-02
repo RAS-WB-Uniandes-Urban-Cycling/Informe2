@@ -19,17 +19,20 @@
     
   #Se normalizan las variables de la capa_variables_LTS 
     
-    capa_clusters<-st_set_geometry(capa_variables_LTS,NULL) %>% transmute(CicloRuta,SITP,Vprom=scale(as.matrix(capa_variables_LTS$Vprom)),
-      Trafico=scale(as.matrix(capa_variables_LTS$Trafico)),Ancho=scale(as.matrix(capa_variables_LTS$Ancho)),Carriles=scale(as.matrix(capa_variables_LTS$Carriles)))
+    capa_clusters<-st_set_geometry(capa_variables_LTS,NULL) %>% transmute(CicloRuta,SITP,Ancho=scale(as.matrix(capa_variables_LTS$Ancho)),Carriles=scale(as.matrix(capa_variables_LTS$Carriles)),
+                   Velocidad=scale(as.matrix(capa_variables_LTS$Velocidad)),Congestion=scale(as.matrix(capa_variables_LTS$Congestion)),Densidad=scale(as.matrix(capa_variables_LTS$Densidad)),
+                   Flujo=scale(as.matrix(capa_variables_LTS$Flujo)))
     
   #Se define el tipo de cada variables as.factor o as.numeric
     
     capa_clusters$CicloRuta<-as.factor(capa_clusters$CicloRuta)
     capa_clusters$SITP<-as.factor(capa_clusters$SITP)
-    capa_clusters$Vprom<-as.numeric(capa_clusters$Vprom)
-    capa_clusters$Trafico<-as.numeric(capa_clusters$Trafico)
-    capa_clusters$Carriles<-as.numeric(capa_clusters$Carriles)
     capa_clusters$Ancho<-as.numeric(capa_clusters$Ancho)
+    capa_clusters$Carriles<-as.numeric(capa_clusters$Carriles)
+    capa_clusters$Velocidad<-as.numeric(capa_clusters$Velocidad)
+    capa_clusters$Congestion<-as.numeric(capa_clusters$Congestion)
+    capa_clusters$Densidad<-as.numeric(capa_clusters$Densidad)
+    capa_clusters$Flujo<-as.numeric(capa_clusters$Flujo)
     
   #Se crea la matriz de distancias por el metodo de Gower
     
