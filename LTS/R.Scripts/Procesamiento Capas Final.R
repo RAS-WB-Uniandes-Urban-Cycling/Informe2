@@ -262,10 +262,11 @@
      
     capa_malla_vial <- capa_malla_vial %>% mutate(Congestion=ifelse(Longitud1==Longitud2,pmax((TProm1-TFF1)/TFF1,(TProm2-TFF2)/TFF2),ifelse(Longitud1<Longitud2, (TProm1-TFF1)/TFF1,(TProm2-TFF2)/TFF2)))
     capa_malla_vial$Congestion <- ifelse(capa_malla_vial$Congestion<0,0,capa_malla_vial$Congestion)
+    capa_malla_vial$Congestion <- ifelse(capa_malla_vial$Congestion>1,1,capa_malla_vial$Congestion)
     
   #Se calcula la densidad  
     
-    capa_malla_vial <- capa_malla_vial %>% mutate(Densidad=ifelse(Longitud1==Longitud2,pmax(199.6566*sqrt(2*log(VpromFF1/Vprom1)),199.6566*sqrt(2*log(VpromFF2/Vprom2)))*Carriles,ifelse(Longitud1<Longitud2, 199.6566*sqrt(2*log(VpromFF1/Vprom1))*Carriles,199.6566*sqrt(2*log(VpromFF2/Vprom2))*Carriles)))
+    capa_malla_vial <- capa_malla_vial %>% mutate(Densidad=ifelse(Longitud1==Longitud2,pmax(199.6566*sqrt(2*log(VpromFF1/Vprom1)),199.6566*sqrt(2*log(VpromFF2/Vprom2))),ifelse(Longitud1<Longitud2, 199.6566*sqrt(2*log(VpromFF1/Vprom1)),199.6566*sqrt(2*log(VpromFF2/Vprom2)))))
     capa_malla_vial$Densidad <- ifelse(is.na(capa_malla_vial$Densidad),0,capa_malla_vial$Densidad)
     
   #Se calcula flujo vehicular  

@@ -15,13 +15,16 @@
 
     load(paste0(ruta_resultados, "Variables_LTS.Rdata"))
     
+    
+    capa_variables_LTS <-capa_variables_LTS %>%  filter(LocNombre=="USAQUEN")
+    
 #Matriz de distancia metodo Gower----
     
   #Se normalizan las variables de la capa_variables_LTS 
     
     capa_clusters<-st_set_geometry(capa_variables_LTS,NULL) %>% transmute(CicloRuta,SITP,Ancho=scale(as.matrix(capa_variables_LTS$Ancho)),Carriles=scale(as.matrix(capa_variables_LTS$Carriles)),
                    Velocidad=scale(as.matrix(capa_variables_LTS$Velocidad)),Congestion=scale(as.matrix(capa_variables_LTS$Congestion)),Densidad=scale(as.matrix(capa_variables_LTS$Densidad)),
-                   Flujo=scale(as.matrix(capa_variables_LTS$Flujo)))
+                   Flujo=scale(as.matrix(capa_variables_LTS$Flujo))) 
     
   #Se define el tipo de cada variables as.factor o as.numeric
     
@@ -87,6 +90,8 @@
 #Se alamcenan los resultados----
     
   #Se guarda la Data (Resutados Clustering)
+    
+    save(capa_LTS_PAM,file=paste0(ruta_resultados,"Resultados_Clustering.Rdata"))
     
     save(capa_LTS_Hclust,capa_LTS_PAM,silhouette_with,grafico_HClust,file=paste0(ruta_resultados,"Resultados_Clustering.Rdata"))
     
