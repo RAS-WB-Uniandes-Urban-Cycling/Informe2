@@ -23,12 +23,20 @@ load(paste0(ruta_resultados, "Variables_LTS.Rdata"))
 
 capa_LTS_PAM$clusters_PAM <-   as.numeric(capa_LTS_PAM$clusters_PAM)
 
-capa_variables_LTS_model <-capa_LTS_PAM %>% filter((ZAT %in% c("DOCE DE OCTUBRE","CIUDAD SALITRE NOR-ORIENTAL","CIUDAD SALITRE SUR-ORIENTAL")))
+capa_variables_LTS_model <-capa_LTS_PAM 
+#capa_variables_LTS_model <-capa_LTS_PAM %>% filter((ZAT %in% c("DOCE DE OCTUBRE","CIUDAD SALITRE NOR-ORIENTAL","CIUDAD SALITRE SUR-ORIENTAL")))
 #capa_variables_LTS <-capa_variables_LTS[-c(1,8)] %>% st_set_geometry(NULL)
 
 #Se declara la regresion Logit Multinomial con un método de clustering elegido
 
-logit_Multi<-multinom(capa_variables_LTS_model$clusters_PAM~Vprom*Trafico*Ancho*Carriles*CicloRuta*SITP, data=capa_variables_LTS_model)
+logit_Multi<-multinom(capa_variables_LTS_model$clusters_PAM~Velocidad+Ancho+Carriles+CicloRuta+SITP+Congestion+Densidad+Flujo+
+                      Velocidad:Ancho+Velocidad:Carriles+Velocidad:CicloRuta+Velocidad:SITP+Velocidad:Congestion+Velocidad:Densidad+Velocidad:Flujo+
+                      Ancho:Carriles+Ancho:CicloRuta+Ancho:SITP+Ancho:Congestion+Ancho:Densidad+Ancho:Flujo+
+                      Carriles:CicloRuta+Carriles:SITP+Carriles:Congestion+Carriles:Densidad+Carriles:Flujo+
+                      CicloRuta:SITP+CicloRuta:Congestion+CicloRuta:Densidad+CicloRuta:Flujo+
+                      SITP:Congestion+SITP:Densidad+SITP:Flujo+
+                      Congestion:Densidad+Congestion:Flujo+
+                      Densidad:Flujo, data=capa_variables_LTS_model)
 
 logit_Multi<-multinom(capa_variables_LTS_model$clusters_PAM~Vprom+Trafico+Ancho+Carriles+CicloRuta+SITP+
                         Vprom:Trafico+Vprom:Ancho+Trafico:Ancho+Vprom:Carriles+Trafico:Carriles+
