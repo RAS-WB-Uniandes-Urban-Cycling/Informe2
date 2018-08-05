@@ -1,28 +1,29 @@
 # proBikePolicies
 
-En este repositorio se encuentran los scripts en `R` para el proyecto RAS entre WB y Uniandes para SDM.
+En este repositorio se encuentran los scripts en `R` para el proyecto Industrial/SALURBAL sobre movilidad en biciletas para la ciudad de Bogotá.
 
 Se propone la siguiente estructura según los ejes de trabajo:
 
-  * Propensión
-  * Seguridad
-  * Modelo de Red
-  * LTS
-  * Indicadores
+  * Propensión: Pablo Uriza
+  * Seguridad: German Carvajal
+  * Modelo de Red: Jorge Huertas
+  * LTS: Alejandro Palacio, Marcelo Botero
   * General
     
-Se propone tener los datos en un servidor (por el momento la carpeta de OneDrive). La estructura de dicha información es:
+Se propone tener los datos de bases de datos de entrada y resultados en la carpeta de OneDrive. La estructura de dicha información es:
 
   * UNIANDES - RAS - SDM: Root
-    * RESULTADOS: La idea sería guardar acá todos los joins, cruces y resultados que hagamos como parte de nuestro trabajo
+    * RESULTADOS: La idea sería guardar en esta ubicación todos los resultados que hagamos como parte de nuestro trabajo
       * PROPENSION: Proyecto Pablo Uriza
         * GRAFICOS: Para guardar imágenes y otros resultados de visualización
         * TABLAS: Para almacenar tablas no georeferenciadas
         * GEO-DATA: Almacenamiento de datos georeferenciados particulares al proyecto
       * SEGURIDAD: Proyecto Germán Carvajal
-        * GRAFICOS: Para guardar imágenes y otros resultados de visualización
-        * TABLAS: Para almacenar tablas no georeferenciadas
-        * GEO-DATA: Almacenamiento de datos georeferenciados particulares al proyecto
+        * Bases de datos: Resultados de análisis preliminares o de procesos intermedios en formato Rdata
+        * Resultados: Almacenamiento de documentos finales o de preparación para presentación
+          * TABLAS: Tablas de resultados finales
+        * Resultados-Español: Gráficas y visualizaciones en español
+        * Resultados-Inglés: Gráficas y visualizaciones en inglés
       * VOLUMENES: Proyecto Sebastian Cardona
         * GRAFICOS: Para guardar imágenes y otros resultados de visualización
         * TABLAS: Para almacenar tablas no georeferenciadas
@@ -35,14 +36,14 @@ Se propone tener los datos en un servidor (por el momento la carpeta de OneDrive
         * GRAFICOS: Para guardar imágenes y otros resultados de visualización
         * TABLAS: Para almacenar tablas no georeferenciadas
         * GEO-DATA: Almacenamiento de datos georeferenciados particulares al proyecto
-      * GENERAL: Guardar acá todos aquellos cruces o construcciones de bases de datos que sepamos que nos van a servir para todos, ie: las ZATs por localidades de Bogotá, el total de viajes, etc.
+      * GENERAL: Guardar acá todos aquellas construcciones de bases de datos que puedan servir a todos, ie: las ZATs por localidades de Bogotá, el total de viajes, etc.
         * GRAFICOS: Para guardar imágenes y otros resultados de visualización
         * TABLAS: Para almacenar tablas no georeferenciadas
         * GEO-DATA: Almacenamiento de datos georeferenciados particulares al proyecto
         
-  * BASES DE DATOS: La idea es almacenar aca todas las bases de datos que recibamos de parte de SDM, BM y cualquier otra que nosotros consigamos tal cual y la recibimos (original). La propuesta es nunca modificar las cosas sobre las mismas bases, sino construir el código de tal forma que lea los originales, los transforme como sea necesario y almacenar las cosas en la ubicación respectiva dentro de RESULTADOS. Con esto garantizamos que todos podamos acceder a la información de la forma como la recibimos y posteriormente que cuando le entreguemos algo a WB-SDM no vayamos a tener problemas de compatibilidad con el almacenamiento/estructura.
+  * BASES DE DATOS: La idea es almacenar en (esta ubicación)[https://github.com/RAS-WB-Uniandes-Urban-Cycling/proBikePolicies.git] las bases de datos de cualquier origen en el formato en que se recibe (original). La propuesta es nunca modificar las cosas sobre las mismas bases, sino construir el código de tal forma que lea los originales, los transforme como sea necesario y almacenar las cosas en la ubicación respectiva dentro de RESULTADOS. Con esto garantizamos que todos podamos acceder a la información de la forma como la recibimos y posteriormente no existan problemas de compatibilidad, y adicionalmente que cualquier persona con acceso a la carpeta pueda ejecutar el código.
   
-      * Documentation RAS-SDM: Esta carpeta es una joya!, tiene absolutamente de todo incluyendo los manuales para entender las bases de datos, por favor revísenla. Adicionalmente sería muy bueno terminar de desarrollar la tabla de Diana y Jorge sobre la descripción de las bases y luego almacenarla dentro de la carpeta de MANUALES (al parecer Targa ya había hecho un intento de esto, ver: 20171755_Insumos_Info_Ciclistas_RAS.xlsx.
+      * Documentation RAS-SDM: Esta carpeta es una joya!, tiene absolutamente de todo incluyendo los manuales para entender las bases de datos, por favor revísenla.
           * 0. MANUALES BASES DE DATOS: Documentos y aclaraciones sobre los datos y las bases
           * 1. BIG DATA MOTIVACION: Información sobre la conferencia que dio pie al contrato RAS
           * 2. RAS: Muchos documentos legales y de correspondencia que explican qué busca la secretaria, qué es lo que nosotros debemos entregar y muchas otras aclaraciones que explican la situación y el objetivo del proyecto
@@ -52,5 +53,5 @@ Se propone tener los datos en un servidor (por el momento la carpeta de OneDrive
           * 6. CICLOVIA DOMINICAL: Existen algunas bases de datos particulares del día domingo, acá se contiene toda la explicación de la logística de las ciclovías de los días festivos
           * 7. CONTRATO SEMAFOROS: Documentos sobre el contrato de semaforización
           * 8. BIBLIOGRAFIA: Incluir aca todos los documentos de referencia externos que estemos utilizando (papers, libros, etc.)
-      * Total de 20 bases de datos con ls que contamos actualmente.
+      * Total de 25 fuentes de datos (al 4 de agosto de 2018), dentro de las diferentes carpetas pueden existir más de una base de datos, tablas, figuras geográficas y otros archivos usados como input para los procesos de análisis.
     
