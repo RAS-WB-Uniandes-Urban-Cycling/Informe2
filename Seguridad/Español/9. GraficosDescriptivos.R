@@ -16,27 +16,32 @@ pacman::p_load(padr)
 pacman::p_load(lubridate)
 pacman::p_load(showtext)
 pacman::p_load(sf)
-Localidades<-st_read(paste(carpetaRAS,"/BASES DE DATOS/IDECA.gdb",sep=""),layer="Loca")
-red_cicloruta<-st_read(paste(carpetaRAS,"/BASES DE DATOS/Shapefiles",sep=""),layer="Red_Ciclorruta")
-Bikeway<-st_join(red_cicloruta,Localidades,join=st_intersects,left=TRUE)%>% st_set_geometry(NULL)
 font_add("Helvetica Light",paste(gitRAS,"/Seguridad/Helvetica Light.ttf",sep=""))
 setwd(paste(carpetaRAS,"/RESULTADOS/SEGURIDAD/Resultados-Español",sep=""))
 readPath<-paste(carpetaRAS,"/BASES DE DATOS/Despacio",sep="")
+cmHeight<-7
+cmWidth<-10
+
+#Lectura de bases de datos originales auxiliares----
+Localidades<-st_read(paste(carpetaRAS,"/BASES DE DATOS/Mapas de Referencia IDECA/MR0318.gdb",sep=""),layer="Loca",crs=4326)
+red_cicloruta<-st_read(paste0(carpetaRAS,"/BASES DE DATOS/Mapas de Referencia IDECA/MR0318.gdb"),layer = "RBic",type = 5,crs=4326) %>% st_transform(4326) %>% st_cast("LINESTRING",do_split = TRUE)
+red_cicloruta$LENGTH_GEO<-st_length(red_cicloruta)
+Bikeway<-st_join(red_cicloruta,Localidades,join=st_intersects,left=TRUE)%>% st_set_geometry(NULL)
 poblacion <- read_excel(paste(carpetaRAS,"/BASES DE DATOS/DANE/DICE015A-ProyeccionesLocalidades-2016.xls.xlsx",sep=""), sheet = "Serie_regularizada_SDP", range = "A6:AK26")
 names(poblacion)[names(poblacion)=="Localidad"]<-"LocNombre"
 auxPopYear<-as.data.frame(cbind(as.numeric(names(poblacion[,2:37])),colSums(poblacion[,2:37])))
 names(auxPopYear)<-c("Group.1","Population")
-biciusuarios<-read.csv(paste(carpetaRAS,"/RESULTADOS/GENERAL/TABLAS/Viajes_Localidad.csv",sep=""),encoding = "UTF-8")
-biciusuarios<-biciusuarios[,c("LocCodigo","VIAJES_ORIGEN_id","LocNombre")]
-names(biciusuarios)[2]<-"f_bicicleta"
-cmHeight<-7
-cmWidth<-10
+viajesbici<-read.csv(paste(carpetaRAS,"/RESULTADOS/GENERAL/TABLAS/Viajes_Localidad.csv",sep=""),encoding = "UTF-8")
+viajesbici<-viajesbici[,c("LocCodigo","VIAJES_ORIGEN_zona","VIAJES_DEST_zona","LocNombre")]
 
-#Leer bases de datos de accidentalidad----
-load(paste(carpetaRAS,"/RESULTADOS/SEGURIDAD/Bases de datos/AccidentesDespacio2011_2015.Rdata",sep=""))
+#Leer bases de datos preprocesada----
+load(paste0(carpetaRAS,"/RESULTADOS/SEGURIDAD/Bases de datos/3. AccidentesBiciTotalGeoData.Rdata"))
+load(paste0(carpetaRAS,"/RESULTADOS/SEGURIDAD/Bases de datos/4. Edad-Sexo-Defunciones-Poblacion-Bogota.Rdata"))
+load(paste0(carpetaRAS,"/RESULTADOS/GENERAL/TABLAS/6. biciusuarios.Rdata"))
+load(paste0(carpetaRAS,"/RESULTADOS/SEGURIDAD/Bases de datos/7. IADR.Rdata"))
 
 #Total de accidentes durante los años----
-TotalAccidentesAño <- aggregate(AccidentesBici$Accidente,by=list(getYear(AccidentesBici$Accidentes.Fecha)),FUN=length)
+TotalAccidentesAño <- aggregate(AccidentesBiciTotal$Accidente,by=list(getYear(AccidentesBiciTotal$Accidentes.Fecha)),FUN=length)
 TotalAccidentesAño$Group.1<-as.numeric(TotalAccidentesAño$Group.1)
 TotalAccidentesAñoGraph <- ggplot(data = TotalAccidentesAño, aes(x=Group.1,y = x)) + geom_line(group=1, color="navy") + theme_minimal()+ylab("Siniestros de ciclistas")+xlab("Año")+theme(axis.text.x = element_text(angle = 0),legend.position = c(0.84,0.2))+geom_text(aes(label=x),size=3,vjust=-2,family="Helvetica Light")+theme(text=element_text(family="Helvetica Light",size=12,color="grey"))+ylim(c(1000,1600))+scale_x_continuous(limits=c(2011,2015))
 svg("./GRAFICOS/TotalAccidentesAño.svg",width = cmWidth, height = cmHeight)
@@ -58,7 +63,7 @@ dev.off()
 rm(TotalAccidentesAño,TotalAccidentesAñoPopGraph)
 
 #Total de accidentes durante los meses----
-TotalAccidentesMes <- aggregate(AccidentesBici$Accidente,by=list(getYear(AccidentesBici$Accidentes.Fecha),getMonth(AccidentesBici$Accidentes.Fecha)),FUN=length)
+TotalAccidentesMes <- aggregate(AccidentesBiciTotal$Accidente,by=list(getYear(AccidentesBiciTotal$Accidentes.Fecha),getMonth(AccidentesBiciTotal$Accidentes.Fecha)),FUN=length)
 TotalAccidentesMes$Mes<-as.Date(paste(TotalAccidentesMes$Group.1,TotalAccidentesMes$Group.2,"01",sep="/"),"%Y/%m/%d")
 TotalAccidentesMes$Important<-ifelse(TotalAccidentesMes$Mes%in%as.Date(c("2012-02-01","2013-02-01","2015-04-01","2014-07-01","2015-09-01")),"Important","NA")
 TotalAccidentesGraphMes <- ggplot(data = TotalAccidentesMes, aes(x=Mes,y = x)) + geom_line(group=1, color="navy") + theme_minimal()+ylab("Siniestros de ciclistas")+xlab("Mes-Año")+theme(text=element_text(family="Helvetica Light",size=12,color="grey"))+scale_x_date(date_labels = "%b-%Y",date_breaks = "1 year")+stat_smooth(method="loess")+geom_point(data=TotalAccidentesMes[TotalAccidentesMes$Important=="Important",],color="red",size=1.5)+geom_text(aes(label=ifelse(TotalAccidentesMes$Important=="Important",paste(getMonth(TotalAccidentesMes$Mes,"%b"),TotalAccidentesMes$x,sep=" - "),NA)),color="red",size=3,vjust=-1,family="Helvetica Light")
@@ -81,7 +86,7 @@ dev.off()
 rm(TotalAccidentesMes,TotalAccidentesGraphMesPop)
 
 #Total de accidentes durante los dias----
-TotalAccidentesDias <- aggregate(AccidentesBici$Accidente,by=list(AccidentesBici$Accidentes.Fecha),FUN=length)
+TotalAccidentesDias <- aggregate(AccidentesBiciTotal$Accidente,by=list(AccidentesBiciTotal$Accidentes.Fecha),FUN=length)
 TotalAccidentesDias<-pad(TotalAccidentesDias, interval="day") %>% mutate(x = replace(x, is.na(x), 0))
 TotalAccidentesDias$Group.1<-as.Date(TotalAccidentesDias$Group.1)
 TotalAccidentesGraphDia <- ggplot(data = TotalAccidentesDias, aes(x=Group.1,y = x))+geom_line(color="navy")+scale_x_date(date_labels = "%Y",date_breaks = "1 year")+ theme_minimal()+ylab("Siniestros de ciclistas")+xlab("Día")+theme(text=element_text(family="Helvetica Light",size=12,color="grey"))
@@ -106,7 +111,7 @@ dev.off()
 rm(TotalAccidentesDias,TotalAccidentesGraphDiasPop)
 
 #Total accidentes por día de la semana y por año----
-TotalAccidentesDias<-aggregate(AccidentesBici$Accidente,by=list(getYear(AccidentesBici$Accidentes.Fecha),weekdays(AccidentesBici$Accidentes.Fecha)),FUN=length)
+TotalAccidentesDias<-aggregate(AccidentesBiciTotal$Accidente,by=list(getYear(AccidentesBiciTotal$Accidentes.Fecha),weekdays(AccidentesBiciTotal$Accidentes.Fecha)),FUN=length)
 TotalAccidentesDias$Group.2[TotalAccidentesDias$Group.2=="Monday"]<-"Lunes"
 TotalAccidentesDias$Group.2[TotalAccidentesDias$Group.2=="Tuesday"]<-"Martes"
 TotalAccidentesDias$Group.2[TotalAccidentesDias$Group.2=="Wednesday"]<-"Miercoles"
@@ -152,7 +157,7 @@ dev.off()
 rm(TotalAccidentesGraphDiasBoxplot,TotalAccidentesDias)
 
 #Accidentes promedio por día de la semana y por año----
-TotalAccidentesDias2 <- aggregate(AccidentesBici$Accidente,by=list(AccidentesBici$Accidentes.Fecha),FUN=length)
+TotalAccidentesDias2 <- aggregate(AccidentesBiciTotal$Accidente,by=list(AccidentesBiciTotal$Accidentes.Fecha),FUN=length)
 TotalAccidentesDias2<-pad(TotalAccidentesDias2, interval="day") %>% mutate(x = replace(x, is.na(x), 0))
 TotalAccidentesDias2$Group.2<-weekdays(TotalAccidentesDias2$Group.1)
 TotalAccidentesDias2$Group.2[TotalAccidentesDias2$Group.2=="Monday"]<-"Lunes"
@@ -172,7 +177,7 @@ dev.off()
 rm(TotalAccidentesDias2)
 
 #Análisis de la hora de acurrencia del total de accidentes para un día (Wednesday)----
-AccidentesMiercoles<-AccidentesBici[weekdays(AccidentesBici$Accidentes.Fecha)=="Wednesday",]
+AccidentesMiercoles<-AccidentesBiciTotal[weekdays(AccidentesBiciTotal$Accidentes.Fecha)=="Wednesday",]
 AccidentesDuranteDia<-aggregate(AccidentesMiercoles$Accidente,by=list(as.POSIXlt(AccidentesMiercoles$Accidentes.HoraOcurrencia)$hour),FUN=length)
 AccidentesDuranteDia[23,]<-c(1,0)
 AccidentesDuranteDiaGraph<-ggplot(data=AccidentesDuranteDia,aes(x=Group.1,y=x))+geom_line(color="navy")+theme_minimal()+ylab("Siniestros de ciclistas")+theme(text=element_text(family="Helvetica Light",color="grey"))+xlab("Hora del día")+xlim(c(0,23))+geom_text(aes(label=x),family="Helvetica Light",size=3,vjust=0,hjust=0)+geom_vline(xintercept=6, colour="red", linetype="dotted")+geom_vline(xintercept=18, colour="red", linetype="dotted")+geom_errorbarh(aes(xmin=6.1,xmax=17.9,y=97.5,colour="red"))+geom_text(aes(x=12.5,y=97.5,label="Horas laborales\n6:00 - 18:00"),family="Helvetica Light",size=5,vjust=0.5,hjust=0.5,color="red")+theme(legend.position="none")
@@ -184,7 +189,7 @@ dev.off()
 rm(AccidentesMiercoles,AccidentesDuranteDia,AccidentesDuranteDiaGraph)
 
 #Análisis de la hora de acurrencia de accidentes promedio por dia por año----
-TotalAccidentesDias2 <- aggregate(AccidentesBici$Accidente,by=list(floor_date(AccidentesBici$Accidentes.HoraOcurrencia,"hour")),FUN=length)
+TotalAccidentesDias2 <- aggregate(AccidentesBiciTotal$Accidente,by=list(floor_date(AccidentesBiciTotal$Accidentes.HoraOcurrencia,"hour")),FUN=length)
 TotalAccidentesDias2<-pad(TotalAccidentesDias2, interval="hour",start_val = as.POSIXct("2011-01-01 00:00:00",format="%Y-%m-%d %H:%M:%S"),end_val = as.POSIXct("2015-12-31 23:00:00",format="%Y-%m-%d %H:%M:%S")) %>% mutate(x = replace(x, is.na(x), 0))
 TotalAccidentesDias2$Group.2<-weekdays(TotalAccidentesDias2$Group.1)
 TotalAccidentesDias2$hora<-as.POSIXlt(TotalAccidentesDias2$Group.1)$hour
@@ -234,8 +239,8 @@ dev.off()
 rm(KmxLocalidadGraphPop)
 
 #Kilometros de infraestructura por localidad estandarizado por biciusuarios----
-KmxLocalidad<-merge(KmxLocalidad,biciusuarios,by="LocNombre",all.x=TRUE)
-KmxLocalidad$EstanBici<-KmxLocalidad$Km*1000/KmxLocalidad$f_bicicleta
+KmxLocalidad<-merge(KmxLocalidad,viajesbici,by="LocNombre",all.x=TRUE)
+KmxLocalidad$EstanBici<-KmxLocalidad$Km*1000/KmxLocalidad$VIAJES_ORIGEN_zona
 KmxLocalidad$LocNombre<-factor(KmxLocalidad$LocNombre, KmxLocalidad$LocNombre[order(KmxLocalidad$EstanBici,decreasing=FALSE)])
 KmxLocalidadGraphBici<-ggplot(data=KmxLocalidad,aes(x=LocNombre,y=EstanBici))+geom_bar(stat="identity", fill = "#4e78a6")+coord_flip()+theme_minimal()+ylab("Kilometros de CicloRuta (Km) por 1.000 biciusuarios")+geom_text(aes(label=paste(round(EstanBici,2),"Km")),size=3,hjust=-0.05,family="Helvetica Light")+theme(text=element_text(family="Helvetica Light",color="grey"))+ylim(c(0,7))+xlab("Localidad")
 svg("./GRAFICOS/Kilometros de infraestructura por localidad Bici.svg",width = cmWidth, height = cmHeight)
@@ -246,7 +251,7 @@ dev.off()
 rm(KmxLocalidadGraphBici)
 
 #Total de accidentes por localidad por año----
-TotalAccidentesLocalidad<-aggregate(AccidentesBici$Accidente,by=list(getYear(AccidentesBici$Accidentes.Fecha),AccidentesBici$Accidentes.Localidad),FUN=length)
+TotalAccidentesLocalidad<-aggregate(AccidentesBiciTotal$Accidente,by=list(getYear(AccidentesBiciTotal$Accidentes.Fecha),AccidentesBiciTotal$Accidentes.Localidad),FUN=length)
 names(TotalAccidentesLocalidad)<-c("Group.1","LocNombre","Accidentes")
 TotalAccidentesLocalidad$Group.1<-as.numeric(TotalAccidentesLocalidad$Group.1)
 TotalAccidentesLocalidad$LocNombre<-factor(TotalAccidentesLocalidad$LocNombre)
@@ -272,7 +277,7 @@ rm(TotalAccidentesLocalidadPopGraph)
 
 #Total de accidentes por localidad por año estandarizadas por biciusuarios----
 TotalAccidentesLocalidad<-merge(TotalAccidentesLocalidad,biciusuarios,by="LocNombre",all.x=TRUE)
-TotalAccidentesLocalidad$EstanBici<-TotalAccidentesLocalidad$Accidentes*1000/TotalAccidentesLocalidad$f_bicicleta
+TotalAccidentesLocalidad$EstanBici<-TotalAccidentesLocalidad$Accidentes*1000/TotalAccidentesLocalidad$VIAJES_ORIGEN_zona
 TotalAccidentesLocalidadBiciGraph<-ggplot(data=TotalAccidentesLocalidad,aes(x=LocNombre,y=EstanBici))+geom_bar(stat="identity",fill="#4e78a6")+facet_grid(Group.1~.)+theme_minimal()+ylab("Siniestros de ciclistas por cada 1.000 biciusuarios")+theme(text=element_text(family="Helvetica Light",color="grey"))+xlab("Localidad")+theme(axis.text.x = element_text(angle = 90, hjust = 1,vjust=0.5))+geom_text(aes(label=round(EstanBici,1)),size=3,hjust=0.5,vjust=0,family="Helvetica Light")+ylim(c(0,32))
 svg("./GRAFICOS/TotalAccidentesLocalidadPorAñoBici.svg",width = cmWidth, height = cmHeight)
 showtext_begin()
@@ -300,10 +305,10 @@ write.csv(Top,"./TABLAS/AccidentalidadLocalidad.csv")
 rm(Top,TotalAccidentesLocalidad)
 
 #Sexo de los involucrados en accidentes----
-AccidentesBici$Sexo[AccidentesBici$Sexo=="FEMENINO"]<-"Mujer"
-AccidentesBici$Sexo[AccidentesBici$Sexo=="MASCULINO"]<-"Hombre"
-AccidentesBici$Sexo[AccidentesBici$Sexo=="NO APLICA"]<-"NA"
-sexoTotal<-aggregate(AccidentesBici$Accidente,by=list(AccidentesBici$Sexo),FUN=length)
+AccidentesBiciTotal$Sexo[AccidentesBiciTotal$Sexo=="FEMENINO"]<-"Mujer"
+AccidentesBiciTotal$Sexo[AccidentesBiciTotal$Sexo=="MASCULINO"]<-"Hombre"
+AccidentesBiciTotal$Sexo[AccidentesBiciTotal$Sexo=="NO APLICA"]<-"NA"
+sexoTotal<-aggregate(AccidentesBiciTotal$Accidente,by=list(AccidentesBiciTotal$Sexo),FUN=length)
 sexoTotal[,2]<-sexoTotal[,2]*100/sum(sexoTotal[,2])
 sexoTotal$Group.1<-factor(sexoTotal$Group.1,c("Mujer","Hombre"))
 sexoTotal <- sexoTotal %>% mutate(pos = cumsum(x)- x/2.4)
@@ -316,16 +321,16 @@ dev.off()
 rm(sexoTotal,sexoGraph)
 
 #Gravedad del accidente para el conductor (Todos los Niveles)----
-AccidentesBici$Gravedad[AccidentesBici$Gravedad=="MUERTA"]<-"Muerta"
-AccidentesBici$Gravedad[AccidentesBici$Gravedad=="HERIDO VALORADO"]<-"Herido Valorado"
-AccidentesBici$Gravedad[AccidentesBici$Gravedad=="HERIDO HOSPITALIZADO"]<-"Herido Hospitalizado"
-AccidentesBici$Gravedad[AccidentesBici$Gravedad=="Ilesa"]<-"Ileso"
-AccidentesBici$Gravedad[AccidentesBici$Gravedad=="Muerta"]<-"Muerto"
-AccidentesBici$Gravedad[AccidentesBici$Gravedad=="Herida"]<-"Herido"
-AccidentesBici$Gravedad[AccidentesBici$Gravedad=="Herido Valorado"]<-"Herido\nValorado"
-AccidentesBici$Gravedad[AccidentesBici$Gravedad=="Herido Hospitalizado"]<-"Herido\nHospitalizado"
-AccidentesBici$Gravedad<-factor(AccidentesBici$Gravedad,c("Ileso","Herido","Herido\nValorado","Herido\nHospitalizado","Muerto"))
-TotalAccidentesGravedad<-aggregate(AccidentesBici$Accidente,by=list(getYear(AccidentesBici$Accidentes.Fecha),AccidentesBici$Gravedad),FUN=length)
+AccidentesBiciTotal$Gravedad[AccidentesBiciTotal$Gravedad=="MUERTA"]<-"Muerta"
+AccidentesBiciTotal$Gravedad[AccidentesBiciTotal$Gravedad=="HERIDO VALORADO"]<-"Herido Valorado"
+AccidentesBiciTotal$Gravedad[AccidentesBiciTotal$Gravedad=="HERIDO HOSPITALIZADO"]<-"Herido Hospitalizado"
+AccidentesBiciTotal$Gravedad[AccidentesBiciTotal$Gravedad=="Ilesa"]<-"Ileso"
+AccidentesBiciTotal$Gravedad[AccidentesBiciTotal$Gravedad=="Muerta"]<-"Muerto"
+AccidentesBiciTotal$Gravedad[AccidentesBiciTotal$Gravedad=="Herida"]<-"Herido"
+AccidentesBiciTotal$Gravedad[AccidentesBiciTotal$Gravedad=="Herido Valorado"]<-"Herido\nValorado"
+AccidentesBiciTotal$Gravedad[AccidentesBiciTotal$Gravedad=="Herido Hospitalizado"]<-"Herido\nHospitalizado"
+AccidentesBiciTotal$Gravedad<-factor(AccidentesBiciTotal$Gravedad,c("Ileso","Herido","Herido\nValorado","Herido\nHospitalizado","Muerto"))
+TotalAccidentesGravedad<-aggregate(AccidentesBiciTotal$Accidente,by=list(getYear(AccidentesBiciTotal$Accidentes.Fecha),AccidentesBiciTotal$Gravedad),FUN=length)
 TotalAccidentesGravedad %<>%
   group_by(Group.1) %>%
   summarise(Sum=sum(x)) %>%
@@ -338,19 +343,19 @@ print(AccidentesSeveridad)
 showtext_end()
 dev.off()
 rm(TotalAccidentesGravedad,AccidentesSeveridad)
-h<-aggregate(AccidentesBici$Accidente,by=list(AccidentesBici$Gravedad),FUN="length")
+h<-aggregate(AccidentesBiciTotal$Accidente,by=list(AccidentesBiciTotal$Gravedad),FUN="length")
 h$y<-h$x/sum(h$x)
 write.csv(h,"./TABLAS/SeveridadAccidentesTotal.csv")
 rm(h)
 
 #Gravedad del accidente para el conductor (Binomial - Muerto/No Muerto)-----
-AccidentesBici$Gravedad2[AccidentesBici$Gravedad=="Ileso"]<-"No muerto"
-AccidentesBici$Gravedad2[AccidentesBici$Gravedad=="Muerto"]<-"Muerto"
-AccidentesBici$Gravedad2[AccidentesBici$Gravedad=="Herido"]<-"No muerto"
-AccidentesBici$Gravedad2[AccidentesBici$Gravedad=="Herido\nValorado"]<-"No muerto"
-AccidentesBici$Gravedad2[AccidentesBici$Gravedad=="Herido\nHospitalizado"]<-"No muerto"
-AccidentesBici$Gravedad2<-factor(AccidentesBici$Gravedad2,c("No muerto","Muerto"))
-TotalAccidentesGravedad<-aggregate(AccidentesBici$Accidente,by=list(getYear(AccidentesBici$Accidentes.Fecha),AccidentesBici$Gravedad2),FUN=length)
+AccidentesBiciTotal$Gravedad2[AccidentesBiciTotal$Gravedad=="Ileso"]<-"No muerto"
+AccidentesBiciTotal$Gravedad2[AccidentesBiciTotal$Gravedad=="Muerto"]<-"Muerto"
+AccidentesBiciTotal$Gravedad2[AccidentesBiciTotal$Gravedad=="Herido"]<-"No muerto"
+AccidentesBiciTotal$Gravedad2[AccidentesBiciTotal$Gravedad=="Herido\nValorado"]<-"No muerto"
+AccidentesBiciTotal$Gravedad2[AccidentesBiciTotal$Gravedad=="Herido\nHospitalizado"]<-"No muerto"
+AccidentesBiciTotal$Gravedad2<-factor(AccidentesBiciTotal$Gravedad2,c("No muerto","Muerto"))
+TotalAccidentesGravedad<-aggregate(AccidentesBiciTotal$Accidente,by=list(getYear(AccidentesBiciTotal$Accidentes.Fecha),AccidentesBiciTotal$Gravedad2),FUN=length)
 TotalAccidentesGravedad %<>%
   group_by(Group.1) %>%
   summarise(Sum=sum(x)) %>%
@@ -365,8 +370,8 @@ dev.off()
 rm(TotalAccidentesGravedad,AccidentesSeveridad)
 
 #Tipos de accidente registrados----
-AccidentesBici$Accidentes.ClaseNombre[AccidentesBici$Accidentes.ClaseNombre=="Caida de ocupante"]<-"Caida Ocupante"
-aux<-aggregate(AccidentesBici$Accidente,by=list(getYear(AccidentesBici$Accidentes.Fecha),AccidentesBici$Accidentes.ClaseNombre),FUN=length)
+AccidentesBiciTotal$Accidentes.ClaseNombre[AccidentesBiciTotal$Accidentes.ClaseNombre=="Caida de ocupante"]<-"Caida Ocupante"
+aux<-aggregate(AccidentesBiciTotal$Accidente,by=list(getYear(AccidentesBiciTotal$Accidentes.Fecha),AccidentesBiciTotal$Accidentes.ClaseNombre),FUN=length)
 aux %<>%
   group_by(Group.1) %>%
   summarise(Sum=sum(x)) %>%
@@ -381,7 +386,7 @@ dev.off()
 rm(aux,AccidentesSeveridad)
 
 #Género y gravedad del accidente----
-aux<-aggregate(AccidentesBici$Accidente,by=list(AccidentesBici$Sexo,AccidentesBici$Gravedad),FUN=length)
+aux<-aggregate(AccidentesBiciTotal$Accidente,by=list(AccidentesBiciTotal$Sexo,AccidentesBiciTotal$Gravedad),FUN=length)
 aux<-aux[aux$Group.1!="NA",]
 aux %<>%
   group_by(Group.1) %>%
@@ -396,7 +401,7 @@ dev.off()
 rm(aux)
 
 #Género y gravedad binomial del accidente----
-aux<-aggregate(AccidentesBici$Accidente,by=list(AccidentesBici$Sexo,AccidentesBici$Gravedad2),FUN=length)
+aux<-aggregate(AccidentesBiciTotal$Accidente,by=list(AccidentesBiciTotal$Sexo,AccidentesBiciTotal$Gravedad2),FUN=length)
 aux<-aux[aux$Group.1!="NA",]
 aux %<>%
   group_by(Group.1) %>%
@@ -411,20 +416,20 @@ dev.off()
 rm(aux)
 
 #Edad del conductor involucrado----
-AccidentesBici$Edad[AccidentesBici$Edad=="SIN INFORMACION"]<-NA
-AccidentesBici$Edad<-as.numeric(AccidentesBici$Edad)
-histogramaEdad<-ggplot()+geom_histogram(data=AccidentesBici,aes(Edad),fill="#4e78a6",color="navy",binwidth=5)+stat_count()+xlab("Edad")+ylab("Frecuencia")+theme_minimal()+theme(text=element_text(family="Helvetica Light",size=12,color="grey"))
+AccidentesBiciTotal$Edad[AccidentesBiciTotal$Edad=="SIN INFORMACION"]<-NA
+AccidentesBiciTotal$Edad<-as.numeric(AccidentesBiciTotal$Edad)
+histogramaEdad<-ggplot()+geom_histogram(data=AccidentesBiciTotal,aes(Edad),fill="#4e78a6",color="navy",binwidth=5)+stat_count()+xlab("Edad")+ylab("Frecuencia")+theme_minimal()+theme(text=element_text(family="Helvetica Light",size=12,color="grey"))
 svg("./GRAFICOS/histogramaEdad.svg",width = cmWidth, height = cmHeight)
 showtext_begin()
 print(histogramaEdad)
 showtext_end()
 dev.off()
 rm(histogramaEdad)
-write.csv(mean(AccidentesBici$Edad,na.rm=TRUE),"./TABLAS/EdadPromedio.csv")
+write.csv(mean(AccidentesBiciTotal$Edad,na.rm=TRUE),"./TABLAS/EdadPromedio.csv")
 
 #Tile de severidad y edad en grupos quinquenales por género----
-AccidentesBici$EdadCategorica<-cut(AccidentesBici$Edad,seq(0,90,5),right=FALSE)
-aux<-aggregate(AccidentesBici$Accidente,by=list(AccidentesBici$EdadCategorica,AccidentesBici$Gravedad,AccidentesBici$Sexo),FUN=length)
+AccidentesBiciTotal$EdadCategorica<-cut(AccidentesBiciTotal$Edad,seq(0,90,5),right=FALSE)
+aux<-aggregate(AccidentesBiciTotal$Accidente,by=list(AccidentesBiciTotal$EdadCategorica,AccidentesBiciTotal$Gravedad,AccidentesBiciTotal$Sexo),FUN=length)
 aux<-aux[aux$Group.3!="NA",]
 svg("./GRAFICOS/EdadSeveridadSexo.svg",width = cmWidth, height = cmHeight)
 showtext_begin()
@@ -434,7 +439,7 @@ dev.off()
 rm(aux)
 
 #Tile de severidad binomial y edad en grupos quinquenales por género----
-aux<-aggregate(AccidentesBici$Accidente,by=list(AccidentesBici$EdadCategorica,AccidentesBici$Gravedad2,AccidentesBici$Sexo),FUN=length)
+aux<-aggregate(AccidentesBiciTotal$Accidente,by=list(AccidentesBiciTotal$EdadCategorica,AccidentesBiciTotal$Gravedad2,AccidentesBiciTotal$Sexo),FUN=length)
 aux<-aux[aux$Group.3!="NA",]
 svg("./GRAFICOS/EdadSeveridadBinomialSexo.svg",width = cmWidth, height = cmHeight)
 showtext_begin()
@@ -444,9 +449,9 @@ dev.off()
 rm(aux)
 
 #Uso del casco y gravedad (Todos los niveles)----
-AccidentesBici$LLevaCasco[AccidentesBici$LLevaCasco=="S"]<-"Si"
-AccidentesBici$LLevaCasco[AccidentesBici$LLevaCasco=="N"]<-"No"
-h<-aggregate(AccidentesBici$Accidente,by=list(AccidentesBici$LLevaCasco,AccidentesBici$Gravedad),FUN="length")
+AccidentesBiciTotal$LLevaCasco[AccidentesBiciTotal$LLevaCasco=="S"]<-"Si"
+AccidentesBiciTotal$LLevaCasco[AccidentesBiciTotal$LLevaCasco=="N"]<-"No"
+h<-aggregate(AccidentesBiciTotal$Accidente,by=list(AccidentesBiciTotal$LLevaCasco,AccidentesBiciTotal$Gravedad),FUN="length")
 h<-h[h$Group.1!="SIN INFORMACION",]
 h %<>%
   group_by(Group.2) %>%
@@ -461,9 +466,9 @@ dev.off()
 rm(h)
 
 #Uso del casco y gravedad (Binomial)----
-AccidentesBici$LLevaCasco[AccidentesBici$LLevaCasco=="S"]<-"Yes"
-AccidentesBici$LLevaCasco[AccidentesBici$LLevaCasco=="N"]<-"No"
-h<-aggregate(AccidentesBici$Accidente,by=list(AccidentesBici$LLevaCasco,AccidentesBici$Gravedad2),FUN="length")
+AccidentesBiciTotal$LLevaCasco[AccidentesBiciTotal$LLevaCasco=="S"]<-"Yes"
+AccidentesBiciTotal$LLevaCasco[AccidentesBiciTotal$LLevaCasco=="N"]<-"No"
+h<-aggregate(AccidentesBiciTotal$Accidente,by=list(AccidentesBiciTotal$LLevaCasco,AccidentesBiciTotal$Gravedad2),FUN="length")
 h<-h[h$Group.1!="SIN INFORMACION",]
 h %<>%
   group_by(Group.2) %>%
@@ -478,10 +483,10 @@ dev.off()
 rm(h)
 
 #Accidentes por tipo de infraestructura/Diseño----
-AccidentesBici$Accidentes.TipoDiseno[AccidentesBici$Accidentes.TipoDiseno=="Interseccion"]<-"Intersección"
-AccidentesBici$Accidentes.TipoDiseno[AccidentesBici$Accidentes.TipoDiseno=="Tramo de Via"]<-"Tramo de Vía"
-AccidentesBici$Accidentes.TipoDiseno[AccidentesBici$Accidentes.TipoDiseno=="Via peatonal"]<-"Vía peatonal"
-h<-aggregate(AccidentesBici$Accidente,by=list(AccidentesBici$Accidentes.TipoDiseno),FUN="length")
+AccidentesBiciTotal$Accidentes.TipoDiseno[AccidentesBiciTotal$Accidentes.TipoDiseno=="Interseccion"]<-"Intersección"
+AccidentesBiciTotal$Accidentes.TipoDiseno[AccidentesBiciTotal$Accidentes.TipoDiseno=="Tramo de Via"]<-"Tramo de Vía"
+AccidentesBiciTotal$Accidentes.TipoDiseno[AccidentesBiciTotal$Accidentes.TipoDiseno=="Via peatonal"]<-"Vía peatonal"
+h<-aggregate(AccidentesBiciTotal$Accidente,by=list(AccidentesBiciTotal$Accidentes.TipoDiseno),FUN="length")
 h$y<-h$x/sum(h$x)
 h$Group.1<-factor(h$Group.1, h$Group.1[order(h$x,decreasing=FALSE)])
 svg("./GRAFICOS/AccidenteTipoInfraestructura.svg",width = cmWidth, height = cmHeight)
@@ -502,7 +507,7 @@ AccidentesTotales$ClaseVehiculo[AccidentesTotales$ClaseVehiculo=="Motociclo"]<-"
 AccidentesTotales$ClaseVehiculo[AccidentesTotales$ClaseVehiculo=="No identificado"]<-"Otro"
 AccidentesTotales$ClaseVehiculo[AccidentesTotales$ClaseVehiculo=="null"]<-"Otro"
 AccidentesTotales$ClaseVehiculo[AccidentesTotales$ClaseVehiculo=="Tractocamion"]<-"Tractocamión"
-relacionados<-rbind(AccidentesTotales[AccidentesTotales$Accidente %in% unique(AccidentesBici$Accidente) & AccidentesTotales$ClaseVehiculo!="Bicicleta",],AccidentesBici[duplicated(AccidentesBici$Accidente),c(1:55)])
+relacionados<-rbind(AccidentesTotales[AccidentesTotales$Accidente %in% unique(AccidentesBiciTotal$Accidente) & AccidentesTotales$ClaseVehiculo!="Bicicleta",],AccidentesBiciTotal[duplicated(AccidentesBiciTotal$Accidente),c(1:55)])
 h<-aggregate(relacionados$Accidente,by=list(relacionados$ClaseVehiculo),FUN=length)
 h$Group.1<-factor(h$Group.1, h$Group.1[order(h$x,decreasing=FALSE)])
 h$y<-h$x/sum(h$x)
@@ -531,7 +536,7 @@ dev.off()
 rm(m,h,w,wd,relacionados)
 
 #--------
-AccidentesBici$Accidentes.TipoTiempo[AccidentesBici$Accidentes.TipoTiempo=="Normal/Normal"]<-"Normal"
-h<-aggregate(AccidentesBici$Accidente,by=list(AccidentesBici$Accidentes.TipoTiempo),FUN="length")
+AccidentesBiciTotal$Accidentes.TipoTiempo[AccidentesBiciTotal$Accidentes.TipoTiempo=="Normal/Normal"]<-"Normal"
+h<-aggregate(AccidentesBiciTotal$Accidente,by=list(AccidentesBiciTotal$Accidentes.TipoTiempo),FUN="length")
 h$y<-h$x/sum(h$x)
 h
