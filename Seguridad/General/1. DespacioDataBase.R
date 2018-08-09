@@ -67,9 +67,9 @@ length(c4)<-117
 c5<-sort(names(Conductores$`2015_BASE_SINIESTROS.xlsx`))
 length(c5)<-117
 variables<-cbind(c1,c2,c3,c4,c5)
-write.csv(variables,"./TABLAS/Variables1.csv")
+write.csv(variables,"./TABLAS/1. Variables1.csv")
 lista<-c(c1,c2,c3,c4,c5)
-write.csv(sort(unique(lista)),"./TABLAS/Lista_variables1.csv")
+write.csv(sort(unique(lista)),"./TABLAS/1. Lista_variables1.csv")
 
 names(Conductores$`2011-BASE_SINIESTROS.xlsx`)[names(Conductores$`2011-BASE_SINIESTROS.xlsx`)=="Accidentes.Tpoa1"]<-"Accidentes.TipoVia1"
 names(Conductores$`2011-BASE_SINIESTROS.xlsx`)[names(Conductores$`2011-BASE_SINIESTROS.xlsx`)=="Accidentes.Tpoa2"]<-"Accidentes.TipoVia2"
@@ -109,9 +109,9 @@ length(c4)<-117
 c5<-sort(names(Conductores$`2015_BASE_SINIESTROS.xlsx`))
 length(c5)<-117
 variables<-cbind(c1,c2,c3,c4,c5)
-write.csv(variables,"./TABLAS/Variables2.csv")
+write.csv(variables,"./TABLAS/1. Variables2.csv")
 lista<-c(c1,c2,c3,c4,c5)
-write.csv(sort(unique(lista)),"./TABLAS/Lista_variables2.csv")
+write.csv(sort(unique(lista)),"./TABLAS/1. Lista_variables2.csv")
 
 VariablesFinales<-c("Accidente",
                     "Accidentes.CardinalVia1",
@@ -196,9 +196,9 @@ PercentMissing[3,2]<-sum(is.na(bici2013))/(dim(bici2013)[1]*dim(bici2013)[2])
 PercentMissing[4,2]<-sum(is.na(bici2014))/(dim(bici2014)[1]*dim(bici2014)[2])
 PercentMissing[5,2]<-sum(is.na(bici2015))/(dim(bici2015)[1]*dim(bici2015)[2])
 PercentMissing[6,2]<-sum(is.na(AccidentesBici))/(dim(AccidentesBici)[1]*dim(AccidentesBici)[2])
-write.csv(PercentMissing,"./TABLAS/PercentMissing.csv")
+write.csv(PercentMissing,"./TABLAS/1. PercentMissingDespacio.csv")
 rm(PercentMissing)
 
 #Limpieza del espacio de trabajo----
 rm(bici2011,bici2012,bici2013,bici2014,bici2015,variables,c1,c2,c3,c4,c5,lista,VariablesFinales,readPath,Conductores)
-save(AccidentesBici,AccidentesTotales,file=paste(carpetaRAS,"/RESULTADOS/SEGURIDAD/Bases de datos/AccidentesDespacio2011_2015.Rdata",sep=""))
+save(AccidentesBici,AccidentesTotales,file=paste(carpetaRAS,"/RESULTADOS/SEGURIDAD/Bases de datos/1. AccidentesDespacio2011_2015.Rdata",sep=""))

@@ -2,12 +2,13 @@
 rm(list=ls())
 carpetaRAS="/Users/germancarvajal/OneDrive - Universidad de Los Andes/Uniandes - RAS - SDM"
 gitRAS="/Users/germancarvajal/OneDrive - Universidad de Los Andes/proBikePolicies"
+require(pacman)
 pacman::p_load(sf)
 pacman::p_load(tmap)
 
 #Lectura de las bases de datos----
 zats<-st_read(paste0(carpetaRAS,"/BASES DE DATOS/ZATs"))
-localidad<-st_read(paste0(carpetaRAS,"/BASES DE DATOS/IDECA_0318.gdb"),layer = "Loca")
+localidad<-st_read(paste0(carpetaRAS,"/BASES DE DATOS/Mapas de referencia IDECA/MR0318.gdb"),layer = "Loca")
 
 #Extracción de centroides e intersección de ZATs y localidades
 zats_cen<-st_centroid(zats)

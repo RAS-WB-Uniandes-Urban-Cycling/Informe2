@@ -1,5 +1,6 @@
 #Preparacion del entorno de trabajo----
 rm(list=ls())
+require(pacman)
 pacman::p_load(googleway)
 carpetaRAS="/Users/germancarvajal/OneDrive - Universidad de Los Andes/Uniandes - RAS - SDM"
 load(paste(carpetaRAS,"/RESULTADOS/SEGURIDAD/Bases de datos/AccidentesDespacio2011_2015.Rdata",sep=""))
@@ -26,5 +27,10 @@ for( i in seq(6427)){
 }
 AccidentesBici<-cbind(AccidentesBici,AccidentesCoords)
 
+#Filtrado de los resultados georeferenciados----
+AccidentesBici<-AccidentesBici[!(is.na(AccidentesBici$lat)),]
+AccidentesBici<-AccidentesBici[(3.6340<=AccidentesBici$lat)&(AccidentesBici$lat<=4.9131),]
+AccidentesBici<-AccidentesBici[(-75.0380<=AccidentesBici$lon)&(AccidentesBici$lon<=-73.2115),]
+
 #Almacenamiento de la tabla de datos----
-save(AccidentesBici,file=paste(carpetaRAS,"/RESULTADOS/SEGURIDAD/Bases de datos/AccidentesCoords.Rdata"))
+save(AccidentesBici,file=paste0(carpetaRAS,"/RESULTADOS/SEGURIDAD/Bases de datos/2. AccidentesCoords.Rdata"))
