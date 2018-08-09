@@ -22,7 +22,7 @@
     
   #Se normalizan las variables de la capa_variables_LTS 
     
-    capa_clusters<-st_set_geometry(capa_variables_LTS,NULL) %>% transmute(CicloRuta,SITP,Segregada,Direccion,Ancho=scale(as.matrix(capa_variables_LTS$Ancho)),Carriles=scale(as.matrix(capa_variables_LTS$Carriles)),
+    capa_clusters<-st_set_geometry(capa_variables_LTS,NULL) %>% transmute(CicloRuta,SITP,Segregada,Ancho=scale(as.matrix(capa_variables_LTS$Ancho)),Carriles=scale(as.matrix(capa_variables_LTS$Carriles)),
                    Velocidad=scale(as.matrix(capa_variables_LTS$Velocidad)),Congestion=scale(as.matrix(capa_variables_LTS$Congestion)),Densidad=scale(as.matrix(capa_variables_LTS$Densidad)),
                    Flujo=scale(as.matrix(capa_variables_LTS$Flujo))) 
     
@@ -31,7 +31,6 @@
     capa_clusters$CicloRuta<-as.factor(capa_clusters$CicloRuta)
     capa_clusters$SITP<-as.factor(capa_clusters$SITP)
     capa_clusters$Segregada<-as.factor(capa_clusters$Segregada)
-    capa_clusters$Direccion<-as.factor(capa_clusters$Direccion)
     capa_clusters$Ancho<-as.numeric(capa_clusters$Ancho)
     capa_clusters$Carriles<-as.numeric(capa_clusters$Carriles)
     capa_clusters$Velocidad<-as.numeric(capa_clusters$Velocidad)
@@ -49,7 +48,7 @@
     
     silhouette_with <- c(NA)
     
-    for(i in 2:10){
+    for(i in 3:5){
       
       clusters_PAM <- pam(dist,diss = TRUE,k = i)
       
@@ -79,7 +78,7 @@
     
   #Se guarda la Data (Resutados Clustering)
     
-    save(capa_LTS_PAM,file=paste0(ruta_resultados,"Resultados_Clustering.Rdata"))
+    save(capa_LTS_PAM,file=paste0(ruta_resultados,"Resultados_Clustering_2.Rdata"))
     
     save(capa_LTS_Hclust,capa_LTS_PAM,silhouette_with,grafico_HClust,file=paste0(ruta_resultados,"Resultados_Clustering.Rdata"))
     
