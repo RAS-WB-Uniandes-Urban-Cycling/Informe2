@@ -22,7 +22,7 @@
     
   #Se normalizan las variables de la capa_variables_LTS 
     
-    capa_clusters<-st_set_geometry(capa_variables_LTS,NULL) %>% transmute(CicloRuta,SITP,Ancho=scale(as.matrix(capa_variables_LTS$Ancho)),Carriles=scale(as.matrix(capa_variables_LTS$Carriles)),
+    capa_clusters<-st_set_geometry(capa_variables_LTS,NULL) %>% transmute(CicloRuta,SITP,Segregada,Direccion,Ancho=scale(as.matrix(capa_variables_LTS$Ancho)),Carriles=scale(as.matrix(capa_variables_LTS$Carriles)),
                    Velocidad=scale(as.matrix(capa_variables_LTS$Velocidad)),Congestion=scale(as.matrix(capa_variables_LTS$Congestion)),Densidad=scale(as.matrix(capa_variables_LTS$Densidad)),
                    Flujo=scale(as.matrix(capa_variables_LTS$Flujo))) 
     
@@ -30,6 +30,8 @@
     
     capa_clusters$CicloRuta<-as.factor(capa_clusters$CicloRuta)
     capa_clusters$SITP<-as.factor(capa_clusters$SITP)
+    capa_clusters$Segregada<-as.factor(capa_clusters$Segregada)
+    capa_clusters$Direccion<-as.factor(capa_clusters$Direccion)
     capa_clusters$Ancho<-as.numeric(capa_clusters$Ancho)
     capa_clusters$Carriles<-as.numeric(capa_clusters$Carriles)
     capa_clusters$Velocidad<-as.numeric(capa_clusters$Velocidad)
@@ -40,21 +42,7 @@
   #Se crea la matriz de distancias por el metodo de Gower
     
     dist<-daisy(capa_clusters, metric = "gower", stand=FALSE)
-    
-#Clustering Hierarchical Clustering----   
-    
-    clusters_Hclust <- hclust(dist,method ="single")
-    grafico_HClust <- clusters_Hclust
-    clusters_Hclust <- cutree(clusters_Hclust, 4) 
-    table(clusters_Hclust)
-    
-    capa_LTS_Hclust<- cbind.data.frame(capa_variables_LTS,data.frame(clusters_Hclust)) %>% st_as_sf 
- 
-    mapa<-tm_shape(capa_LTS_Hclust)+tm_lines(col="clusters_Hclust",style ="cat" ,scale=5 ,palette = "Accent" ,title.col ="Cluster", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
-    mapa
-    
-    #capa_LTS_Hclust$clusters_Hclust <- ifelse(capa_LTS_Hclust$clusters_Hclust==3, 1, ifelse(capa_LTS_Hclust$clusters_Hclust==2, 2,ifelse(capa_LTS_Hclust$clusters_Hclust==4, 3,4)))
-    
+
 #Clustering PAM Algorithm----
     
   #Numero de clusters por el metodo Silhoutte   
