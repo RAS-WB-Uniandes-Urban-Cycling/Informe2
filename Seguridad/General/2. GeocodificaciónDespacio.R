@@ -29,8 +29,8 @@ AccidentesBici<-cbind(AccidentesBici,AccidentesCoords)
 
 #Filtrado de los resultados georeferenciados----
 AccidentesBici<-AccidentesBici[!(is.na(AccidentesBici$lat)),]
-AccidentesBici<-AccidentesBici[(3.6340<=AccidentesBici$lat)&(AccidentesBici$lat<=4.9131),]
-AccidentesBici<-AccidentesBici[(-75.0380<=AccidentesBici$lon)&(AccidentesBici$lon<=-73.2115),]
+AccidentesBici<-AccidentesBici[(4.2464<=AccidentesBici$lat)&(AccidentesBici$lat<=4.8857),]
+AccidentesBici<-AccidentesBici[(-74.4784<=AccidentesBici$lon)&(AccidentesBici$lon<=-73.7306),]
 
 #Almacenamiento de la tabla de datos----
 save(AccidentesBici,file=paste0(carpetaRAS,"/RESULTADOS/SEGURIDAD/Bases de datos/2. AccidentesCoords.Rdata"))
