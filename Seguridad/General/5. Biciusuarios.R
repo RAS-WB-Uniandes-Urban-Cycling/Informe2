@@ -9,6 +9,7 @@ pacman::p_load(dplyr)
 pacman::p_load(readxl)
 pacman::p_load(zoo)
 pacman::p_load(readr)
+pacman::p_load(sf)
 loca_fact<-c("ANTONIO NARIÑO","BARRIOS UNIDOS","BOSA","CANDELARIA","CHAPINERO","CIUDAD BOLIVAR","ENGATIVA","FONTIBON","KENNEDY","LOS MARTIRES","PUENTE ARANDA","RAFAEL URIBE URIBE","SAN CRISTOBAL","SANTA FE","SUBA","SUMAPAZ","TEUSAQUILLO","TUNJUELITO","USAQUEN","USME","OTRA LOCALIDAD RURAL",NA)
 
 #Lectura de las bases de datos de defunciones----
@@ -55,24 +56,32 @@ names(biciusuarios2017)<-c("GR_EDAD","SEXO","FECHA","LOCALIDAD","BICIUSRS")
 biciusuarios2017<-merge(GENDER_AGE,biciusuarios2017,by=c("GR_EDAD","SEXO","LOCALIDAD"),all.x=TRUE) %>% mutate(FECHA = replace(FECHA, is.na(FECHA),"2017-01-01"),BICIUSRS = replace(BICIUSRS, is.na(BICIUSRS),0))
 
 #Estimación del número de biciusuarios 2015----
-biciusuarios2015<-read.csv(paste0(carpetaRAS,"/RESULTADOS/GENERAL/TABLAS/encuesta 2015 - personasTipoDia.csv"))
-biciusuarios2015<-biciusuarios2015[biciusuarios2015$tipo_dia=="dia_habil",]
+biciusuarios2015<-read.csv(paste0(carpetaRAS,"/BASES DE DATOS/Encuesta de Movilidad/2015/Encuesta/encuesta 2015 - personas.csv"),sep=";",fileEncoding = "Latin1",encoding = "Latin1")
 
 etapas2015<-read.csv(paste0(carpetaRAS,"/BASES DE DATOS/Encuesta de Movilidad/2015/Encuesta/encuesta 2015 - etapas.csv"),sep=";",fileEncoding = "Latin1",encoding = "Latin1")
-etapas2015<-etapas2015[etapas2015$MEDIOTRASPORTE=="Bicicleta"|etapas2015$MEDIOTRASPORTE=="Bicicleta con motor"|etapas2015$MEDIOTRASPORTE=="Bicicletas publicas",]
-etapas2015<-paste0(etapas2015$ID_ENCUESTA,"-",etapas2015$NUMERO_PERSONA)
+etapas2015$BICI<-ifelse(etapas2015$MEDIOTRASPORTE=="Bicicleta"|etapas2015$MEDIOTRASPORTE=="Bicicleta con motor"|etapas2015$MEDIOTRASPORTE=="Bicicletas publicas",TRUE,FALSE)
+etapas2015<-etapas2015[,c("ID_ENCUESTA","NUMERO_PERSONA","NUMERO_VIAJE","BICI")]
+
+viajes2015<-read.csv(paste0(carpetaRAS,"/BASES DE DATOS/Encuesta de Movilidad/2015/Encuesta/encuesta 2015 - viajes.csv"),sep=";",fileEncoding = "Latin1",encoding = "Latin1",stringsAsFactors = FALSE)
+viajes2015<-viajes2015[,c("ID_ENCUESTA","NUMERO_PERSONA","NUMERO_VIAJE","MOTIVOVIAJE","DIA_HABIL")]
+viajes2015<-left_join(viajes2015,etapas2015,by=c("ID_ENCUESTA","NUMERO_PERSONA","NUMERO_VIAJE"))
+viajes2015<-viajes2015[viajes2015$BICI,]
+viajes2015<-viajes2015[viajes2015$MOTIVOVIAJE%in%c("Estudiar","Trabajar","Asuntos de Trabajo","Buscar trabajo") & viajes2015$DIA_HABIL=="S",]
+viajes2015<-paste0(viajes2015$ID_ENCUESTA,"-",viajes2015$NUMERO_PERSONA)
+rm(etapas2015)
 
 encuesta2015<-read.csv(paste0(carpetaRAS,"/BASES DE DATOS/Encuesta de Movilidad/2015/Encuesta/encuesta 2015 - encuestas.csv"),sep=";",fileEncoding = "Latin1",encoding = "Latin1",stringsAsFactors = FALSE)
 encuesta2015<-encuesta2015[encuesta2015$DEPARTAMENTO=="Bogota D.C.",c("ID_ENCUESTA","ZAT_HOGAR")]
 encuesta2015<-merge(encuesta2015,ZAT_loca,by=c("ZAT_HOGAR"),all.x=TRUE)
 
-biciusuarios2015$Key<-paste0(biciusuarios2015$id_encuesta,"-",biciusuarios2015$numero_persona)
-biciusuarios2015<-biciusuarios2015[biciusuarios2015$Key%in%etapas2015,]
-biciusuarios2015<-biciusuarios2015[biciusuarios2015$id_encuesta%in%encuesta2015$ID_ENCUESTA,c("id_encuesta","sexo","edad","moviliza_bicicleta","ponderador_calibrado")]
-biciusuarios2015<-merge(biciusuarios2015,encuesta2015,by.x = "id_encuesta",by.y="ID_ENCUESTA",all.x=TRUE)
-rm(encuesta2015,etapas2015)
+biciusuarios2015$Key<-paste0(biciusuarios2015$ID_ENCUESTA,"-",biciusuarios2015$NUMERO_PERSONA)
+biciusuarios2015<-biciusuarios2015[biciusuarios2015$Key%in%viajes2015,]
+biciusuarios2015<-biciusuarios2015[biciusuarios2015$ID_ENCUESTA%in%encuesta2015$ID_ENCUESTA, c("ID_ENCUESTA","SEXO","EDAD","PONDERADOR_CALIBRADO")]
+cosa<-paste0(biciusuarios2015$ID_ENCUESTA,"-",biciusuarios2015$NUMERO_PERSONA)
+save(cosa,file="/Users/germancarvajal/Desktop/cosa.Rdata")
+biciusuarios2015<-merge(biciusuarios2015,encuesta2015,by.x = "ID_ENCUESTA",by.y="ID_ENCUESTA",all.x=TRUE)
+rm(encuesta2015,viajes2015)
 
-biciusuarios2015<-na.omit(biciusuarios2015)
 names(biciusuarios2015)<-toupper(names(biciusuarios2015))
 
 biciusuarios2015$PONDERADOR_CALIBRADO<-as.numeric(gsub(",",".",biciusuarios2015$PONDERADOR_CALIBRADO))
@@ -83,6 +92,7 @@ names(biciusuarios2015)<-c("GR_EDAD","SEXO","FECHA","LOCALIDAD","BICIUSRS")
 biciusuarios2015$SEXO<-as.factor(ifelse(biciusuarios2015$SEXO=="Hombre","Male","Female"))
 
 biciusuarios2015<-merge(GENDER_AGE,biciusuarios2015,by=c("GR_EDAD","SEXO","LOCALIDAD"),all.x=TRUE) %>% mutate(FECHA = replace(FECHA, is.na(FECHA),"2015-01-01"),BICIUSRS = replace(BICIUSRS, is.na(BICIUSRS),0))
+sum(biciusuarios2015$BICIUSRS)
 
 #Estimación del número de biciusuarios 2014----
 encuesta2014<-read.csv(paste0(carpetaRAS,"/BASES DE DATOS/Encuesta multiproposito/2014/capa/DBF_MTP_256_1.txt"),sep = "\t",encoding="Latin1",fileEncoding = "Latin1",stringsAsFactors = FALSE)
@@ -123,9 +133,10 @@ biciusuarios2011<-read_excel(paste0(carpetaRAS,"/BASES DE DATOS/Encuesta de Movi
 biciusuarios2011<-biciusuarios2011[biciusuarios2011$MUN_D=="11001",c("ORDEN","ID_PERSO","P4_B","P5_B","F_EXP","ZAT")]
 
 viajes2011<-read_excel(paste0(carpetaRAS,"/BASES DE DATOS/Encuesta de Movilidad/2011/120927_Base de Datos EODH 2011/Mod_D_VIAJES2_BaseImputacion_Definitiva.xlsx"),na="N/A")
-viajes2011<-viajes2011[,c("ORDEN","ID_PERSO","E1_P1_D","E2_P1_D","E3_P1_D","E4_P1_D","E5_P1_D")]
+viajes2011<-viajes2011[,c("ORDEN","ID_PERSO","P13_D","E1_P1_D","E2_P1_D","E3_P1_D","E4_P1_D","E5_P1_D")]
 viajes2011<-viajes2011[!is.na(viajes2011$E1_P1_D),]
 viajes2011$Bici<-ifelse(viajes2011$E1_P1_D==18|viajes2011$E1_P1_D==19|viajes2011$E2_P1_D==18|viajes2011$E2_P1_D==19|viajes2011$E3_P1_D==18|viajes2011$E3_P1_D==19|viajes2011$E4_P1_D==18|viajes2011$E4_P1_D==19|viajes2011$E5_P1_D==18|viajes2011$E5_P1_D==19,TRUE,FALSE)
+viajes2011<-viajes2011[viajes2011$P13_D%in%c("01","02","03","13"),]
 viajes2011<-unique(na.omit(viajes2011[viajes2011$Bici==TRUE,c("ORDEN","ID_PERSO")]))
 
 biciusuarios2011$Key<-paste(biciusuarios2011$ORDEN,biciusuarios2011$ID_PERSO,sep="-")
@@ -156,8 +167,9 @@ biciusuarios2011<-merge(GENDER_AGE,biciusuarios2011,by=c("GR_EDAD","SEXO","LOCAL
         st_geometry(UPZ_loca)<-NULL
         
 viajes2005<-read_excel(paste0(carpetaRAS,"/BASES DE DATOS/Encuesta de Movilidad/2005/MODULOD.xlsx"))
-viajes2005<-viajes2005[,c("ID","NR_FOR","AI10_NHOG","D7_NPER","D35_MEDIO")]
+viajes2005<-viajes2005[,c("ID","NR_FOR","AI10_NHOG","D7_NPER","D34_MOTI","D35_MEDIO")]
 viajes2005<-viajes2005[viajes2005$D35_MEDIO==2,]
+viajes2005<-viajes2005[viajes2005$D34_MOTI%in%c(2,3,4),]
 
 biciusuarios2005<-read_excel(paste0(carpetaRAS,"/BASES DE DATOS/Encuesta de Movilidad/2005/MODULOC.xlsx"))
 biciusuarios2005<-biciusuarios2005[!is.na(biciusuarios2005$ID_UPZ),c("ID","NR_FOR","AI10_NHOG","C7_PERS","C8_EDAD","C9_SEXO","FEXPROY","ID_UPZ")]

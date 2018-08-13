@@ -9,6 +9,7 @@ pacman::p_load(tmap)
 pacman::p_load(readxl)
 pacman::p_load(zoo)
 pacman::p_load(gdata)
+pacman::p_load(padr)
 
 # Lectura de la función de codificación de edades en grupos----
 load(paste0(carpetaRAS,"/RESULTADOS/SEGURIDAD/Bases de datos/4. GruposEdadCodificacion.Rdata"))
@@ -18,7 +19,7 @@ viajes2005<-read_excel(paste0(carpetaRAS,"/BASES DE DATOs/Encuesta de Movilidad/
 
 # Filtrar medio de transporte bicicleta y ubicación del hogar en bogotá
 viajes2005<-viajes2005[(viajes2005$D35_MEDIO==2)&(!is.na(viajes2005$ID_UPZ)),c("ID","D7_NPER","DISTANCIA","D27_NVIA","ID_UPZ","D29_UPZ","D32_UPZ","FACTRED_FI")]
-KM_recorridos2005<-sum(viajes2005$FACTRED_FI*viajes2005$DISTANCIA,na.rm=TRUE)
+KM_recorridos2005<-c("2005-01-01",sum(viajes2005$FACTRED_FI*viajes2005$DISTANCIA,na.rm=TRUE))
 viajes2005$D29_UPZ[is.na(viajes2005$D29_UPZ)]<-viajes2005$ID_UPZ[is.na(viajes2005$D29_UPZ)]
 viajes2005$KEY<-paste(viajes2005$ID,viajes2005$D7_NPER,sep="-")
 
@@ -95,6 +96,7 @@ personas2015<-read.csv(paste0(carpetaRAS,"/RESULTADOS/GENERAL/TABLAS/encuesta 20
 personas2015<-personas2015[personas2015$tipo_dia=="dia_habil",]
 personas2015$KEY<-paste(personas2015$id_encuesta,personas2015$numero_persona,sep="-")
 personas2015<-personas2015[,c("KEY","sexo","edad")]
+personas2015$sexo<-as.factor(ifelse(personas2015$sexo=="Hombre","Male","Female"))
 personas2015$edad<-as.numeric(personas2015$edad)
 personas2015$GR_EDAD<-factor(apply(as.data.frame(personas2015$edad),MARGIN=1,FUN=encodeEdad2,g=gruposEdad),levels = paste0(gruposEdad$ED_MIN,"-",gruposEdad$ED_MAX))
 viajes2015$KEY<-paste(viajes2015$ID_ENCUESTA,viajes2015$NUMERO_PERSONA,sep="-")
@@ -160,5 +162,14 @@ viajes %<>%
   mutate(VIAJESINT = na.approx(VIAJES, na.rm=FALSE),DIST_TOTAL_KMINT = na.approx(DIST_TOTAL_KM, na.rm=FALSE))
 viajes<-as.data.frame(viajes)
 
+#Modificación del formato de kilómetros recorridos de validación del año 2005----
+m<-as.data.frame(matrix(NA,1,2))
+names(m)<-c("Fecha","DIST_TOTAL_KM")
+m[1,]<-KM_recorridos2005
+m$Fecha<-as.Date(m$Fecha)
+m$DIST_TOTAL_KM<-as.numeric(m$DIST_TOTAL_KM)
+KM_recorridos2005<-m
+rm(m)
+
 # Guardado de los resultados de viajes y distancia recorrida entre localidades----
-save(viajes,file=paste0(carpetaRAS,"/RESULTADOS/SEGURIDAD/Bases de datos/10. Viajes_KilometrosRecorridos.Rdata"))
+save(KM_recorridos2005,viajes,file=paste0(carpetaRAS,"/RESULTADOS/SEGURIDAD/Bases de datos/10. Viajes_KilometrosRecorridos.Rdata"))
