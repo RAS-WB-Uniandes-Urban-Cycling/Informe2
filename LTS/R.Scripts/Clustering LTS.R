@@ -16,13 +16,13 @@
     load(paste0(ruta_resultados, "Variables_LTS.Rdata"))
     
     
-    capa_variables_LTS <-capa_variables_LTS %>%  filter(LocNombre=="USAQUEN")
+    capa_variables_LTS <-capa_variables_LTS %>%  filter(LocNombre %in% c("TEUSAQUILLO","USAQUEN"))
     
 #Matriz de distancia metodo Gower----
     
   #Se normalizan las variables de la capa_variables_LTS 
     
-    capa_clusters<-st_set_geometry(capa_variables_LTS,NULL) %>% transmute(CicloRuta,SITP,Segregada,Ancho=scale(as.matrix(capa_variables_LTS$Ancho)),Carriles=scale(as.matrix(capa_variables_LTS$Carriles)),
+    capa_clusters<-st_set_geometry(capa_variables_LTS,NULL) %>% transmute(CicloRuta,SITP,Ancho=scale(as.matrix(capa_variables_LTS$Ancho)),Carriles=scale(as.matrix(capa_variables_LTS$Carriles)),
                    Velocidad=scale(as.matrix(capa_variables_LTS$Velocidad)),Congestion=scale(as.matrix(capa_variables_LTS$Congestion)),Densidad=scale(as.matrix(capa_variables_LTS$Densidad)),
                    Flujo=scale(as.matrix(capa_variables_LTS$Flujo))) 
     
@@ -30,7 +30,6 @@
     
     capa_clusters$CicloRuta<-as.factor(capa_clusters$CicloRuta)
     capa_clusters$SITP<-as.factor(capa_clusters$SITP)
-    capa_clusters$Segregada<-as.factor(capa_clusters$Segregada)
     capa_clusters$Ancho<-as.numeric(capa_clusters$Ancho)
     capa_clusters$Carriles<-as.numeric(capa_clusters$Carriles)
     capa_clusters$Velocidad<-as.numeric(capa_clusters$Velocidad)
@@ -48,7 +47,7 @@
     
     silhouette_with <- c(NA)
     
-    for(i in 3:5){
+    for(i in 3:6){
       
       clusters_PAM <- pam(dist,diss = TRUE,k = i)
       
@@ -58,8 +57,8 @@
     
   #Se plotea silhouette width
     
-    plot(1:10, silhouette_with,xlab = "Number of clusters",ylab = "Silhouette Width")
-    lines(1:10, silhouette_with)
+    plot(1:6, silhouette_with,xlab = "Number of clusters",ylab = "Silhouette Width")
+    lines(1:6, silhouette_with)
     
   #Se hace hace clustering
     
@@ -69,7 +68,10 @@
     
     capa_LTS_PAM<- cbind.data.frame(capa_variables_LTS,clusters_PAM) %>% st_as_sf 
     
-    mapa<-tm_shape(capa_LTS_PAM)+tm_lines(col="clusters_PAM",style ="cat" ,scale=5 ,palette = "Accent" ,title.col ="Cluster", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
+     mapa<-tm_shape(capa_LTS_PAM)+tm_lines(col="clusters_PAM",style ="cat" ,scale=5 ,palette = "Accent" ,title.col ="Cluster", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
+    mapa
+    
+    mapa<-tm_shape(capa_LTS_PAM)+tm_lines(col="CicloRuta",style ="cat" ,scale=5 ,palette = "Accent" ,title.col ="Cluster", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
     mapa
     
    #capa_LTS_PAM$clusters_PAM <- ifelse(capa_LTS_PAM$clusters_PAM==3, 1, ifelse(capa_LTS_PAM$clusters_PAM==2, 2,ifelse(capa_LTS_PAM$clusters_PAM==4, 3,4)))

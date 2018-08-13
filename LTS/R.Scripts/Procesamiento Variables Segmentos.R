@@ -108,9 +108,9 @@
   
   #Se hace un Join espacial entre capa_malla_vial y shape_calzadas
     
-    capa_malla_vial<-capa_malla_vial %>% st_join(select(layer_zats,SCaNombre),left = FALSE, largest=TRUE) %>% rename(c(SCaNombre="SCatastral")) %>%   st_join(select(layer_calzadas,CalAncho),left = TRUE, largest=TRUE)  %>% 
+    capa_malla_vial<-capa_malla_vial %>% st_join(select(layer_localidad,LocNombre),left = FALSE, largest=TRUE)  %>% st_join(select(layer_calzadas,CalAncho),left = TRUE, largest=TRUE)  %>% 
       transmute(ID=row_number(),Ancho=if_else(!is.na(CalAncho),as.numeric(CalAncho),as.numeric(Ancho)),
-      Carriles=lanes,SCatastral,Longitud1,TProm1,TFF1,Vprom1, VpromFF1,Longitud2,TProm2,TFF2,Vprom2, VpromFF2)
+      Carriles=lanes,LocNombre,Longitud1,TProm1,TFF1,Vprom1, VpromFF1,Longitud2,TProm2,TFF2,Vprom2, VpromFF2)
     
   #Se corrigen los datos de ancho de la via
     
@@ -120,7 +120,7 @@
     capa_malla_vial$Ancho<-ifelse(is.na(capa_malla_vial$Ancho) & capa_malla_vial$Carriles==3 , mean(capa_malla_vial$Ancho[capa_malla_vial$Carriles==3], na.rm = TRUE), capa_malla_vial$Ancho)
     capa_malla_vial$Ancho<-ifelse(is.na(capa_malla_vial$Ancho) & capa_malla_vial$Carriles==4 , mean(capa_malla_vial$Ancho[capa_malla_vial$Carriles==4], na.rm = TRUE), capa_malla_vial$Ancho)
     capa_malla_vial$Ancho<-ifelse(is.na(capa_malla_vial$Ancho) & capa_malla_vial$Carriles==5 , mean(capa_malla_vial$Ancho[capa_malla_vial$Carriles==5], na.rm = TRUE), capa_malla_vial$Ancho)
-    capa_malla_vial <- capa_malla_vial %>% filter(!is.na(Ancho))
+    capa_malla_vial <- capa_malla_vial %>% filter(!is.na(Ancho))  %>%  mutate(ID=row_number())
     
     save(capa_malla_vial,file=paste0(ruta_resultados,"Procesamiento.Rdata"))
     
@@ -291,10 +291,6 @@
         
 #Capa LTS----
   
-  #Se hace un join entre capa_malla_vial y layer_Localidad  
-    
-    capa_malla_vial<-capa_malla_vial %>% st_join(select(layer_localidad,LocNombre),left = FALSE, largest=TRUE) 
-    
   #Se crea la capa LTS
     
     capa_variables_LTS<-capa_malla_vial %>% transmute (ID=row_number(),LocNombre,Ancho,Carriles,CicloRuta,SITP,Velocidad,Congestion,Densidad,Flujo,Segregada,Direccion)
