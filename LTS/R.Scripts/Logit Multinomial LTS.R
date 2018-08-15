@@ -40,7 +40,7 @@
                           Densidad:Flujo+Densidad:Segregada, data=capa_variables_LTS_model)
     
     
-    logit_Multi<-multinom(capa_variables_LTS_model$clusters_PAM~Velocidad+Ancho+Carriles+CicloRuta+SITP+Congestion+Densidad+Flujo+Segregada, data=capa_variables_LTS_model)
+    logit_Multi<-multinom(capa_variables_LTS_model$clusters_PAM~Velocidad+Ancho+Carriles+CicloRuta+SITP+Congestion+Densidad+Flujo, data=capa_variables_LTS_model)
 
 #Significancia de variables
 
