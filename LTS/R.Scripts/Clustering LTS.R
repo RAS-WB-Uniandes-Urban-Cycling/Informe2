@@ -16,19 +16,20 @@
     load(paste0(ruta_resultados, "Variables_LTS.Rdata"))
     
     
-    capa_variables_LTS <-capa_variables_LTS %>%  filter(LocNombre %in% c("TEUSAQUILLO","USAQUEN"))
+    capa_variables_LTS <-capa_variables_LTS %>%  filter(LocNombre %in% c("USAQUEN"))
     
 #Matriz de distancia metodo Gower----
     
   #Se normalizan las variables de la capa_variables_LTS 
     
-    capa_clusters<-st_set_geometry(capa_variables_LTS,NULL) %>% transmute(CicloRuta,SITP,Ancho=scale(as.matrix(capa_variables_LTS$Ancho)),Carriles=scale(as.matrix(capa_variables_LTS$Carriles)),
+    capa_clusters<-st_set_geometry(capa_variables_LTS,NULL) %>% transmute(Segregada,SITP,Direccion,Ancho=scale(as.matrix(capa_variables_LTS$Ancho)),Carriles=scale(as.matrix(capa_variables_LTS$Carriles)),
                    Velocidad=scale(as.matrix(capa_variables_LTS$Velocidad)),Congestion=scale(as.matrix(capa_variables_LTS$Congestion)),Densidad=scale(as.matrix(capa_variables_LTS$Densidad)),
                    Flujo=scale(as.matrix(capa_variables_LTS$Flujo))) 
     
   #Se define el tipo de cada variables as.factor o as.numeric
     
-    capa_clusters$CicloRuta<-as.factor(capa_clusters$CicloRuta)
+    capa_clusters$Segregada<-as.factor(capa_clusters$Segregada)
+    capa_clusters$Direccion<-as.factor(capa_clusters$Direccion)
     capa_clusters$SITP<-as.factor(capa_clusters$SITP)
     capa_clusters$Ancho<-as.numeric(capa_clusters$Ancho)
     capa_clusters$Carriles<-as.numeric(capa_clusters$Carriles)
