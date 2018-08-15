@@ -20,15 +20,6 @@
       
 #Procesamiento Capa Malla Vial----
     
-    capa_variables_LTS <- st_set_precision(capa_variables_LTS, precision = -1e-0001)
-    centroides_capa_variables_LTS <- st_centroid(capa_variables_LTS$geometry)
-    capa_variables_LTS <- capa_variables_LTS %>% st_split(st_combine(centroides_capa_variables_LTS)) %>% st_collection_extract( type = c("LINESTRING")) 
-    capa_variables_LTS <- capa_variables_LTS %>% mutate(ID=row_number())
-    
-    saveRDS(capa_variables_LTS,"Prueba")
-      
-    capa_variables_LTS <- st_set_precision(capa_variables_LTS, precision = 0)
-        
   #Se obtienen las coordenadas (Lat/Long) de punto inicial de cada segmento la capa_malla_vial
     
     coordenadas_incio_seg<-st_coordinates(capa_variables_LTS) %>% as_tibble()%>% group_by(L1)%>% filter(row_number()==1) %>% 
@@ -39,11 +30,14 @@
     
   #Se unen las dos trablas de coordenadas
     
-    coordenadas_malla_vial <- coordenadas_incio_seg %>% rbind(coordenadas_fin_seg) 
+    capa_Provisional_1<-capa_variables_LTS %>% transmute(ID,Velocidad)  %>% left_join(coordenadas_incio_seg, By=ID)
+    capa_Provisional_2<-capa_variables_LTS %>% transmute(ID,Velocidad)  %>% left_join(coordenadas_fin_seg, By=ID)
+    
+    coordenadas_malla_vial <- capa_Provisional_1%>% rbind(capa_Provisional_2) %>% st_set_geometry(NULL)
     
   #Se cuentan y agrupan los repetidos
     
-    intersecciones_malla_vial <- coordenadas_malla_vial %>% group_by(Latitud, Longitud) %>% summarise(count=n()) %>% filter(count>=4) %>% ungroup()
+    intersecciones_malla_vial <- coordenadas_malla_vial %>% group_by(Latitud, Longitud) %>% summarise(Numero_Intersecciones=n(),Cluster=max(Velocidad)) %>% filter(Numero_Intersecciones>=3) %>% ungroup()
 
   #Se genera la capa de intersecciones
     

@@ -22,14 +22,13 @@
     
   #Se normalizan las variables de la capa_variables_LTS 
     
-    capa_clusters<-st_set_geometry(capa_variables_LTS,NULL) %>% transmute(Segregada,SITP,Direccion,Ancho=scale(as.matrix(capa_variables_LTS$Ancho)),Carriles=scale(as.matrix(capa_variables_LTS$Carriles)),
+    capa_clusters<-st_set_geometry(capa_variables_LTS,NULL) %>% transmute(CicloRuta,SITP,Ancho=scale(as.matrix(capa_variables_LTS$Ancho)),Carriles=scale(as.matrix(capa_variables_LTS$Carriles)),
                    Velocidad=scale(as.matrix(capa_variables_LTS$Velocidad)),Congestion=scale(as.matrix(capa_variables_LTS$Congestion)),Densidad=scale(as.matrix(capa_variables_LTS$Densidad)),
                    Flujo=scale(as.matrix(capa_variables_LTS$Flujo))) 
     
   #Se define el tipo de cada variables as.factor o as.numeric
     
-    capa_clusters$Segregada<-as.factor(capa_clusters$Segregada)
-    capa_clusters$Direccion<-as.factor(capa_clusters$Direccion)
+    capa_clusters$CicloRuta<-as.factor(capa_clusters$CicloRuta)
     capa_clusters$SITP<-as.factor(capa_clusters$SITP)
     capa_clusters$Ancho<-as.numeric(capa_clusters$Ancho)
     capa_clusters$Carriles<-as.numeric(capa_clusters$Carriles)
@@ -72,7 +71,7 @@
      mapa<-tm_shape(capa_LTS_PAM)+tm_lines(col="clusters_PAM",style ="cat" ,scale=5 ,palette = "Accent" ,title.col ="Cluster", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
     mapa
     
-    mapa<-tm_shape(capa_LTS_PAM)+tm_lines(col="CicloRuta",style ="cat" ,scale=5 ,palette = "Accent" ,title.col ="Cluster", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
+    mapa<-tm_shape(capa_variables_LTS)+tm_lines(col="CicloRuta",style ="cat" ,scale=5 ,palette = "Accent" ,title.col ="Cluster", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
     mapa
     
    #capa_LTS_PAM$clusters_PAM <- ifelse(capa_LTS_PAM$clusters_PAM==3, 1, ifelse(capa_LTS_PAM$clusters_PAM==2, 2,ifelse(capa_LTS_PAM$clusters_PAM==4, 3,4)))
