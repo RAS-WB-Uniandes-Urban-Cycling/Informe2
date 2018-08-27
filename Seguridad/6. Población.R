@@ -8,6 +8,7 @@ pacman::p_load(tidyverse)
 pacman::p_load(gdata)
 pacman::p_load(readr)
 pacman::p_load(readxl)
+pacman::p_load(reshape2)
 
 # Carga de la función de codificación de la edad por grupos----
 load(paste(carpetaRAS,"/RESULTADOS/SEGURIDAD/Bases de datos/4. GruposEdadCodificacion.Rdata",sep=""))
@@ -91,5 +92,5 @@ rm(PoblacionTot,prop,est16_17)
 estimations$DEV_FROM_OF<-paste((estimations$POBLACION_prop-estimations$POBLACION)*100/estimations$POBLACION,"%")
 
 #Almacenamiento de resultados----
-write.csv(estimations,paste0(carpetaRAS,"/RESULTADOS/SEGURIDAD/Resultados/TABLAS/6. EstimacionesPoblacion2016_2017.csv"))
+write.csv(estimations,paste0(carpetaRAS,"/RESULTADOS/SEGURIDAD/TABLAS/6. EstimacionesPoblacion2016_2017.csv"))
 save(Poblacion,file=paste(carpetaRAS,"/RESULTADOS/SEGURIDAD/Bases de datos/6. Poblacion.Rdata",sep=""))

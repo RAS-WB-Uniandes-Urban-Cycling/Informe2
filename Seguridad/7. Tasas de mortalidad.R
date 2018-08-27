@@ -40,8 +40,6 @@ AccidentesBiciTotal<-AccidentesBiciTotal[,c("Sexo","Edad","Accidentes.Localidad"
 AccidentesBiciTotal<-AccidentesBiciTotal[AccidentesBiciTotal$Gravedad2=="Dead",]
 AccidentesBiciTotal$Gravedad2<-NULL
 AccidentesBiciTotal$Edad<-as.numeric(AccidentesBiciTotal$Edad)
-AccidentesBiciTotal$Sexo2<-factor(ifelse(AccidentesBiciTotal$Sexo=="FEMENINO","Female",ifelse(AccidentesBiciTotal$Sexo=="MASCULINO","Male",NA)))
-AccidentesBiciTotal$Sexo<-NULL
 AccidentesBiciTotal$Fecha<-as.POSIXct(paste(getYear(AccidentesBiciTotal$Accidentes.Fecha),getMonth(AccidentesBiciTotal$Accidentes.Fecha),1,sep="-"),format="%Y-%m-%e")
 AccidentesBiciTotal$Accidentes.Fecha<-NULL
 AccidentesBiciTotal$Accidentes.Localidad<-as.character(AccidentesBiciTotal$Accidentes.Localidad)
@@ -49,15 +47,21 @@ AccidentesBiciTotal$Accidentes.Localidad[AccidentesBiciTotal$Accidentes.Localida
 AccidentesBiciTotal$Accidentes.Localidad<-as.factor(AccidentesBiciTotal$Accidentes.Localidad)
 AccidentesBiciTotal<-na.omit(AccidentesBiciTotal)
 AccidentesBiciTotal$GR_EDAD<-as.factor(apply(as.data.frame(AccidentesBiciTotal$Edad),MARGIN=1,FUN=encodeEdad2,g=gruposEdad))
-names(AccidentesBiciTotal)<-c("EDAD","LOCALIDAD","SEXO","FECHA","GR_EDAD")
+names(AccidentesBiciTotal)<-c("SEXO","EDAD","LOCALIDAD","FECHA","GR_EDAD")
 
 #Pre-procesamiento de la base de datos de biciusuarios----
 biciusuarios$AÑO<-as.numeric(getYear(biciusuarios$FECHA))
 biciusuarios$FECHA<-NULL
 biciusuarios$BICIUSRS<-NULL
 
-####### Calculo de las tosas de mortalidad para toda bogota - estimado de poblacion oficial (Agregado)----
+#Eliminación del grupo de edad de 0-4 años por limitaciones de información----
+AccidentesBiciTotal<-AccidentesBiciTotal %>% filter(GR_EDAD!="0-4")
+Agregado<-Agregado %>% filter(GR_EDAD!="0-4")
+biciusuarios<-biciusuarios %>% filter(GR_EDAD!="0-4")
+Poblacion<-Poblacion %>% filter(GR_EDAD!="0-4")
+stndpop<-stndpop %>% filter(GR_EDAD!="0-4")
 
+####### Calculo de las tosas de mortalidad para toda bogota - estimado de poblacion oficial (Agregado)----
 # Lectura de las estimaciones de poblacion oficiales para bogota (Sexo y grupos de edad)
 Poblacion_NLOC<-read.csv(paste0(carpetaRAS,"/BASES DE DATOS/DANE/VisorCertificaPPO_Oct11_SinProtección.csv"),skip=2) #Base de datos nacional
 Poblacion_NLOC<-Poblacion_NLOC[Poblacion_NLOC$DPMP==11,1:251] #Filtrado para la ciudad de bogotá
@@ -73,6 +77,9 @@ Poblacion_NLOC$POBLACION<-as.numeric(gsub(",","",Poblacion_NLOC$POBLACION))
 Poblacion_NLOC$GR_EDAD<-factor(apply(as.data.frame(Poblacion_NLOC$EDAD),MARGIN=1,FUN=encodeEdad2,g=gruposEdad),levels = paste0(gruposEdad$ED_MIN,"-",gruposEdad$ED_MAX))
 Poblacion_NLOC<-aggregate(Poblacion_NLOC$POBLACION,by=list(Poblacion_NLOC$GR_EDAD,Poblacion_NLOC$ANO),FUN=sum)
 names(Poblacion_NLOC)<-c("GR_EDAD","AÑO","POBLACION")
+
+# Eliminación del grupo de edad 0-4 años por limitación de la información disponible
+Poblacion_NLOC<-Poblacion_NLOC[Poblacion_NLOC$GR_EDAD!="0-4",]
 
 # Consolidación de las muertes de biciusuarios por edad y por sexo
 AccidentesBiciTotal_NLOC<-aggregate(AccidentesBiciTotal$EDAD,by=list(AccidentesBiciTotal$GR_EDAD,AccidentesBiciTotal$FECHA),FUN=length)
@@ -201,6 +208,9 @@ Poblacion_NLOC$POBLACION<-as.numeric(gsub(",","",Poblacion_NLOC$POBLACION))
 Poblacion_NLOC$GR_EDAD<-factor(apply(as.data.frame(Poblacion_NLOC$EDAD),MARGIN=1,FUN=encodeEdad2,g=gruposEdad),levels = paste0(gruposEdad$ED_MIN,"-",gruposEdad$ED_MAX))
 Poblacion_NLOC<-aggregate(Poblacion_NLOC$POBLACION,by=list(Poblacion_NLOC$GR_EDAD,Poblacion_NLOC$SEXO,Poblacion_NLOC$ANO),FUN=sum)
 names(Poblacion_NLOC)<-c("GR_EDAD","SEXO","AÑO","POBLACION")
+
+# Eliminación del grupo de edad 0-4 años por limitación de la información disponible
+Poblacion_NLOC<-Poblacion_NLOC[Poblacion_NLOC$GR_EDAD!="0-4",]
 
 # Consolidación de las muertes de biciusuarios por edad y por sexo
 AccidentesBiciTotal_NLOC<-aggregate(AccidentesBiciTotal$EDAD,by=list(AccidentesBiciTotal$GR_EDAD,AccidentesBiciTotal$SEXO,AccidentesBiciTotal$FECHA),FUN=length)
@@ -367,7 +377,7 @@ WorkTable_localidad_of$CDRbic[is.infinite(WorkTable_localidad_of$CDRbic)]<-0
 WorkTable_localidad_of$SMRbic_bog<-WorkTable_localidad_of$MUERTES/WorkTable_localidad_of$Exp
 WorkTable_localidad_of$SMRbic_bog[is.nan(WorkTable_localidad_of$SMRbic_bog)]<-0
 WorkTable_localidad_of$SMRbic_bog[is.infinite(WorkTable_localidad_of$SMRbic_bog)]<-0
-WorkTable_localidad_of$IADRbic_bog<-WorkTable_localidad_of$CDRbog*WorkTable_localidad$SMR_of
+WorkTable_localidad_of$IADRbic_bog<-WorkTable_localidad_of$CDRbog*WorkTable_localidad_of$SMRbic_bog
 
 ####### Calculo de las tosas de mortalidad para toda bogota - estimado de población propuesto (Sexo - localidad)----
 
@@ -424,7 +434,7 @@ WorkTable_localidad_prop$CDRbic[is.infinite(WorkTable_localidad_prop$CDRbic)]<-0
 WorkTable_localidad_prop$SMRbic_bog<-WorkTable_localidad_prop$MUERTES/WorkTable_localidad_prop$Exp
 WorkTable_localidad_prop$SMRbic_bog[is.nan(WorkTable_localidad_prop$SMRbic_bog)]<-0
 WorkTable_localidad_prop$SMRbic_bog[is.infinite(WorkTable_localidad_prop$SMRbic_bog)]<-0
-WorkTable_localidad_prop$IADRbic_bog<-WorkTable_localidad_prop$CDRbog*WorkTable_localidad_prop$SMR
+WorkTable_localidad_prop$IADRbic_bog<-WorkTable_localidad_prop$CDRbog*WorkTable_localidad_prop$SMRbic_bog
 
 #Almacenamiento de las tasas de mortalidad----
 save(WorkTable_bogotaAg_of, WorkTable_bogotaAg_prop, 

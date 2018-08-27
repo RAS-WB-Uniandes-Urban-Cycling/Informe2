@@ -38,10 +38,10 @@ Agregado<-Agregado[Agregado$CAUSA_666==501|Agregado$CAUSA_666==502,]
 #Función para decodificar la edad de las defunciones----
 encodeEdad<-function(x){
   edad=NULL
-  if(x==0|x==1|x==2|x==3|x==4|x==5|x==6){edad=c(0,9)} #0
-  else if(x==7){edad=c(0,9)} #1
-  else if(x==8){edad=c(0,9)} #2-4
-  else if(x==9){edad=c(0,9)} #5-9
+  if(x==0|x==1|x==2|x==3|x==4|x==5|x==6){edad=c(0,4)} #0
+  else if(x==7){edad=c(0,4)} #1
+  else if(x==8){edad=c(0,4)} #2-4
+  else if(x==9){edad=c(5,9)}
   else if(x==10){edad=c(10,14)}
   else if(x==11){edad=c(15,19)}
   else if(x==12){edad=c(20,24)}
