@@ -57,5 +57,5 @@ rcic2019<-aggregate(rcic2019_add$LENGTH_GEO,by=list(rcic2019_add$FECHA,rcic2019_
 longCiclTime<-rbind(rcic2012,rcic2013,rcic2014,rcic2015,rcic2016,rcic2017,rcic2018,rcic2019)
 
 #Almacenamiento de resultados----
-write.csv(longCiclTime,paste0(carpetaRAS,"/RESULTADOS/SEGURIDAD/Resultados/TABLAS/8. lengthCiclTime.csv"))
+write.csv(longCiclTime,paste0(carpetaRAS,"/RESULTADOS/SEGURIDAD/TABLAS/8. lengthCiclTime.csv"))
 
