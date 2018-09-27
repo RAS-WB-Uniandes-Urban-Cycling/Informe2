@@ -10,11 +10,11 @@ library(circlize)
 
 ######## Heatmaps demanda#######
 # Carga de acap con ZATs, proyección en SRID 4326 longlat WGS84
-ZATs_sf <- st_read("Bases de datos/Bases/Bases.gdb",layer = "ZATs",stringsAsFactors = FALSE) %>% st_transform(4326) %>% 
+ZATs_sf <- st_read("Bases de datos/Bases.gdb",layer = "ZATs",stringsAsFactors = FALSE) %>% st_transform(4326) %>% 
   mutate(id = as.numeric(id),zona_num_n = as.numeric(zona_num_n)) %>% select(zona_num_n ) %>% filter(!st_is_empty(.))
 
 # Polígono zona Bogotá según IDECA quitanto Localidad de Sumapaz
-Loc <- st_read("Bases de datos/Bases/IDECA.gdb",layer = "Loca") %>% filter(LocNombre != "SUMAPAZ") %>% st_transform(4326)
+Loc <- st_read("Bases de datos/IDECA.gdb",layer = "Loca") %>% filter(LocNombre != "SUMAPAZ") %>% st_transform(4326)
 
 # Selección de ZATs dentro de región de Bogotá
 sel <- st_within(x = st_centroid(ZATs_sf), y = st_union(Loc), sparse = FALSE)
@@ -23,7 +23,7 @@ ZATLoc <- st_join(x = st_centroid(ZATBOG),y = select(Loc,LocCodigo,LocNombre)) %
 ZATBOG_df <- ZATBOG %>% left_join(ZATLoc) %>% `st_geometry<-`(NULL)
 
 # Matriz OD Multimodal
-ODZATMM <- read_xlsx("Bases de datos/Bases/EncuestaMovilidad2015/Matrices EODH/matriz_medio_pico_habil.xlsx",na = "0")
+ODZATMM <- read_xlsx("Bases de datos/EncuestaMovilidad2015/Matrices EODH/matriz_medio_pico_habil.xlsx",na = "0")
 ODZATMM[is.na(ODZATMM)] <- 0
 ODZATMM <- ODZATMM %>% filter(zat_origen %in% unique(ZATBOG$zona_num_n) & zat_destino %in% unique(ZATBOG$zona_num_n)) %>% 
   mutate(f_Total = select(.,starts_with("f_")) %>% rowSums())
