@@ -16,7 +16,7 @@
     load(paste0(ruta_resultados, "5-Variables_LTS.Rdata"))
     
     
-    capa_variables_LTS <-capa_variables_LTS %>%  filter(LocNombre %in% c("SUBA"))
+    capa_variables_LTS <-capa_variables_LTS %>%  filter(LocNombre %in% c("KENNEDY"))
     
 #Matriz de distancia metodo Gower----
     
@@ -66,7 +66,7 @@
     
     clusters_PAM <- as.data.frame(clusters_PAM$clustering) %>% transmute(clusters_PAM=clusters_PAM$clustering)
     
-    capa_LTS_PAM<- cbind.data.frame(capa_variables_LTS,clusters_PAM) %>% st_as_sf 
+    capa_LTS_PAM_Kennedy<- cbind.data.frame(capa_variables_LTS,clusters_PAM) %>% st_as_sf 
     
      mapa<-tm_shape(capa_LTS_PAM)+tm_lines(col="clusters_PAM",style ="cat" ,scale=5 ,palette = "Accent" ,title.col ="Cluster", popup.vars = TRUE)+tmap_mode("view")+tm_view(alpha = 1, basemaps = "OpenStreetMap.BlackAndWhite")
     mapa
@@ -78,7 +78,7 @@
     
   #Se guarda la Data (Resutados Clustering)
     
-    save(capa_LTS_PAM,file=paste0(ruta_resultados,"Resultados_Clustering_Suba.Rdata"))
+    save(capa_LTS_PAM_Kennedy,file=paste0(ruta_resultados,"Resultados_Clustering_Kennedy.Rdata"))
     
   #Se eliminan los datos que no se usaran  
     

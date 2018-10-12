@@ -1,0 +1,2 @@
+load("/Users/alejandropalacio/Desktop/Aplicacion/Data/Accidentes_LTS_Bogota.rds")
+load("/Users/alejandropalacio/Desktop/Aplicacion/Data/Intersecciones.rds")

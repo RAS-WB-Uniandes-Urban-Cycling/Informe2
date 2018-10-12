@@ -2,8 +2,8 @@
 
   #Ruta de los archivos
   
-    ruta_resultados <-"/Users/alejandropalacio/Universidad de Los Andes/German Augusto Carvajal Murcia - UNIANDES - RAS - SDM/RESULTADOS/PROPENSION/GEO-DATA/"
-      
+    ruta_resultados <-"/Users/alejandropalacio/Universidad de Los Andes/German Augusto Carvajal Murcia - UNIANDES - RAS - SDM/RESULTADOS/LTS/Bases de Datos/"
+
   #Librerías a utilizar
       
     library(nnet)
@@ -16,10 +16,11 @@
   #Se cargan los resultados
       
     load(paste0(ruta_resultados, "5-Variables_LTS.Rdata"))
-    load(paste0(ruta_resultados,"6-Resultados_Clustering.Rdata"))
+    load(paste0(ruta_resultados,"Capas Clustering LTS/Resultados_Clustering_Kennedy.Rdata"))
     
-      
 #Se almacena la capa_LTS_PAM en capa_variables_LTS_model    
+    
+    capa_LTS_PAM <- capa_LTS_PAM_Kennedy
     
     capa_LTS_PAM$clusters_PAM <-   as.numeric(capa_LTS_PAM$clusters_PAM)
 
@@ -74,12 +75,12 @@
     predicted=predict(logit_Multi,capa_variables_LTS,type="probs")
     predicted
     
-    Capa_Variables_Prediccion <- cbind(capa_variables_LTS,predicted)
+    Capa_Variables_Prediccion_Kennedy <- cbind(capa_variables_LTS,predicted)
 
 #Se guardan los resultados
 
     save(logit_Multi,file=paste0(ruta_resultados,"7-Modelo_Análisis_Estadístico_LTS.Rdata"))
-    save(Capa_Variables_Prediccion,file=paste0(ruta_resultados,"8-Capa_Predicción_LTS_Logit.Rdata"))
+    save(Capa_Variables_Prediccion_Kennedy,file=paste0(ruta_resultados,"Capa_Predicción_LTS_Logit_Kennedy.Rdata"))
     saveRDS(Capa_Variables_Prediccion,"LTS_Bogota.rds")
     save(capa_variables_LTS_model,file=paste0(ruta_resultados,"Capa_Calculo_Logit.Rdata"))
     

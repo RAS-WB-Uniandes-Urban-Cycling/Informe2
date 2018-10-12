@@ -1,0 +1,13 @@
+name: Aplicacion
+title: Aplicacion
+username:
+account: apalacio10
+server: shinyapps.io
+hostUrl: https://api.shinyapps.io/v1
+appId: 392862
+bundleId: 1583339
+url: https://apalacio10.shinyapps.io/Aplicacion/
+when: 1536822185.76918
+asMultiple: FALSE
+asStatic: FALSE
+ignoredFiles: .RData
