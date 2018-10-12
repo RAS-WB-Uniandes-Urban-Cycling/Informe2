@@ -1,4 +1,4 @@
-# Recodificación de variables encuesta movilidad 2015
+# Recodificaci?n de variables encuesta movilidad 2015
 library(tidyverse)
 library(sf)
 library(mlr)
@@ -73,7 +73,7 @@ CommutingTrips <- Personas %>% filter(edad>=14)%>%
   # Filter missings after imputation
   filter(!is.na(latitud_origen),!is.na(longitud_origen),!is.na(latitud_destino),!is.na(longitud_destino)) %>% 
   # Filter for people living in Bogota
-  inner_join(Encuesta %>% filter(municipio == "BOGOTA-DC 11001"),by = c("id_encuesta")) 
+  inner_join(Encuesta %>% filter(municipio == "BOGOTA-DC 11001"),by = c("id_encuesta")) %>% 
 
 desireLines <- CommutingTrips %>% rowwise() %>% 
   mutate(geometry = st_sfc(st_linestring(rbind(c(longitud_origen,latitud_origen),c(longitud_destino,latitud_destino))))) %>% 
@@ -81,28 +81,23 @@ desireLines <- CommutingTrips %>% rowwise() %>%
 
 routes <- line2route(desireLines,"route_osrm",l_id = "id",osrmurl = "http://localhost:5000/",profile = "biking")
 
-source("./mabr.R")
+source("PropensiÃ³n/mabr.R") #Minimum area bounding rectangle function
 
-buffer_origen <- CommutingTrips %>% select(id_encuesta,numero_persona,numero_viaje,longitud_origen,latitud_origen) %>% st_as_sf(coords = c("longitud_origen","latitud_origen"),crs = 4326) %>% 
+CommutingTrips <- inner_join(separate(routes,id,into = c("id_encuesta","numero_persona","numero_viaje"),convert = T),CommutingTrips) %>% 
+  dplyr::filter(distance > 0)
+
+buffer_origen <- CommutingTrips %>% st_set_geometry(NULL) %>% select(id_encuesta,numero_persona,numero_viaje,longitud_origen,latitud_origen) %>% st_as_sf(coords = c("longitud_origen","latitud_origen"),crs = 4326) %>% 
   st_transform(3116) %>% st_buffer(dist = units::set_units(500,m)) %>% mutate(Area = as.numeric(units::set_units(st_area(.),"km^2"))) %>% st_transform(4326)
-buffer_destino <- CommutingTrips %>% select(id_encuesta,numero_persona,numero_viaje,longitud_destino,latitud_destino) %>% st_as_sf(coords = c("longitud_destino","latitud_destino"),crs = 4326) %>% 
+buffer_destino <- CommutingTrips %>% st_set_geometry(NULL) %>% select(id_encuesta,numero_persona,numero_viaje,longitud_destino,latitud_destino) %>% st_as_sf(coords = c("longitud_destino","latitud_destino"),crs = 4326) %>% 
   st_transform(3116) %>% st_buffer(dist = units::set_units(500,m))%>% mutate(Area = as.numeric(units::set_units(st_area(.),"km^2"))) %>% st_transform(4326)
-buffer_ruta <- separate(routes,id,into = c("id_encuesta","numero_persona","numero_viaje"),convert = T) %>% select(-error) %>% mabr() %>% mutate(Area = as.numeric(units::set_units(st_area(.),"km^2")))
+buffer_ruta <- CommutingTrips %>% select(id_encuesta,numero_persona,numero_viaje)%>% mabr() %>% mutate(Area = as.numeric(units::set_units(st_area(.),"km^2")))
 
-
-CR <- inner_join(separate(routes,id,into = c("id_encuesta","numero_persona","numero_viaje"),convert = T),CommutingTrips)
-
-Individuo <- CR %>% st_set_geometry(NULL) %>% group_by(id_encuesta,numero_persona,BicycleCommuting,sexo,ageRank,economic_activity,socioeconomic_status,MotorizedVehicles,license) %>% summarise(age = mean (edad),AvgDistance = mean (distance))
+Individuo <- CommutingTrips %>% st_set_geometry(NULL) %>% group_by(id_encuesta,numero_persona,BicycleCommuting,sexo,ageRank,economic_activity,socioeconomic_status,MotorizedVehicles,license) %>% summarise(age = mean (edad),AvgDistance = mean (distance))
 
 plot(select(left_join(separate(routes,id,into = c("id_encuesta","numero_persona","numero_viaje"),convert = T),CommutingTrips),BicycleCommuting))
 
-
-a <- filter(CR,BicycleCommuting == T)
-sum(routes$distance*a$ponderador_calibrado_viajes,na.rm = T)
-
-CommutingTrips %>% filter(is.na(latitud_origen),is.na(longitud_origen),is.na(latitud_destino),is.na(longitud_destino)) %>%glimpse()
-
-capa_LTS <- Capa_Variables_Prediccion %>% st_as_sf() %>% mutate(Cluster=ifelse(X4>=0.5,1,ifelse(X3>=0.5,2,ifelse(X2>=0.5,3,4))))
+BicycleCommuters <- filter(CR,BicycleCommuting == T)
+sum(BicycleCommuters$distance*BicycleCommuters$ponderador_calibrado_viajes,na.rm = T)
 
 #### Accidentes ####
 load(paste0(path,"RESULTADOS/SEGURIDAD/Bases de datos/3. AccidentesBiciTotalGeoData.Rdata"))
@@ -178,7 +173,12 @@ BP_ruta <- capa_BP %>% st_join(buffer_ruta,left = FALSE,largest = FALSE) %>% st_
   summarise(NCPark = n())
 
 #### LTS ####
-load(paste0(path, "RESULTADOS/LTS/Bases de Datos/8-Capa_Predicción_LTS_Logit.Rdata"))
+load(paste0(path, "RESULTADOS/LTS/Bases de Datos/8-Capa_PredicciÃ³n_LTS_Logit.Rdata"))
+LTS_origen <- LTS_origen %>% select(id_encuesta,numero_persona,numero_viaje,LTS1=`LTS 1`,LTS2=`LTS 2`,LTS3=`LTS 3`,LTS4=`LTS 4`)
+LTS_destino <- LTS_destino %>% select(id_encuesta,numero_persona,numero_viaje,LTS1=`LTS 1`,LTS2=`LTS 2`,LTS3=`LTS 3`,LTS4=`LTS 4`)
+LTS_ruta <- LTS_ruta %>% select(id_encuesta,numero_persona,numero_viaje,LTS1=`LTS 1`,LTS2=`LTS 2`,LTS3=`LTS 3`,LTS4=`LTS 4`)
+
+capa_LTS <- Capa_Variables_Prediccion %>% st_as_sf() %>% mutate(Cluster=ifelse(X4>=0.5,1,ifelse(X3>=0.5,2,ifelse(X2>=0.5,3,4))))
 
 # Origen
 t <- Sys.time()
@@ -261,7 +261,7 @@ Sys.time()-t
 #### Pendiente ####
 load(paste0(path,"RESULTADOS/PROPENSION/GEO-DATA/Slopes.RData"))
 
-#### Índice de Entropía de uso del suelo ####
+#### ?ndice de Entrop?a de uso del suelo ####
 cat_usos <- read_csv(paste0(path,"BASES DE DATOS/Mapas de Referencia IDECA/UsosLote.csv"),locale = locale(encoding = stringi::stri_enc_get()))
 usos_lote <- read_sf(paste0(path,"BASES DE DATOS/Mapas de Referencia IDECA/MR0318.gdb"),layer = "Uso",stringsAsFactors = FALSE)
 capa_lote <- read_sf(paste0(path,"BASES DE DATOS/Mapas de Referencia IDECA/MR0318.gdb"),layer = "Lote",type = 3,stringsAsFactors = FALSE) %>% st_transform(4326) %>% 
@@ -280,14 +280,19 @@ entropy_destino <- capa_lote %>% st_join(buffer_origen[1:10,]) %>%
   mutate(Prop=UsoArea/sum(UsoArea),entropyIndex=-Prop*log(Prop)/log(n())) %>% summarise_at("entropyIndex",sum)
 Sys.time()-t
 
+load(paste0(path,"RESULTADOS/PROPENSION/GEO-DATA/Entropy_Index.RData"))
+
+#### TOI
+load(paste0(path,"RESULTADOS/PROPENSION/GEO-DATA/TOI.RData"))
+
 #### Datasets ####
-Individual <- select(CommutingTrips,id_encuesta,numero_persona,numero_viaje,BicycleCommuting,sex=sexo,age=edad,ageRank,license,economic_activity,socioeconomic_status,motorized_vehicles=MotorizedVehicles) %>% replace(.,is.na(.),FALSE)
-Environmental_O <-  CR %>%  st_set_geometry(NULL) %>% select(id_encuesta,numero_persona,numero_viaje,distance) %>% left_join(buffer_origen %>% st_set_geometry(NULL)) %>%  left_join(Accidentes_origen) %>% left_join(SiTP_origen) %>% 
-  left_join(TM_origen) %>% left_join(BP_origen) %>% left_join(CiclR_origen) %>% left_join(LTS_origen) %>% left_join(slope_origen) %>% replace(.,is.na(.),0)
-Environmental_D <-  CR %>% st_set_geometry(NULL) %>% select(id_encuesta,numero_persona,numero_viaje,distance) %>% left_join(buffer_destino %>% st_set_geometry(NULL)) %>% left_join(Accidentes_destino) %>% left_join(SiTP_destino) %>% 
-  left_join(TM_destino) %>% left_join(BP_destino) %>% left_join(CiclR_destino) %>% left_join(LTS_destino) %>% left_join(slope_destino) %>% replace(.,is.na(.),0)
-Environmental_R <-  CR %>% st_set_geometry(NULL) %>% select(id_encuesta,numero_persona,numero_viaje,distance) %>% left_join(buffer_ruta %>% st_set_geometry(NULL)) %>% left_join(Accidentes_ruta) %>% left_join(SiTP_ruta) %>% 
-  left_join(TM_ruta) %>% left_join(BP_ruta) %>% left_join(CiclR_ruta) %>% left_join(LTS_ruta) %>% left_join(slope_ruta) %>% replace(.,is.na(.),0)
+Individual <- CommutingTrips %>% st_set_geometry(NULL) %>% select(id_encuesta,numero_persona,numero_viaje,BicycleCommuting,sex=sexo,age=edad,ageRank,license,economic_activity,socioeconomic_status,motorized_vehicles=MotorizedVehicles) %>% replace(.,is.na(.),FALSE)
+Environmental_O <-  CommutingTrips %>%  st_set_geometry(NULL) %>% select(id_encuesta,numero_persona,numero_viaje,distance) %>% left_join(buffer_origen %>% st_set_geometry(NULL)) %>%  left_join(Accidentes_origen) %>% left_join(SiTP_origen) %>% 
+  left_join(TM_origen) %>% left_join(BP_origen) %>% left_join(CiclR_origen) %>% left_join(LTS_origen) %>% left_join(slope_origen) %>% left_join(entropy_origen) %>% replace(.,is.na(.),0)
+Environmental_D <-  CommutingTrips %>% st_set_geometry(NULL) %>% select(id_encuesta,numero_persona,numero_viaje,distance) %>% left_join(buffer_destino %>% st_set_geometry(NULL)) %>% left_join(Accidentes_destino) %>% left_join(SiTP_destino) %>% 
+  left_join(TM_destino) %>% left_join(BP_destino) %>% left_join(CiclR_destino) %>% left_join(LTS_destino) %>% left_join(slope_destino) %>% left_join(entropy_destino) %>% replace(.,is.na(.),0)
+Environmental_R <-  CommutingTrips %>% st_set_geometry(NULL) %>% select(id_encuesta,numero_persona,numero_viaje,distance) %>% left_join(buffer_ruta %>% st_set_geometry(NULL)) %>% left_join(Accidentes_ruta) %>% left_join(SiTP_ruta) %>% 
+  left_join(TM_ruta) %>% left_join(BP_ruta) %>% left_join(CiclR_ruta) %>% left_join(LTS_ruta) %>% left_join(slope_ruta) %>% left_join(TOI) %>% replace(.,is.na(.),0)
 
 Data <- Individual %>% left_join(Environmental_O,by=c("id_encuesta","numero_persona","numero_viaje")) %>% 
   left_join(Environmental_D,by=c("id_encuesta","numero_persona","numero_viaje"),suffix = c(".O", ".D")) %>% 
@@ -297,60 +302,13 @@ Data <- Individual %>% left_join(Environmental_O,by=c("id_encuesta","numero_pers
          NSiTP = NSiTP/distance,
          NTM = NTM/distance,
          NCPark = NCPark/distance,
-         CiclR = CiclR/distance,
+         CiclR.O = CiclR.O/1000,
+         CiclR.D = CiclR.D/1000,
+         CiclR = CiclR/1000,
+         Avgslope.O = tan(Avgslope.O*pi/180)*100,
+         Avgslope.D = tan(Avgslope.D*pi/180)*100,
+         Avgslope = tan(Avgslope*pi/180)*100,
          sex=factor(sex,levels = c("Hombre","Mujer")),
          license=factor(license,levels = c("No license","Motorcycle","Other vehicles")),
          economic_activity=factor(economic_activity,levels = c("Student","Employed","Other")),
-         socioeconomic_status=factor(socioeconomic_status,levels = c("Low","Middle","High")),
-         LTS1.O = `LTS 1.O`, LTS1.D = `LTS 1.D`, LTS1 = `LTS 1`,
-         LTS2.O = `LTS 2.O`, LTS2.D = `LTS 2.D`, LTS2 = `LTS 2`,
-         LTS3.O = `LTS 3.O`, LTS3.D = `LTS 3.D`, LTS3 = `LTS 3`,
-         LTS4.O = `LTS 4.O`, LTS4.D = `LTS 4.D`, LTS4 = `LTS 4`)
-DataI <- Individuo %>% ungroup()%>% 
-  mutate(sexo=factor(sexo,levels = c("Hombre","Mujer")),
-         license=factor(license,levels = c("No license","Motorcycle","Other vehicles")),
-         economic_activity=factor(economic_activity,levels = c("Student","Employed","Other")),
          socioeconomic_status=factor(socioeconomic_status,levels = c("Low","Middle","High")))
-
-fit <- glm(BicycleCommuting ~ AvgSlope, family = "binomial",data = DataI)
-cbind(broom::tidy(fit),broom::confint_tidy(fit))
-
-fit <- glm(BicycleCommuting ~ sexo + age + license + economic_activity + 
-             socioeconomic_status + MotorizedVehicles + AvgDistance, family = "binomial",data = DataI)
-cbind(broom::tidy(fit),broom::confint_tidy(fit))
-
-fitT <- glm(BicycleCommuting ~ sexo + age + license + economic_activity + 
-              socioeconomic_status + MotorizedVehicles + AvgDistance +
-              , family = "binomial",data = Data)
-summary(fitT)
-
-fit <- glm(BicycleCommuting ~ distance, family = "binomial",data = Data)
-cbind(exp(cbind(coef(fit), confint(fit))) ,coef(summary(fit))[,4])
-ggplot(Data,aes(x = NSiTP.O,y = as.numeric(BicycleCommuting),color = sex, fill = sex)) + 
-  stat_smooth(aes(linetype = "loess"),method = "loess", formula = y~x, alpha = 0.2) +
-  stat_smooth(aes(linetype = "logit"),method = "glm", method.args = list(family = "binomial"), formula = y~x, alpha = 0.2) +
-  #geom_point(alpha = 0.3,position = position_jitter(height = 0.03, width = 0))+
-  scale_color_manual(labels = c("Male", "Female"), values = c("blue", "red"))+
-  scale_fill_manual(labels = c("Male", "Female"), values = c("blue", "red"))+
-  scale_linetype_manual(name = "Fit Type", values = c(1, 3))+
-  labs(x=varX,y="Bycycle Commuting",title = "Route buffer")+
-  theme_light()
-
-
-cbind(broom::tidy(fit),broom::confint_tidy(fit))
-
-
-fit <- glm(BicycleCommuting ~ NAccidentes.O + NSiTP.O + NTM.O + NCPark.O + CiclR.O +
-             `LTS 1.O` + `LTS 2.O` + `LTS 3.O` + `LTS 4.O` + Avgslope.O,
-           family = "binomial",data = Data)
-cbind(exp(cbind(coef(fit), confint(fit))) ,coef(summary(fit))[,4])
-
-fit <- glm(BicycleCommuting ~ NAccidentes.D + NSiTP.D + NTM.D + NCPark.D + CiclR.D +
-             `LTS 1.D` + `LTS 2.D` + `LTS 3.D` + `LTS 4.D` + Avgslope.D,
-           family = "binomial",data = Data)
-cbind(exp(cbind(coef(fit), confint(fit))) ,coef(summary(fit))[,4])
-
-fit <- glm(BicycleCommuting ~ NAccidentes + NSiTP + NTM + NCPark + CiclR +
-             `LTS 1` + `LTS 2` + `LTS 3` + `LTS 4` + Avgslope + distance,
-           family = "binomial",data = Data)
-cbind(exp(cbind(coef(fit), confint(fit))) ,coef(summary(fit))[,4])
