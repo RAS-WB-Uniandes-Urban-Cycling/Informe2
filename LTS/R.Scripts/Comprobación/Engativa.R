@@ -174,7 +174,7 @@
     capa_cluster_Engativa <- capa_LTS_Localidad[ , !(names(capa_LTS_Localidad) %in% c("ID","LocNombre","Segregada","Direccion","Cluster"))] 
     capa_cluster_Engativa<- capa_cluster_Engativa %>% st_set_geometry(NULL)
     
-    save(capa_cluster_Engativa,file=paste0(ruta_resultados,"Resultados_Clustering_Engativa.Rdata"))
+    save(capa_cluster_Engativa,file=paste0(ruta_resultados,"Capas Clustering LTS/Resultados_Clustering_Engativa.Rdata"))
     
     #Se obtienen las coordenadas (Lat/Long) de punto inicial de cada segmento la capa_malla_vial
     
@@ -273,7 +273,7 @@
     capa_regresion_Engativa <- capa_variables_LTS_Final[ , !(names(capa_LTS_Localidad) %in% c("ID","Segregada","Direccion","Cluster","X1","X2","X3","X4","Distancia"))] 
     capa_regresion_Engativa<- capa_regresion_Engativa %>% st_set_geometry(NULL)
     
-    save(capa_regresion_Engativa,file=paste0(ruta_resultados,"Resultados_Regresion_Engativa.Rdata"))
+    save(capa_regresion_Engativa,file=paste0(ruta_resultados,"Capas Prediccion LTS Logit/Resultados_Regresion_Engativa.Rdata"))
   
 #Grafica radar capa completa----
     
