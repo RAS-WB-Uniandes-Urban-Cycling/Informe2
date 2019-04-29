@@ -5,9 +5,9 @@ account: apalacio10
 server: shinyapps.io
 hostUrl: https://api.shinyapps.io/v1
 appId: 392862
-bundleId: 1583339
+bundleId: 1661390
 url: https://apalacio10.shinyapps.io/Aplicacion/
-when: 1536822185.76918
+when: 1540420965.29689
 asMultiple: FALSE
 asStatic: FALSE
 ignoredFiles: .RData
