@@ -15,20 +15,19 @@ pacman::p_load(ggnewscale)
 pacman::p_load(colorspace)
 pacman::p_load(ggpubr)
 pacman::p_load(showtext)
+pacman::p_load(pals)
 font_add("Helvetica Light",paste(gitRAS,"/Seguridad/Helvetica Light.ttf",sep=""))
 setwd(paste(carpetaRAS,"/RESULTADOS/SEGURIDAD/Resultados-Inglés",sep=""))
-cmHeight<-7
-cmWidth<-10
 registerDoMC(4)
 
 #Carga de la base de datos de viajes realizados----
 load(paste0(carpetaRAS,"/RESULTADOS/SEGURIDAD/Bases de datos/10.5 Viajes_Recorridos.Rdata"))
 viajesRecorridos<-viajesRecorridos %>% st_transform(crs=3116) %>% st_make_valid
 
-#Creación de la lista de almacenamiento de resultados
+#Creación de la lista de almacenamiento de resultados----
 results<-list(NA)
 
-#Splitting de segmentos para el año 2011
+#Splitting de segmentos para el año 2011----
 i=11
 UPZ<-st_read(paste0(carpetaRAS,"/BASES DE DATOS/Mapas de Referencia IDECA/MR10",i,".gdb"),layer="UPla") %>% 
   st_transform(crs=4326) %>% 
@@ -39,7 +38,7 @@ results[i-10] <- list(st_split(A, st_combine(BB)) %>% st_collection_extract( typ
 results[i-10]<-list(results[[i-10]] %>% mutate(Year=2000+i))
 rm(A,BB)
 
-#Spliting de segmentos para los años 2012-2017
+#Spliting de segmentos para los años 2012-2017----
 Resultados<-foreach(i=12:17) %dopar% {
   UPZ<-st_read(paste0(carpetaRAS,"/BASES DE DATOS/Mapas de Referencia IDECA/MR12",i,".gdb"),layer='UPla', stringsAsFactors = FALSE) %>% 
     st_transform(crs=4326) %>% 
@@ -74,16 +73,17 @@ for(i in 12:17){
 }
 rm(UPZ,i)
 
-#Consolidación de resultados en una única tabla
+#Consolidación de resultados en una única tabla----
 Table<-do.call("rbind",Resultados)
 Table<-rbind(Table,results[[1]])
 Table$Km<-as.numeric(st_length(Table)/1000)
 rm(Resultados,results,viajesRecorridos)
 
-#Almacenamiento de resultados
+#Almacenamiento de resultados----
 save(Table,file = paste0(carpetaRAS,"/RESULTADOS/SEGURIDAD/Bases de datos/15.  Kilometros_Ruta por UPZ.Rdata"))
 
-#Mapa explicativo del procedimiento
+#Mapa explicativo del procedimiento----
+load(paste0(carpetaRAS,"/RESULTADOS/SEGURIDAD/Bases de datos/15.  Kilometros_Ruta por UPZ.Rdata"))
 zat <- st_read(paste0(carpetaRAS,"/BASES DE DATOs/ZATs")) %>% 
   st_transform(crs=4326) %>% 
   st_transform(crs=3116)
@@ -153,7 +153,7 @@ map2 <- ggplot() +
           mapping = aes(fill = caracter),
           lwd = 0) +
   geom_sf(data = plotting_route_original,
-          lwd = 0.4,
+          lwd = 1,
           color = "blue") +
   annotation_scale(location = "bl", 
                    width_hint = 0.4) +
@@ -216,7 +216,7 @@ map3 <- ggplot() +
                     name = "ZAT") +
   geom_sf(data = plotting_route_split,
           mapping = aes(colour = UPlCodigo),
-          lwd = 1.5,
+          lwd = 1,
           show.legend = F) +
   scale_color_manual(values = darken(segment_colors, 0.2)) +
   annotation_scale(location = "bl", 
@@ -233,7 +233,7 @@ map3 <- ggplot() +
                                         size = 0.2), 
         panel.background = element_rect(fill = alpha("forestgreen", 0.2)))
 
-pdf("./GRAFICOS/UPZ_distribution_process.pdf",width = cmWidth, height = cmHeight*1.2)
+pdf("./GRAFICOS/UPZ_distribution_process.pdf",width = 11, height = 6)
 showtext_begin()
 print(
   ggarrange(map1, map2, map3, labels=c("A","B","C"),common.legend = TRUE,legend = "bottom",ncol = 3)

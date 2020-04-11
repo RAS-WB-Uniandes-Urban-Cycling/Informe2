@@ -22,6 +22,7 @@ font_add("Helvetica Light",paste(gitRAS,"/Seguridad/Helvetica Light.ttf",sep="")
 setwd(paste(carpetaRAS,"/RESULTADOS/SEGURIDAD/Resultados-Inglés",sep=""))
 cmHeight<-7
 cmWidth<-10
+capture.output(now() %>% as.character(), file = "./GRAFICOS/estadisticas.txt")
 
 #Leer bases de datos preprocesada----
 load(paste0(carpetaRAS,"/RESULTADOS/SEGURIDAD/Bases de datos/3. AccidentesBiciTotalGeoData.Rdata"))
@@ -642,7 +643,28 @@ aux <- AccidentesBiciTotal %>%
          Group.1 = getYear(Accidentes.Fecha)) %>%
   left_join(aggregate(biciusuarios$BICIUSRSINT,by=list(getYear(biciusuarios$FECHA)),FUN=sum) %>% 
               rename(BICIUSRS=x), by="Group.1") %>% 
-  mutate(Group.1=as.Date(paste0(Group.1,"-01-01")),EstanBici=x*1000/BICIUSRS) %>% 
+  mutate(Group.1=as.Date(paste0(Group.1,"-01-01")),EstanBici=x*1000/BICIUSRS) %>% {
+    data <- .
+    
+    capture.output({
+      suppressWarnings({
+        print("Biciusurios - total - Dead")
+        data %>% 
+          filter(year(Accidentes.Fecha) %in% c(2011, 2017),
+                 Gravedad2 == "Dead") %>% 
+          t.test(EstanBici~Group.1, data = .) %>% 
+          print()
+        print("Biciusurios - total - Not Dead")
+        data %>% 
+          filter(year(Accidentes.Fecha) %in% c(2011, 2017),
+                 Gravedad2 == "Not Dead") %>% 
+          t.test(EstanBici~Group.1, data = .) %>% 
+          print()
+      })
+    }, file = "./GRAFICOS/estadisticas.txt", append = T)
+    
+    data
+  } %>% 
   group_by(Group.1 = floor_date(Accidentes.Fecha, unit = "year"),
            Group.2 = Gravedad2) %>% 
   summarise(n = n(),
@@ -654,21 +676,15 @@ aux <- AccidentesBiciTotal %>%
          sd_EstanBici = NULL) %>% 
   ungroup() %>% 
   as.data.frame() %>% 
-  reshape(idvar = "Group.1", timevar = "Group.2", direction= "wide") %>% 
-  mutate(lab.Dead = ifelse(year(Group.1) %in% c(2011, 2017),
-                           paste0("(", sprintf('%.3f', pmax(lwr.Dead, 0)),", ", sprintf('%.3f', upr.Dead),")"),
-                           NA),
-         `lab.Not Dead` = ifelse(year(Group.1) %in% c(2011, 2017),
-                                 paste0("(", sprintf('%.3f', pmax(`lwr.Not Dead`, 0)),", ", sprintf('%.3f', `upr.Not Dead`),")"),
-                                 NA))
+  reshape(idvar = "Group.1", timevar = "Group.2", direction= "wide")
 
 graph11_2 <- ggplot(data = aux, aes(x=Group.1)) + xlab("Year") + scale_x_date(date_labels = "%Y")+
   geom_point(aes(y = EstanBici.Dead,colour="Dead"),show.legend = FALSE) +
   geom_errorbar(aes(ymin = lwr.Dead,ymax=upr.Dead,colour="Dead"),show.legend = FALSE) +
-  geom_text(aes(y = upr.Dead,label=lab.Dead),size=3,vjust=-1,family="Helvetica Light",show.legend = FALSE) +
+  geom_text(aes(y = upr.Dead,label=sprintf('%.3f',EstanBici.Dead)),size=3,vjust=-1,family="Helvetica Light",show.legend = FALSE) +
   geom_point(aes(y = `EstanBici.Not Dead`,colour="Not Dead"),show.legend = TRUE) + 
   geom_errorbar(aes(ymin = `lwr.Not Dead`,ymax=`upr.Not Dead`,colour="Not Dead"),show.legend = FALSE) + ylab("Bicyclists’ collisions per 1,000 bicyclists")+
-  geom_text(aes(y = `upr.Not Dead`,label=`lab.Not Dead`),size=3,vjust=-1,family="Helvetica Light",show.legend = FALSE)+
+  geom_text(aes(y = `upr.Not Dead`,label=sprintf('%.3f',`EstanBici.Not Dead`)),size=3,vjust=-1,family="Helvetica Light",show.legend = FALSE)+
   scale_colour_manual(breaks=c("Dead","Not Dead"),values = c("orangered3","navy"),labels=c("Fatal","Nonfatal"))+
   scale_linetype_manual(breaks=c("Tipo1","Tipo2"),values=c(1,3),labels=c("Fatal","Nonfatal"))+labs(colour="",linetype="")+
   scale_y_continuous(expand = expand_scale(mult = 0.2)) +
@@ -726,7 +742,28 @@ aux <- AccidentesBiciTotal %>%
          Group.1 = getYear(Accidentes.Fecha)) %>%
   left_join(aggregate(viajes$DIST_TOTAL_KMINT,by=list(viajes$AÑO),FUN=sum) %>% 
               rename(KM=x), by="Group.1") %>% 
-  mutate(Group.1=as.Date(paste0(Group.1,"-01-01")),EstanKm=x*1000000/KM) %>% 
+  mutate(Group.1=as.Date(paste0(Group.1,"-01-01")),EstanKm=x*1000000/KM) %>% {
+    data <- .
+    
+    capture.output({
+      suppressWarnings({
+        print("VKmT - total - Dead")
+        data %>% 
+          filter(year(Accidentes.Fecha) %in% c(2011, 2017),
+                 Gravedad2 == "Dead") %>% 
+          t.test(EstanKm~Group.1, data = .) %>% 
+          print()
+        print("VKmT - total - Not Dead")
+        data %>% 
+          filter(year(Accidentes.Fecha) %in% c(2011, 2017),
+                 Gravedad2 == "Not Dead") %>% 
+          t.test(EstanKm~Group.1, data = .) %>% 
+          print()
+      })
+    }, file = "./GRAFICOS/estadisticas.txt", append = T)
+    
+    data
+  } %>% 
   group_by(Group.1 = floor_date(Accidentes.Fecha, unit = "year"),
            Group.2 = Gravedad2) %>% 
   summarise(n = n(),
@@ -738,21 +775,15 @@ aux <- AccidentesBiciTotal %>%
          sd_EstanKm = NULL) %>% 
   ungroup() %>% 
   as.data.frame() %>% 
-  reshape(idvar = "Group.1", timevar = "Group.2", direction= "wide") %>% 
-  mutate(lab.Dead = ifelse(year(Group.1) %in% c(2011, 2017),
-                           paste0("(", sprintf('%.3f', pmax(lwr.Dead, 0)),", ", sprintf('%.3f', upr.Dead),")"),
-                           NA),
-         `lab.Not Dead` = ifelse(year(Group.1) %in% c(2011, 2017),
-                                 paste0("(", sprintf('%.3f', pmax(`lwr.Not Dead`, 0)),", ", sprintf('%.3f', `upr.Not Dead`),")"),
-                                 NA))
+  reshape(idvar = "Group.1", timevar = "Group.2", direction= "wide")
 
 graph21_2 <- ggplot(data = aux, aes(x=Group.1)) + xlab("Year") + scale_x_date(date_labels = "%Y")+
   geom_point(aes(y = EstanKm.Dead,colour="Dead"),show.legend = FALSE) +
   geom_errorbar(aes(ymin = lwr.Dead,ymax=upr.Dead,colour="Dead"),show.legend = FALSE) +
-  geom_text(aes(y = upr.Dead,label=lab.Dead),size=3,vjust=-1,family="Helvetica Light",show.legend = FALSE) +
+  geom_text(aes(y = upr.Dead,label=sprintf('%.3f', EstanKm.Dead)),size=3,vjust=-1,family="Helvetica Light",show.legend = FALSE) +
   geom_point(aes(y = `EstanKm.Not Dead`,colour="Not Dead"),show.legend = TRUE) + 
   geom_errorbar(aes(ymin = `lwr.Not Dead`,ymax=`upr.Not Dead`,colour="Not Dead"),show.legend = FALSE) + ylab("Bicyclists’ collisions per million VKmT") +
-  geom_text(aes(y = `upr.Not Dead`,label=`lab.Not Dead`),size=3,vjust=-1,family="Helvetica Light",show.legend = FALSE)+
+  geom_text(aes(y = `upr.Not Dead`,label=sprintf('%.3f', `EstanKm.Not Dead`)),size=3,vjust=-1,family="Helvetica Light",show.legend = FALSE)+
   scale_colour_manual(breaks=c("Dead","Not Dead"),values = c("orangered3","navy"),labels=c("Fatal","Nonfatal"))+
   scale_linetype_manual(breaks=c("Tipo1","Tipo2"),values=c(1,3),labels=c("Fatal","Nonfatal"))+labs(colour="",linetype="")+
   scale_y_continuous(expand = expand_scale(mult = 0.2)) +
@@ -905,7 +936,44 @@ aux <- AccidentesBiciTotal %>%
          Group.1 = getYear(Accidentes.Fecha)) %>%
   left_join(aggregate(biciusuarios$BICIUSRSINT,by=list(getYear(biciusuarios$FECHA)),FUN=sum) %>% 
               rename(BICIUSRS=x), by="Group.1") %>% 
-  mutate(Group.1=as.Date(paste0(Group.1,"-01-01")),EstanBici=x*1000/BICIUSRS) %>% 
+  mutate(Group.1=as.Date(paste0(Group.1,"-01-01")),EstanBici=x*1000/BICIUSRS) %>% {
+    data <- .
+    
+    capture.output({
+      suppressWarnings({
+        print("Biciusuarios - Female - Dead")
+        data %>% 
+          filter(year(Accidentes.Fecha) %in% c(2011, 2017),
+                 Gravedad2 == "Dead",
+                 Sexo=="Female") %>% 
+          t.test(EstanBici~Group.1, data = .) %>% 
+          print()
+        print("Biciusuarios - Female - Not Dead")
+        data %>% 
+          filter(year(Accidentes.Fecha) %in% c(2011, 2017),
+                 Gravedad2 == "Not Dead",
+                 Sexo=="Female") %>% 
+          t.test(EstanBici~Group.1, data = .) %>% 
+          print()
+        print("Biciusuarios - Male - Dead")
+        data %>% 
+          filter(year(Accidentes.Fecha) %in% c(2011, 2017),
+                 Gravedad2 == "Dead",
+                 Sexo=="Male") %>% 
+          t.test(EstanBici~Group.1, data = .) %>% 
+          print()
+        print("Biciusuarios - Male - Not Dead")
+        data %>% 
+          filter(year(Accidentes.Fecha) %in% c(2011, 2017),
+                 Gravedad2 == "Not Dead",
+                 Sexo=="Female") %>% 
+          t.test(EstanBici~Group.1, data = .) %>% 
+          print()
+      })
+    }, file = "./GRAFICOS/estadisticas.txt", append = T)
+    
+    data
+  } %>% 
   group_by(Group.1 = floor_date(Accidentes.Fecha, unit = "year"),
            Group.2 = Gravedad2,
            Group.3 = Sexo) %>% 
@@ -918,21 +986,15 @@ aux <- AccidentesBiciTotal %>%
          sd_EstanKm = NULL) %>% 
   ungroup() %>% 
   as.data.frame() %>% 
-  reshape(idvar = c("Group.1","Group.3"), timevar = "Group.2", direction= "wide") %>% 
-  mutate(lab.Dead = ifelse(year(Group.1) %in% c(2011, 2017),
-                           paste0("(", sprintf('%.3f', pmax(lwr.Dead, 0)),", ", sprintf('%.3f', upr.Dead),")"),
-                           NA),
-         `lab.Not Dead` = ifelse(year(Group.1) %in% c(2011, 2017),
-                                 paste0("(", sprintf('%.3f', pmax(`lwr.Not Dead`, 0)),", ", sprintf('%.3f', `upr.Not Dead`),")"),
-                                 NA))
+  reshape(idvar = c("Group.1","Group.3"), timevar = "Group.2", direction= "wide")
 
 graph12_2 <- ggplot(data = aux, aes(x=Group.1)) + xlab("Year") + scale_x_date(date_labels = "%Y")+
   geom_point(aes(y = EstanBici.Dead,colour="Dead"),show.legend = FALSE) +
   geom_errorbar(aes(ymin = lwr.Dead,ymax=upr.Dead,colour="Dead"),show.legend = FALSE) +
-  geom_text(aes(y = upr.Dead,label=lab.Dead),size=3,vjust=-1,family="Helvetica Light",show.legend = FALSE) +
+  geom_text(aes(y = upr.Dead,label=sprintf('%.3f', EstanBici.Dead)),size=3,vjust=-1,family="Helvetica Light",show.legend = FALSE) +
   geom_point(aes(y = `EstanBici.Not Dead`,colour="Not Dead"),show.legend = TRUE) + 
   geom_errorbar(aes(ymin = `lwr.Not Dead`,ymax=`upr.Not Dead`,colour="Not Dead"),show.legend = FALSE) + ylab("Bicyclists’ collisions per 1,000 bicyclists") +
-  geom_text(aes(y = `upr.Not Dead`,label=`lab.Not Dead`),size=3,vjust=-1,family="Helvetica Light",show.legend = FALSE)+
+  geom_text(aes(y = `upr.Not Dead`,label=sprintf('%.3f',`EstanBici.Not Dead`)),size=3,vjust=-1,family="Helvetica Light",show.legend = FALSE)+
   scale_colour_manual(breaks=c("Dead","Not Dead"),values = c("orangered3","navy"),labels=c("Fatal","Nonfatal"))+
   scale_linetype_manual(breaks=c("Tipo1","Tipo2"),values=c(1,3),labels=c("Fatal","Nonfatal"))+labs(colour="",linetype="")+
   scale_y_continuous(expand = expand_scale(mult = 0.2)) +
@@ -1002,7 +1064,44 @@ aux <- AccidentesBiciTotal %>%
          Group.1 = getYear(Accidentes.Fecha)) %>%
   left_join(aggregate(viajes$DIST_TOTAL_KMINT,by=list(viajes$AÑO),FUN=sum) %>% 
               rename(KM=x), by="Group.1") %>% 
-  mutate(Group.1=as.Date(paste0(Group.1,"-01-01")),EstanKm=x*1000000/KM) %>% 
+  mutate(Group.1=as.Date(paste0(Group.1,"-01-01")),EstanKm=x*1000000/KM) %>% {
+    data <- .
+    
+    capture.output({
+      suppressWarnings({
+        print("Km - Female - Dead")
+        data %>% 
+          filter(year(Accidentes.Fecha) %in% c(2011, 2017),
+                 Gravedad2 == "Dead",
+                 Sexo=="Female") %>% 
+          t.test(EstanKm~Group.1, data = .) %>% 
+          print()
+        print("Km - Female - Not Dead")
+        data %>% 
+          filter(year(Accidentes.Fecha) %in% c(2011, 2017),
+                 Gravedad2 == "Not Dead",
+                 Sexo=="Female") %>% 
+          t.test(EstanKm~Group.1, data = .) %>% 
+          print()
+        print("Km - Male - Dead")
+        data %>% 
+          filter(year(Accidentes.Fecha) %in% c(2011, 2017),
+                 Gravedad2 == "Dead",
+                 Sexo=="Male") %>% 
+          t.test(EstanKm~Group.1, data = .) %>% 
+          print()
+        print("Km - Male - Not Dead")
+        data %>% 
+          filter(year(Accidentes.Fecha) %in% c(2011, 2017),
+                 Gravedad2 == "Not Dead",
+                 Sexo=="Female") %>% 
+          t.test(EstanKm~Group.1, data = .) %>% 
+          print()
+      })
+    }, file = "./GRAFICOS/estadisticas.txt", append = T)
+    
+    data
+  } %>% 
   group_by(Group.1 = floor_date(Accidentes.Fecha, unit = "year"),
            Group.2 = Gravedad2,
            Group.3 = Sexo) %>% 
@@ -1015,21 +1114,15 @@ aux <- AccidentesBiciTotal %>%
          sd_EstanKm = NULL) %>% 
   ungroup() %>% 
   as.data.frame() %>% 
-  reshape(idvar = c("Group.1","Group.3"), timevar = "Group.2", direction= "wide") %>% 
-  mutate(lab.Dead = ifelse(year(Group.1) %in% c(2011, 2017),
-                           paste0("(", sprintf('%.3f', pmax(lwr.Dead, 0)),", ", sprintf('%.3f', upr.Dead),")"),
-                           NA),
-         `lab.Not Dead` = ifelse(year(Group.1) %in% c(2011, 2017),
-                                 paste0("(", sprintf('%.3f', pmax(`lwr.Not Dead`, 0)),", ", sprintf('%.3f', `upr.Not Dead`),")"),
-                                 NA))
+  reshape(idvar = c("Group.1","Group.3"), timevar = "Group.2", direction= "wide")
 
 graph22_2 <- ggplot(data = aux, aes(x=Group.1)) + xlab("Year") + scale_x_date(date_labels = "%Y")+
   geom_point(aes(y = EstanKm.Dead,colour="Dead"),show.legend = FALSE) +
   geom_errorbar(aes(ymin = lwr.Dead,ymax=upr.Dead,colour="Dead"),show.legend = FALSE) +
-  geom_text(aes(y = upr.Dead,label=lab.Dead),size=3,vjust=-1,family="Helvetica Light",show.legend = FALSE) +
+  geom_text(aes(y = upr.Dead,label=sprintf('%.3f', EstanKm.Dead)),size=3,vjust=-1,family="Helvetica Light",show.legend = FALSE) +
   geom_point(aes(y = `EstanKm.Not Dead`,colour="Not Dead"),show.legend = TRUE) + 
   geom_errorbar(aes(ymin = `lwr.Not Dead`,ymax=`upr.Not Dead`,colour="Not Dead"),show.legend = FALSE) + ylab("Bicyclists’ collisions per million VKmT") +
-  geom_text(aes(y = `upr.Not Dead`,label=`lab.Not Dead`),size=3,vjust=-1,family="Helvetica Light",show.legend = FALSE)+
+  geom_text(aes(y = `upr.Not Dead`,label=sprintf('%.3f', `EstanKm.Not Dead`)),size=3,vjust=-1,family="Helvetica Light",show.legend = FALSE)+
   scale_colour_manual(breaks=c("Dead","Not Dead"),values = c("orangered3","navy"),labels=c("Fatal","Nonfatal"))+
   scale_linetype_manual(breaks=c("Tipo1","Tipo2"),values=c(1,3),labels=c("Fatal","Nonfatal"))+labs(colour="",linetype="")+
   scale_y_continuous(expand = expand_scale(mult = 0.2)) +
