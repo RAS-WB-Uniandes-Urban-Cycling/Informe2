@@ -256,7 +256,7 @@ dev.off()
 
 #Kilómetros recorridos y biciusuarios por año----
 aux<-aggregate(viajes[,c("VIAJESINT","DIST_TOTAL_KMINT")],by=list(viajes$AÑO),FUN=sum) %>%  mutate(Fecha=as.Date(paste0(Group.1,"-01-01")))
-aux<-left_join(aux, aggregate(biciusuarios$BICIUSRSINT,by=list(biciusuarios$FECHA),FUN=sum) %>% select(bici=x,Fecha=Group.1), by=c("Fecha"))
+aux<-left_join(aux, aggregate(biciusuarios$BICIUSRSINT,by=list(biciusuarios$FECHA),FUN=sum) %>% dplyr::select(bici=x,Fecha=Group.1), by=c("Fecha"))
 svg("./GRAFICOS/TraveledKM_Cyclists_Time.svg",width = cmWidth,height = cmHeight)
 showtext_begin()
 print(
@@ -304,8 +304,9 @@ dev.off()
 
 #Kilómetros recorridos por biciusuario----
 aux<-aggregate(viajes[,c("VIAJESINT","DIST_TOTAL_KMINT")],by=list(viajes$AÑO),FUN=sum) %>%  mutate(Fecha=as.Date(paste0(Group.1,"-01-01"))) %>% na.omit
-aux<-left_join(aux, aggregate(biciusuarios$BICIUSRSINT,by=list(biciusuarios$FECHA),FUN=sum) %>% select(bici=x,Fecha=Group.1), by=c("Fecha"))
+aux<-left_join(aux, aggregate(biciusuarios$BICIUSRSINT,by=list(biciusuarios$FECHA),FUN=sum) %>% dplyr::select(bici=x,Fecha=Group.1), by=c("Fecha"))
 aux$DIST_PER_CYC<-aux$DIST_TOTAL_KM/aux$bici
+write_rds(aux, paste(carpetaRAS, "/RESULTADOS/SEGURIDAD/Bases de datos/11. kilometrosPorCiclista.rds"))
 svg("./GRAFICOS/KMperCyclist_Time.svg",width = cmWidth,height = cmHeight)
 showtext_begin()
 print(
@@ -366,12 +367,14 @@ showtext_end()
 dev.off()
 
 #SMR de los ciclistas contra la población de Bogotá----
-aux<-WorkTable_bogotaAg_prop[,c("FECHA","SMRbic_bog")] %>% mutate(FECHA=as.Date(FECHA))
+aux<-WorkTable_bogotaAg_of[,c("FECHA","SMRbic_bog")] %>% mutate(FECHA=as.Date(paste0(FECHA,"-12-31")))
+summary(lm(formula = SMRbic_bog~FECHA, data =aux))
 svg("./GRAFICOS/SMR_BogotaCyclists_Time.svg",width = cmWidth,height = cmHeight)
 showtext_begin()
 print(
   ggplot(aux,aes(x=FECHA))+scale_x_date(date_labels="%Y",limits=as.Date(c("2010-11-01","2017-03-01")))+xlab("Year")+
     geom_line(aes(y=SMRbic_bog),color="lightsteelblue3")+ylab("Standardized mortality ratio")+
+    stat_smooth(aes(y = SMRbic_bog),method="lm",formula = y~x,linetype="dashed",size=0.5,alpha=0.2,fill="navy",show.legend = FALSE,se = FALSE)+
     theme_minimal()+theme(text=element_text(family="Helvetica Light",size=12,color="grey"))+
     theme(legend.text=element_text(colour="black",size=10,family="Helvetica Light"),legend.title=element_text(colour="black",family="Helvetica Light"),axis.text.x = element_text(angle = 90,vjust=0.5))
 )
@@ -379,7 +382,7 @@ showtext_end()
 dev.off()
 
 #IADR de los ciclistas contra la población de Bogotá----
-aux<-WorkTable_bogotaAg_prop[,c("FECHA","IADRbic_bog")] %>% mutate(FECHA=as.Date(FECHA))
+aux<-WorkTable_bogotaAg_of[,c("FECHA","IADRbic_bog")] %>% mutate(FECHA=as.Date(FECHA))
 svg("./GRAFICOS/IADR_BogotaCyclists_Time.svg",width = cmWidth,height = cmHeight)
 showtext_begin()
 print(
@@ -392,7 +395,7 @@ showtext_end()
 dev.off()
 
 #Crude death rate de los clistas y referencia de Bogotá por género----
-aux<-WorkTable_bogota_prop[,c("FECHA","SEXO","CDRbic","CDRbog")] %>% mutate(FECHA=as.Date(FECHA))
+aux<-WorkTable_bogota_of[,c("FECHA","SEXO","CDRbic","CDRbog")] %>% mutate(FECHA=as.Date(FECHA))
 svg("./GRAFICOS/CDR_GenderBogota_Time.svg",width = cmWidth,height = cmHeight)
 showtext_begin()
 print(
@@ -408,7 +411,7 @@ dev.off()
 
 #Age-Adjusted death rate de los ciclistas hombres y referencia de Bogotá----
 confidence<-0.05
-aux<-WorkTable_bogota_prop[,c("FECHA","SEXO","ADRbic","VarBic","ADRbog")] %>% mutate(FECHA=as.Date(FECHA))
+aux<-WorkTable_bogota_of[,c("FECHA","SEXO","ADRbic","VarBic","ADRbog")] %>% mutate(FECHA=as.Date(FECHA))
 aux$lowerBic<-pmax(aux$ADRbic-qnorm(1-confidence/2)*sqrt(aux$VarBic),0)
 aux$upperBic<-pmin(aux$ADRbic+qnorm(1-confidence/2)*sqrt(aux$VarBic),80)
 svg("./GRAFICOS/ADR_MaleBogotá_Time.svg",width = cmWidth,height = cmHeight)
@@ -426,7 +429,7 @@ dev.off()
 
 #Age-Adjusted death rate de los ciclistas mujeres y referencia de Bogotá----
 confidence<-0.05
-aux<-WorkTable_bogota_prop[,c("FECHA","SEXO","ADRbic","VarBic","ADRbog")] %>% mutate(FECHA=as.Date(FECHA))
+aux<-WorkTable_bogota_of[,c("FECHA","SEXO","ADRbic","VarBic","ADRbog")] %>% mutate(FECHA=as.Date(FECHA))
 aux$lowerBic<-pmax(aux$ADRbic-qnorm(1-confidence/2)*sqrt(aux$VarBic),0)
 aux$upperBic<-pmin(aux$ADRbic+qnorm(1-confidence/2)*sqrt(aux$VarBic),80)
 svg("./GRAFICOS/ADR_FemaleBogotá_Time.svg",width = cmWidth,height = cmHeight)
@@ -444,7 +447,7 @@ dev.off()
 
 #Age-Adjusted death rate por sexo----
 confidence<-0.05
-aux<-WorkTable_bogota_prop[,c("FECHA","SEXO","ADRbic","VarBic","ADRbog")] %>% mutate(FECHA=as.Date(FECHA))
+aux<-WorkTable_bogota_of[,c("FECHA","SEXO","ADRbic","VarBic","ADRbog")] %>% mutate(FECHA=as.Date(FECHA))
 aux$lowerBic<-pmax(aux$ADRbic-qnorm(1-confidence/2)*sqrt(aux$VarBic),0)
 aux$upperBic<-pmin(aux$ADRbic+qnorm(1-confidence/2)*sqrt(aux$VarBic),80)
 svg("./GRAFICOS/ADR_gender_Time.svg",width = cmWidth,height = cmHeight)
@@ -460,7 +463,9 @@ showtext_end()
 dev.off()
 
 #SMR de los ciclistas contra la población de Bogotá por género----
-aux<-WorkTable_bogota_prop[,c("FECHA","SEXO","SMRbic_bog")] %>% mutate(FECHA=as.Date(FECHA))
+aux<-WorkTable_bogota_of[,c("FECHA","SEXO","SMRbic_bog")] %>% mutate(FECHA=as.Date(paste0(FECHA, "-12-31")))
+summary(lm(formula = SMRbic_bog~FECHA, data =aux %>% filter(SEXO=="Male")))
+summary(lm(formula = SMRbic_bog~FECHA, data =aux %>% filter(SEXO=="Female")))
 svg("./GRAFICOS/SMR_Cyclists_Gender_Time.svg",width = cmWidth,height = cmHeight)
 showtext_begin()
 print(
@@ -474,7 +479,7 @@ showtext_end()
 dev.off()
 
 #IADR de los ciclistas contra la población de Bogotá por género----
-aux<-WorkTable_bogota_prop[,c("FECHA","SEXO","IADRbic_bog")] %>% mutate(FECHA=as.Date(FECHA))
+aux<-WorkTable_bogota_of[,c("FECHA","SEXO","IADRbic_bog")] %>% mutate(FECHA=as.Date(FECHA))
 svg("./GRAFICOS/IADR_Cyclists_Gender_Time.svg",width = cmWidth,height = cmHeight)
 showtext_begin()
 print(
@@ -488,7 +493,7 @@ showtext_end()
 dev.off()
 
 #Crude death rate de los clistas por localidad----
-aux<-WorkTable_localidad_prop[,c("FECHA","SEXO","CDRbic","LOCALIDAD")] %>% mutate(FECHA=as.Date(FECHA)) %>% filter(LOCALIDAD!="SUMAPAZ")
+aux<-WorkTable_localidad_of[,c("FECHA","SEXO","CDRbic","LOCALIDAD")] %>% mutate(FECHA=as.Date(FECHA)) %>% filter(LOCALIDAD!="SUMAPAZ")
 svg("./GRAFICOS/CDR_Gender_Localidad_Time.svg",width = cmWidth,height = cmHeight)
 showtext_begin()
 print(
@@ -503,7 +508,7 @@ showtext_end()
 dev.off()
 
 #Age-adjusted death rate de los clistas por localidad----
-aux<-WorkTable_localidad_prop[,c("FECHA","SEXO","ADRbic","LOCALIDAD")] %>% mutate(FECHA=as.Date(FECHA)) %>% filter(LOCALIDAD!="SUMAPAZ")
+aux<-WorkTable_localidad_of[,c("FECHA","SEXO","ADRbic","LOCALIDAD")] %>% mutate(FECHA=as.Date(FECHA)) %>% filter(LOCALIDAD!="SUMAPAZ")
 svg("./GRAFICOS/ADR_Gender_Localidad_Time.svg",width = cmWidth,height = cmHeight)
 showtext_begin()
 print(
@@ -518,7 +523,7 @@ showtext_end()
 dev.off()
 
 #SMR de los clistas por localidad----
-aux<-WorkTable_localidad_prop[,c("FECHA","SEXO","SMRbic_bog","LOCALIDAD")] %>% mutate(FECHA=as.Date(FECHA)) %>% filter(LOCALIDAD!="SUMAPAZ")
+aux<-WorkTable_localidad_of[,c("FECHA","SEXO","SMRbic_bog","LOCALIDAD")] %>% mutate(FECHA=as.Date(FECHA)) %>% filter(LOCALIDAD!="SUMAPAZ")
 svg("./GRAFICOS/SMR_Gender_Localidad_Time.svg",width = cmWidth,height = cmHeight)
 showtext_begin()
 print(
@@ -533,7 +538,7 @@ showtext_end()
 dev.off()
 
 #IADR de los clistas por localidad----
-aux<-WorkTable_localidad_prop[,c("FECHA","SEXO","IADRbic_bog","LOCALIDAD")] %>% mutate(FECHA=as.Date(FECHA)) %>% filter(LOCALIDAD!="SUMAPAZ")
+aux<-WorkTable_localidad_of[,c("FECHA","SEXO","IADRbic_bog","LOCALIDAD")] %>% mutate(FECHA=as.Date(FECHA)) %>% filter(LOCALIDAD!="SUMAPAZ")
 svg("./GRAFICOS/IADR_Gender_Localidad_Time.svg",width = cmWidth,height = cmHeight)
 showtext_begin()
 print(
@@ -591,16 +596,31 @@ aux <- left_join(aux,aggregate(biciusuarios$BICIUSRSINT,by=list(getYear(biciusua
 aux<-reshape(aux,idvar = "Group.1",timevar = "Group.2",direction= "wide")
 aux$`EstanBici.Not Dead`[is.na(aux$`x.Not Dead`)]<-0
 aux$EstanBici.Dead[is.na(aux$x.Dead)]<-0
-graph11<-  ggplot(data = aux, aes(x=Group.1)) + xlab("Year")+ scale_x_date(date_labels = "%Y")+
-  geom_line(aes(y = EstanBici.Dead,colour="Dead")) + ylab("Cyclists’ casualties")+
-  geom_text(aes(y = EstanBici.Dead,label=round(EstanBici.Dead,1)),size=3,vjust=-2,family="Helvetica Light")+ylim(0,14)+
+
+summary(lm(formula = `EstanBici.Not Dead`~Group.1, data=aux))
+summary(lm(formula = EstanBici.Dead~Group.1, data=aux))
+
+aux <- aux %>% 
+  mutate(y_lab_1 = ifelse(Group.1=="2014-01-01", 5.7, NA),
+         lab_1 = ifelse(Group.1=="2014-01-01", "p = 0.013", NA),
+         y_lab_2 = ifelse(Group.1=="2014-01-01", 1.7, NA),
+         lab_2 = ifelse(Group.1=="2014-01-01", "p = 0.513", NA))
+
+graph11 <-  ggplot(data = aux, aes(x=Group.1)) + xlab("Year")+ scale_x_date(date_labels = "%Y")+
+  geom_line(aes(y = EstanBici.Dead,colour="Dead",linetype="Tipo1"),show.legend = FALSE) + ylab("Bicyclists’ collisions")+
+  geom_text(aes(y = EstanBici.Dead,label=round(EstanBici.Dead,1)),size=3,vjust=-2,family="Helvetica Light",show.legend = FALSE)+ylim(0,14)+
   stat_smooth(aes(y = EstanBici.Dead,colour="Dead"),method="lm",linetype="dashed",size=0.5,alpha=0.2,fill="orangered3",show.legend = FALSE)+
-  geom_line(aes(y = `EstanBici.Not Dead`,colour="Not Dead")) + ylab("Cyclists’ casualties per 1.000 cyclists")+
-  geom_text(aes(y = `EstanBici.Not Dead`,label=round(`EstanBici.Not Dead`,1)),size=3,vjust=-2,family="Helvetica Light")+
-  stat_smooth(aes(y = `EstanBici.Not Dead`,colour="Not Dead"),method="lm",formula = y~x,linetype="dashed",size=0.5,alpha=0.2,fill="navy",show.legend = FALSE)+
-  scale_colour_manual(breaks=c("Dead","Not Dead"),values = c("orangered3","navy"),labels=c("Fatal","Nonfatal"))+labs(colour="")+
-  theme_minimal()+theme(text=element_text(family="Helvetica Light",size=12,color="grey40"))
-svg("./GRAFICOS/AccidentsDeathsPerCyclists_TimeYear.svg",width = cmWidth, height = cmHeight)
+  geom_line(aes(y = `EstanBici.Not Dead`,colour="Not Dead",linetype="Tipo2"),show.legend = TRUE) + ylab("Bicyclists’ collisions per 1,000 bicyclists")+
+  geom_text(aes(y = `EstanBici.Not Dead`,label=round(`EstanBici.Not Dead`,1)),size=3,vjust=-2,family="Helvetica Light",show.legend = FALSE)+
+  stat_smooth(aes(y = `EstanBici.Not Dead`,colour="Not Dead"),method="lm",formula = y~x,linetype="dashed",size=0.5,alpha=0.2,fill="navy",show.legend = FALSE) +
+  geom_text(aes(y = y_lab_1, label = lab_1),size=3.5,vjust=-2,family="Helvetica Light",show.legend = FALSE,color="black") +
+  geom_text(aes(y = y_lab_2, label = lab_2),size=3.5,vjust=-2,family="Helvetica Light",show.legend = FALSE,color="black") +
+  scale_colour_manual(breaks=c("Dead","Not Dead"),values = c("orangered3","navy"),labels=c("Fatal","Nonfatal"))+
+  scale_linetype_manual(breaks=c("Tipo1","Tipo2"),values=c(1,3),labels=c("Fatal","Nonfatal"))+labs(colour="",linetype="")+
+  theme_minimal()+
+  theme(text=element_text(family="Helvetica Light",size=12,color="grey40")) 
+
+pdf("./GRAFICOS/AccidentsDeathsPerCyclists_TimeYear.pdf",width = cmWidth, height = cmHeight)
 showtext_begin()
 print(
   graph11
@@ -608,28 +628,136 @@ print(
 showtext_end()
 dev.off()
 
+#Total de accidentes y mortalidad durante los meses colapsado por años estandarizado por biciusuarios----
+aux <- AccidentesBiciTotal %>% 
+  filter(year(Accidentes.Fecha)<=2017,
+         !is.na(Gravedad2)) %>% 
+  st_set_geometry(NULL) %>%
+  group_by(Accidentes.Fecha = floor_date(Accidentes.Fecha, unit = "month"),
+           Gravedad2) %>% 
+  summarise(x = n()) %>% 
+  group_by(Gravedad2) %>% 
+  pad(interval = "month") %>% 
+  mutate(x = ifelse(is.na(x), 0, x),
+         Group.1 = getYear(Accidentes.Fecha)) %>%
+  left_join(aggregate(biciusuarios$BICIUSRSINT,by=list(getYear(biciusuarios$FECHA)),FUN=sum) %>% 
+              rename(BICIUSRS=x), by="Group.1") %>% 
+  mutate(Group.1=as.Date(paste0(Group.1,"-01-01")),EstanBici=x*1000/BICIUSRS) %>% 
+  group_by(Group.1 = floor_date(Accidentes.Fecha, unit = "year"),
+           Group.2 = Gravedad2) %>% 
+  summarise(n = n(),
+            sd_EstanBici = sd(EstanBici),
+            EstanBici = mean(EstanBici)) %>%
+  mutate(lwr = EstanBici - qt(0.975, df = n - 1) * sd_EstanBici / sqrt(n),
+         upr = EstanBici + qt(0.975, df = n - 1) * sd_EstanBici / sqrt(n),
+         n = NULL,
+         sd_EstanBici = NULL) %>% 
+  ungroup() %>% 
+  as.data.frame() %>% 
+  reshape(idvar = "Group.1", timevar = "Group.2", direction= "wide") %>% 
+  mutate(lab.Dead = ifelse(year(Group.1) %in% c(2011, 2017),
+                           paste0("(", sprintf('%.3f', pmax(lwr.Dead, 0)),", ", sprintf('%.3f', upr.Dead),")"),
+                           NA),
+         `lab.Not Dead` = ifelse(year(Group.1) %in% c(2011, 2017),
+                                 paste0("(", sprintf('%.3f', pmax(`lwr.Not Dead`, 0)),", ", sprintf('%.3f', `upr.Not Dead`),")"),
+                                 NA))
+
+graph11_2 <- ggplot(data = aux, aes(x=Group.1)) + xlab("Year") + scale_x_date(date_labels = "%Y")+
+  geom_point(aes(y = EstanBici.Dead,colour="Dead"),show.legend = FALSE) +
+  geom_errorbar(aes(ymin = lwr.Dead,ymax=upr.Dead,colour="Dead"),show.legend = FALSE) +
+  geom_text(aes(y = upr.Dead,label=lab.Dead),size=3,vjust=-1,family="Helvetica Light",show.legend = FALSE) +
+  geom_point(aes(y = `EstanBici.Not Dead`,colour="Not Dead"),show.legend = TRUE) + 
+  geom_errorbar(aes(ymin = `lwr.Not Dead`,ymax=`upr.Not Dead`,colour="Not Dead"),show.legend = FALSE) + ylab("Bicyclists’ collisions per 1,000 bicyclists")+
+  geom_text(aes(y = `upr.Not Dead`,label=`lab.Not Dead`),size=3,vjust=-1,family="Helvetica Light",show.legend = FALSE)+
+  scale_colour_manual(breaks=c("Dead","Not Dead"),values = c("orangered3","navy"),labels=c("Fatal","Nonfatal"))+
+  scale_linetype_manual(breaks=c("Tipo1","Tipo2"),values=c(1,3),labels=c("Fatal","Nonfatal"))+labs(colour="",linetype="")+
+  scale_y_continuous(expand = expand_scale(mult = 0.2)) +
+  theme_minimal()+
+  theme(text=element_text(family="Helvetica Light",size=12,color="grey40")) 
+
 #Total de accidentes y mortalidad durante los años estandarizado por kilómetros recorridos----
 aux <- aggregate(AccidentesBiciTotal$Accidente,by=list(getYear(AccidentesBiciTotal$Accidentes.Fecha),AccidentesBiciTotal$Gravedad2),FUN=length)
-aux <- left_join(aux,aggregate(viajes$DIST_TOTAL_KMINT,by=list(viajes$AÑO),FUN=sum) %>% rename(KM=x),by="Group.1") %>% mutate(Group.1=as.Date(paste0(Group.1,"-01-01")),EstanKm=x*1000/KM)
+aux <- left_join(aux,aggregate(viajes$DIST_TOTAL_KMINT,by=list(viajes$AÑO),FUN=sum) %>% rename(KM=x),by="Group.1") %>% mutate(Group.1=as.Date(paste0(Group.1,"-01-01")),EstanKm=x*1000000/KM)
 aux<-reshape(aux,idvar = "Group.1",timevar = "Group.2",direction= "wide")
 aux$`EstanKm.Not Dead`[is.na(aux$`x.Not Dead`)]<-0
 aux$EstanKm.Dead[is.na(aux$x.Dead)]<-0
-graph21<-  ggplot(data = aux, aes(x=Group.1)) + xlab("Year")+ scale_x_date(date_labels = "%Y")+
-  geom_line(aes(y = EstanKm.Dead,colour="Dead")) + ylab("Cyclists’ casualties")+
-  geom_text(aes(y = EstanKm.Dead,label=round(EstanKm.Dead,2)),size=3,vjust=-2,family="Helvetica Light")+ylim(0,1.1)+
-  stat_smooth(aes(y = EstanKm.Dead,colour="Dead"),method="lm",linetype="dashed",size=0.5,alpha=0.2,fill="orangered3",show.legend = FALSE)+
-  geom_line(aes(y = `EstanKm.Not Dead`,colour="Not Dead")) + ylab("Cyclists’ casualties per million Km cycled per day")+
-  geom_text(aes(y = `EstanKm.Not Dead`,label=round(`EstanKm.Not Dead`,1)),size=3,vjust=-2,family="Helvetica Light")+
+
+summary(lm(formula = `EstanKm.Not Dead`~Group.1, data=aux))
+summary(lm(formula = EstanKm.Dead~Group.1, data=aux))
+
+aux <- aux %>% 
+  mutate(y_lab_1 = ifelse(Group.1=="2014-01-01", 600, NA),
+         lab_1 = ifelse(Group.1=="2014-01-01", "p = 0.002", NA),
+         y_lab_2 = ifelse(Group.1=="2014-01-01", 200, NA),
+         lab_2 = ifelse(Group.1=="2014-01-01", "p = 0.132", NA))
+
+graph21 <- ggplot(data = aux, aes(x=Group.1)) + xlab("Year")+ scale_x_date(date_labels = "%Y")+
+  geom_line(aes(y = EstanKm.Dead,colour="Dead",linetype="Tipo1"),show.legend = FALSE) + 
+  geom_text(aes(y = EstanKm.Dead,label=round(EstanKm.Dead,2)),size=3,vjust=-2,family="Helvetica Light",show.legend = FALSE)+
+  stat_smooth(aes(y = EstanKm.Dead,colour="Dead"),method="lm",linetype="dashed",size=0.5,alpha=0.2,fill="orangered3",show.legend = FALSE)+ylim(0, 1100) +
+  geom_line(aes(y = `EstanKm.Not Dead`,colour="Not Dead",linetype="Tipo2"),show.legend = TRUE) + ylab("Bicyclists’ collisions per million VKmT")+
+  geom_text(aes(y = `EstanKm.Not Dead`,label=round(`EstanKm.Not Dead`,1)),size=3,vjust=-2,family="Helvetica Light",show.legend = FALSE)  +
+  geom_text(aes(y = y_lab_1, label = lab_1),size=3.5,vjust=-2,family="Helvetica Light",show.legend = FALSE,color="black") +
+  geom_text(aes(y = y_lab_2, label = lab_2),size=3.5,vjust=-2,family="Helvetica Light",show.legend = FALSE,color="black") +
   stat_smooth(aes(y = `EstanKm.Not Dead`,colour="Not Dead"),method="lm",formula = y~x,linetype="dashed",size=0.5,alpha=0.2,fill="navy",show.legend = FALSE)+
-  scale_colour_manual(breaks=c("Dead","Not Dead"),values = c("orangered3","navy"),labels=c("Fatal","Nonfatal"))+labs(colour="")+
+  scale_colour_manual(breaks=c("Dead","Not Dead"),values = c("orangered3","navy"),labels=c("Fatal","Nonfatal"))+
+  scale_linetype_manual(breaks=c("Tipo1","Tipo2"),values=c(1,3),labels=c("Fatal","Nonfatal"))+labs(colour="",linetype="")+
   theme_minimal()+theme(text=element_text(family="Helvetica Light",size=12,color="grey40"))
-svg("./GRAFICOS/AccidentsDeathsPerKm_TimeYear.svg",width = cmWidth, height = cmHeight)
+
+pdf("./GRAFICOS/AccidentsDeathsPerKm_TimeYear.pdf",width = cmWidth, height = cmHeight)
 showtext_begin()
 print(
   graph21
 )
 showtext_end()
 dev.off()
+
+#Total de accidentes y mortalidad durante los meses colapsado por años estandarizado por kilometros recorridos ----
+aux <- AccidentesBiciTotal %>% 
+  filter(year(Accidentes.Fecha)<=2017,
+         !is.na(Gravedad2)) %>% 
+  st_set_geometry(NULL) %>%
+  group_by(Accidentes.Fecha = floor_date(Accidentes.Fecha, unit = "month"),
+           Gravedad2) %>% 
+  summarise(x = n()) %>% 
+  group_by(Gravedad2) %>% 
+  pad(interval = "month") %>% 
+  mutate(x = ifelse(is.na(x), 0, x),
+         Group.1 = getYear(Accidentes.Fecha)) %>%
+  left_join(aggregate(viajes$DIST_TOTAL_KMINT,by=list(viajes$AÑO),FUN=sum) %>% 
+              rename(KM=x), by="Group.1") %>% 
+  mutate(Group.1=as.Date(paste0(Group.1,"-01-01")),EstanKm=x*1000000/KM) %>% 
+  group_by(Group.1 = floor_date(Accidentes.Fecha, unit = "year"),
+           Group.2 = Gravedad2) %>% 
+  summarise(n = n(),
+            sd_EstanKm = sd(EstanKm),
+            EstanKm = mean(EstanKm)) %>%
+  mutate(lwr = EstanKm - qt(0.975, df = n - 1) * sd_EstanKm / sqrt(n),
+         upr = EstanKm + qt(0.975, df = n - 1) * sd_EstanKm / sqrt(n),
+         n = NULL,
+         sd_EstanKm = NULL) %>% 
+  ungroup() %>% 
+  as.data.frame() %>% 
+  reshape(idvar = "Group.1", timevar = "Group.2", direction= "wide") %>% 
+  mutate(lab.Dead = ifelse(year(Group.1) %in% c(2011, 2017),
+                           paste0("(", sprintf('%.3f', pmax(lwr.Dead, 0)),", ", sprintf('%.3f', upr.Dead),")"),
+                           NA),
+         `lab.Not Dead` = ifelse(year(Group.1) %in% c(2011, 2017),
+                                 paste0("(", sprintf('%.3f', pmax(`lwr.Not Dead`, 0)),", ", sprintf('%.3f', `upr.Not Dead`),")"),
+                                 NA))
+
+graph21_2 <- ggplot(data = aux, aes(x=Group.1)) + xlab("Year") + scale_x_date(date_labels = "%Y")+
+  geom_point(aes(y = EstanKm.Dead,colour="Dead"),show.legend = FALSE) +
+  geom_errorbar(aes(ymin = lwr.Dead,ymax=upr.Dead,colour="Dead"),show.legend = FALSE) +
+  geom_text(aes(y = upr.Dead,label=lab.Dead),size=3,vjust=-1,family="Helvetica Light",show.legend = FALSE) +
+  geom_point(aes(y = `EstanKm.Not Dead`,colour="Not Dead"),show.legend = TRUE) + 
+  geom_errorbar(aes(ymin = `lwr.Not Dead`,ymax=`upr.Not Dead`,colour="Not Dead"),show.legend = FALSE) + ylab("Bicyclists’ collisions per million VKmT") +
+  geom_text(aes(y = `upr.Not Dead`,label=`lab.Not Dead`),size=3,vjust=-1,family="Helvetica Light",show.legend = FALSE)+
+  scale_colour_manual(breaks=c("Dead","Not Dead"),values = c("orangered3","navy"),labels=c("Fatal","Nonfatal"))+
+  scale_linetype_manual(breaks=c("Tipo1","Tipo2"),values=c(1,3),labels=c("Fatal","Nonfatal"))+labs(colour="",linetype="")+
+  scale_y_continuous(expand = expand_scale(mult = 0.2)) +
+  theme_minimal() +
+  theme(text=element_text(family="Helvetica Light",size=12,color="grey40")) 
 
 #Total de accidentes durante los meses----
 aux <- aggregate(AccidentesBiciTotal$Accidente,by=list(getYear(AccidentesBiciTotal$Accidentes.Fecha),getMonth(AccidentesBiciTotal$Accidentes.Fecha),AccidentesBiciTotal$Gravedad2),FUN=length) %>% mutate(Mes=as.Date(paste(Group.1,Group.2,"01",sep="/"),"%Y/%m/%d"))
@@ -674,7 +802,7 @@ dev.off()
 
 #Total de accidentes durante los meses estandarizado por kilómetros recorridos----
 aux <- aggregate(AccidentesBiciTotal$Accidente,by=list(getYear(AccidentesBiciTotal$Accidentes.Fecha),getMonth(AccidentesBiciTotal$Accidentes.Fecha),AccidentesBiciTotal$Gravedad2),FUN=length) %>% mutate(Mes=as.Date(paste(Group.1,Group.2,"01",sep="/"),"%Y/%m/%d"))
-aux <- left_join(aux,aggregate(viajes$DIST_TOTAL_KMINT,by=list(viajes$AÑO),FUN=sum) %>% rename(KM=x),by="Group.1") %>% mutate(EstanKm=x*1000/KM)
+aux <- left_join(aux,aggregate(viajes$DIST_TOTAL_KMINT,by=list(viajes$AÑO),FUN=sum) %>% rename(KM=x),by="Group.1") %>% mutate(EstanKm=x*1000000/KM)
 aux$Important <-ifelse(aux$Mes%in%as.Date(c("2012-02-01","2015-04-01","2015-09-01","2017-05-01","2017-09-01")),"Important","NA")
 aux<-reshape(aux,idvar = c("Mes","Important"),timevar = "Group.3",direction= "wide")
 aux$`EstanKm.Not Dead`[is.na(aux$`x.Not Dead`)]<-0
@@ -721,16 +849,36 @@ aux <- left_join(aux,aggregate(biciusuarios$BICIUSRSINT,by=list(getYear(biciusua
 aux<-reshape(aux,idvar = c("Group.1","Group.3"),timevar = "Group.2",direction= "wide")
 aux$`EstanBici.Not Dead`[is.na(aux$`x.Not Dead`)]<-0
 aux$EstanBici.Dead[is.na(aux$x.Dead)]<-0
+
+summary(lm(formula = `EstanBici.Not Dead`~Group.1, data=aux %>% filter(Group.3=="Female")))
+summary(lm(formula = EstanBici.Dead~Group.1, data=aux%>% filter(Group.3=="Female")))
+summary(lm(formula = `EstanBici.Not Dead`~Group.1, data=aux %>% filter(Group.3=="Male")))
+summary(lm(formula = EstanBici.Dead~Group.1, data=aux%>% filter(Group.3=="Male")))
+
+aux<- aux %>% 
+  mutate(y_lab_1 = ifelse(Group.1=="2014-01-01" & Group.3=="Female", 6.5, NA),
+         lab_1 = ifelse(Group.1=="2014-01-01" & Group.3=="Female", "p = 0.728", NA),
+         y_lab_2 = ifelse(Group.1=="2014-01-01" & Group.3=="Female", 0.6, NA),
+         lab_2 = ifelse(Group.1=="2014-01-01" & Group.3=="Female", "p = 0.166", NA),
+         y_lab_1 = ifelse(Group.1=="2014-01-01" & Group.3=="Male", 4, y_lab_1),
+         lab_1 = ifelse(Group.1=="2014-01-01" & Group.3=="Male", "p = 0.021", lab_1),
+         y_lab_2 = ifelse(Group.1=="2014-01-01" & Group.3=="Male", 1, y_lab_2),
+         lab_2 = ifelse(Group.1=="2014-01-01" & Group.3=="Male", "p = 0.412", lab_2))
+
 graph12<-  ggplot(data = aux, aes(x=Group.1)) + xlab("Year")+ scale_x_date(date_labels = "%Y")+
-  geom_line(aes(y = EstanBici.Dead,colour="Dead")) + ylab("Cyclists’ casualties")+
-  geom_text(aes(y = EstanBici.Dead,label=round(EstanBici.Dead,1)),size=3,vjust=-0.5,family="Helvetica Light")+ylim(0,17)+
+  geom_line(aes(y = EstanBici.Dead,colour="Dead",linetype="Tipo1"),show.legend = FALSE) + ylab("Bicyclists’ collisions")+
+  geom_text(aes(y = EstanBici.Dead,label=round(EstanBici.Dead,1)),size=3,vjust=-0.5,family="Helvetica Light",show.legend = FALSE)+ylim(0,17)+
   stat_smooth(aes(y = EstanBici.Dead,colour="Dead"),method="lm",linetype="dashed",size=0.5,alpha=0.2,fill="orangered3",show.legend = FALSE)+
-  geom_line(aes(y = `EstanBici.Not Dead`,colour="Not Dead")) + ylab("Cyclists’ casualties per 1.000 cyclists")+
-  geom_text(aes(y = `EstanBici.Not Dead`,label=round(`EstanBici.Not Dead`,1)),size=3,vjust=-2,family="Helvetica Light")+
+  geom_line(aes(y = `EstanBici.Not Dead`,colour="Not Dead",linetype="Tipo2"),show.legend = TRUE) + ylab("Bicyclists’ collisions per 1,000 bicyclists")+
+  geom_text(aes(y = `EstanBici.Not Dead`,label=round(`EstanBici.Not Dead`,1)),size=3,vjust=-2,family="Helvetica Light",show.legend = FALSE)+
+  geom_text(aes(y = y_lab_1, label = lab_1),size=3.5,vjust=-2,family="Helvetica Light",show.legend = FALSE,color="black") +
+  geom_text(aes(y = y_lab_2, label = lab_2),size=3.5,vjust=-2,family="Helvetica Light",show.legend = FALSE,color="black") +
   stat_smooth(aes(y = `EstanBici.Not Dead`,colour="Not Dead"),method="lm",formula = y~x,linetype="dashed",size=0.5,alpha=0.2,fill="navy",show.legend = FALSE)+
-  scale_colour_manual(breaks=c("Dead","Not Dead"),values = c("orangered3","navy"),labels=c("Fatal","Nonfatal"))+labs(colour="")+
+  scale_colour_manual(breaks=c("Dead","Not Dead"),values = c("orangered3","navy"),labels=c("Fatal","Nonfatal"))+
+  scale_linetype_manual(breaks=c("Tipo1","Tipo2"),values=c(1,3),labels=c("Fatal","Nonfatal"))+labs(colour="",linetype="")+
   theme_minimal()+theme(text=element_text(family="Helvetica Light",size=12,color="grey40"))+
   facet_grid(Group.3~.)
+
 svg("./GRAFICOS/AccidentsDeathsPerCyclists_Gender_TimeYear.svg",width = cmWidth, height = cmHeight)
 showtext_begin()
 print(
@@ -739,22 +887,95 @@ print(
 showtext_end()
 dev.off()
 
+#Total de accidentes y mortalidad durante los meses colapsado por años estandarizado por biciusuarios por genero----
+aux <- AccidentesBiciTotal %>% 
+  filter(year(Accidentes.Fecha)<=2017,
+         !is.na(Gravedad2),
+         !is.na(Sexo)) %>% 
+  st_set_geometry(NULL) %>%
+  group_by(Accidentes.Fecha = floor_date(Accidentes.Fecha, unit = "month"),
+           Gravedad2,
+           Sexo) %>% 
+  summarise(x = n()) %>% 
+  group_by(Gravedad2, Sexo) %>% 
+  pad(interval = "month",
+      start_val = as.Date("2011-01-01"), 
+      end_val = as.Date("2017-12-01")) %>% 
+  mutate(x = ifelse(is.na(x), 0, x),
+         Group.1 = getYear(Accidentes.Fecha)) %>%
+  left_join(aggregate(biciusuarios$BICIUSRSINT,by=list(getYear(biciusuarios$FECHA)),FUN=sum) %>% 
+              rename(BICIUSRS=x), by="Group.1") %>% 
+  mutate(Group.1=as.Date(paste0(Group.1,"-01-01")),EstanBici=x*1000/BICIUSRS) %>% 
+  group_by(Group.1 = floor_date(Accidentes.Fecha, unit = "year"),
+           Group.2 = Gravedad2,
+           Group.3 = Sexo) %>% 
+  summarise(n = n(),
+            sd_EstanBici = sd(EstanBici),
+            EstanBici = mean(EstanBici)) %>%
+  mutate(lwr = EstanBici - qt(0.975, df = n - 1) * sd_EstanBici / sqrt(n),
+         upr = EstanBici + qt(0.975, df = n - 1) * sd_EstanBici / sqrt(n),
+         n = NULL,
+         sd_EstanKm = NULL) %>% 
+  ungroup() %>% 
+  as.data.frame() %>% 
+  reshape(idvar = c("Group.1","Group.3"), timevar = "Group.2", direction= "wide") %>% 
+  mutate(lab.Dead = ifelse(year(Group.1) %in% c(2011, 2017),
+                           paste0("(", sprintf('%.3f', pmax(lwr.Dead, 0)),", ", sprintf('%.3f', upr.Dead),")"),
+                           NA),
+         `lab.Not Dead` = ifelse(year(Group.1) %in% c(2011, 2017),
+                                 paste0("(", sprintf('%.3f', pmax(`lwr.Not Dead`, 0)),", ", sprintf('%.3f', `upr.Not Dead`),")"),
+                                 NA))
+
+graph12_2 <- ggplot(data = aux, aes(x=Group.1)) + xlab("Year") + scale_x_date(date_labels = "%Y")+
+  geom_point(aes(y = EstanBici.Dead,colour="Dead"),show.legend = FALSE) +
+  geom_errorbar(aes(ymin = lwr.Dead,ymax=upr.Dead,colour="Dead"),show.legend = FALSE) +
+  geom_text(aes(y = upr.Dead,label=lab.Dead),size=3,vjust=-1,family="Helvetica Light",show.legend = FALSE) +
+  geom_point(aes(y = `EstanBici.Not Dead`,colour="Not Dead"),show.legend = TRUE) + 
+  geom_errorbar(aes(ymin = `lwr.Not Dead`,ymax=`upr.Not Dead`,colour="Not Dead"),show.legend = FALSE) + ylab("Bicyclists’ collisions per 1,000 bicyclists") +
+  geom_text(aes(y = `upr.Not Dead`,label=`lab.Not Dead`),size=3,vjust=-1,family="Helvetica Light",show.legend = FALSE)+
+  scale_colour_manual(breaks=c("Dead","Not Dead"),values = c("orangered3","navy"),labels=c("Fatal","Nonfatal"))+
+  scale_linetype_manual(breaks=c("Tipo1","Tipo2"),values=c(1,3),labels=c("Fatal","Nonfatal"))+labs(colour="",linetype="")+
+  scale_y_continuous(expand = expand_scale(mult = 0.2)) +
+  theme_minimal() +
+  theme(text=element_text(family="Helvetica Light",size=12,color="grey40")) +
+  facet_grid(Group.3~., scales = "free_y")
+
 #Total de accidentes y mortalidad durante los años estandarizado por kilómetros recorridos por género----
 aux <- aggregate(AccidentesBiciTotal$Accidente,by=list(getYear(AccidentesBiciTotal$Accidentes.Fecha),AccidentesBiciTotal$Gravedad2,AccidentesBiciTotal$Sexo),FUN=length)
-aux <- left_join(aux,aggregate(viajes$DIST_TOTAL_KMINT,by=list(viajes$AÑO,viajes$SEXO),FUN=sum) %>% rename(KM=x,Group.3=Group.2),by=c("Group.1","Group.3")) %>% mutate(Group.1=as.Date(paste0(Group.1,"-01-01")),EstanKm=x*1000/KM)
+aux <- left_join(aux,aggregate(viajes$DIST_TOTAL_KMINT,by=list(viajes$AÑO,viajes$SEXO),FUN=sum) %>% rename(KM=x,Group.3=Group.2),by=c("Group.1","Group.3")) %>% mutate(Group.1=as.Date(paste0(Group.1,"-01-01")),EstanKm=x*1000000/KM)
 aux<-reshape(aux,idvar = c("Group.1","Group.3"),timevar = "Group.2",direction= "wide")
 aux$`EstanKm.Not Dead`[is.na(aux$`x.Not Dead`)]<-0
 aux$EstanKm.Dead[is.na(aux$x.Dead)]<-0
-graph22<-  ggplot(data = aux, aes(x=Group.1)) + xlab("Year")+ scale_x_date(date_labels = "%Y")+
-  geom_line(aes(y = EstanKm.Dead,colour="Dead")) + ylab("Cyclists’ casualties")+
-  geom_text(aes(y = EstanKm.Dead,label=round(EstanKm.Dead,2)),size=3,vjust=-0.5,family="Helvetica Light")+ylim(-0.1,1.4)+
+
+summary(lm(formula = `EstanKm.Not Dead`~Group.1, data=aux %>% filter(Group.3=="Female")))
+summary(lm(formula = EstanKm.Dead~Group.1, data=aux%>% filter(Group.3=="Female")))
+summary(lm(formula = `EstanKm.Not Dead`~Group.1, data=aux %>% filter(Group.3=="Male")))
+summary(lm(formula = EstanKm.Dead~Group.1, data=aux%>% filter(Group.3=="Male")))
+
+aux<- aux %>% 
+  mutate(y_lab_1 = ifelse(Group.1=="2014-01-01" & Group.3=="Female", 800, NA),
+         lab_1 = ifelse(Group.1=="2014-01-01" & Group.3=="Female", "p = 0.036", NA),
+         y_lab_2 = ifelse(Group.1=="2014-01-01" & Group.3=="Female", 150, NA),
+         lab_2 = ifelse(Group.1=="2014-01-01" & Group.3=="Female", "p = 0.942", NA),
+         y_lab_1 = ifelse(Group.1=="2014-01-01" & Group.3=="Male", 850, y_lab_1),
+         lab_1 = ifelse(Group.1=="2014-01-01" & Group.3=="Male", "p = 0.001", lab_1),
+         y_lab_2 = ifelse(Group.1=="2014-01-01" & Group.3=="Male", 150, y_lab_2),
+         lab_2 = ifelse(Group.1=="2014-01-01" & Group.3=="Male", "p = 0.082", lab_2))
+
+graph22 <-  ggplot(data = aux, aes(x=Group.1)) + xlab("Year")+ scale_x_date(date_labels = "%Y")+
+  geom_line(aes(y = EstanKm.Dead,colour="Dead",linetype="Tipo1"),show.legend = FALSE) + ylab("Cyclists’ casualties")+
+  geom_text(aes(y = EstanKm.Dead,label=round(EstanKm.Dead,2)),size=3,vjust=-0.5,family="Helvetica Light",show.legend = FALSE)+ylim(0,1400)+
   stat_smooth(aes(y = EstanKm.Dead,colour="Dead"),method="lm",linetype="dashed",size=0.5,alpha=0.2,fill="orangered3",show.legend = FALSE)+
-  geom_line(aes(y = `EstanKm.Not Dead`,colour="Not Dead")) + ylab("Cyclists’ casualties per million Km cycled per day")+
-  geom_text(aes(y = `EstanKm.Not Dead`,label=round(`EstanKm.Not Dead`,1)),size=3,vjust=-2,family="Helvetica Light")+
+  geom_line(aes(y = `EstanKm.Not Dead`,colour="Not Dead",linetype="Tipo2"),show.legend = TRUE) + ylab("Bicyclists’ collisions per million VKmT")+
+  geom_text(aes(y = `EstanKm.Not Dead`,label=round(`EstanKm.Not Dead`,1)),size=3,vjust=-2,family="Helvetica Light",show.legend = FALSE)+
+  geom_text(aes(y = y_lab_1, label = lab_1),size=3.5,vjust=-2,family="Helvetica Light",show.legend = FALSE,color="black") +
+  geom_text(aes(y = y_lab_2, label = lab_2),size=3.5,vjust=-2,family="Helvetica Light",show.legend = FALSE,color="black") +
   stat_smooth(aes(y = `EstanKm.Not Dead`,colour="Not Dead"),method="lm",formula = y~x,linetype="dashed",size=0.5,alpha=0.2,fill="navy",show.legend = FALSE)+
-  scale_colour_manual(breaks=c("Dead","Not Dead"),values = c("orangered3","navy"),labels=c("Fatal","Nonfatal"))+labs(colour="")+
+  scale_colour_manual(breaks=c("Dead","Not Dead"),values = c("orangered3","navy"),labels=c("Fatal","Nonfatal"))+
+  scale_linetype_manual(breaks=c("Tipo1","Tipo2"),values=c(1,3),labels=c("Fatal","Nonfatal"))+labs(colour="",linetype="")+
   theme_minimal()+theme(text=element_text(family="Helvetica Light",size=12,color="grey40"))+
   facet_grid(Group.3~.)
+
 svg("./GRAFICOS/AccidentsDeathsPerKm_Gender_TimeYear.svg",width = cmWidth, height = cmHeight)
 showtext_begin()
 print(
@@ -763,7 +984,58 @@ print(
 showtext_end()
 dev.off()
 
-ggarrange(graph11,graph12+ylab(""),graph21+ylab("Cyclists’ casualties per 1M Km cycled"),graph22+ylab(""),labels=c("A","B","C","D"),common.legend = TRUE,legend = "bottom")
+#Total de accidentes y mortalidad durante los meses colapsado por años estandarizado por kilometros recorridos por genero----
+aux <- AccidentesBiciTotal %>% 
+  filter(year(Accidentes.Fecha)<=2017,
+         !is.na(Gravedad2),
+         !is.na(Sexo)) %>% 
+  st_set_geometry(NULL) %>%
+  group_by(Accidentes.Fecha = floor_date(Accidentes.Fecha, unit = "month"),
+           Gravedad2,
+           Sexo) %>% 
+  summarise(x = n()) %>% 
+  group_by(Gravedad2, Sexo) %>% 
+  pad(interval = "month",
+      start_val = as.Date("2011-01-01"), 
+      end_val = as.Date("2017-12-01")) %>% 
+  mutate(x = ifelse(is.na(x), 0, x),
+         Group.1 = getYear(Accidentes.Fecha)) %>%
+  left_join(aggregate(viajes$DIST_TOTAL_KMINT,by=list(viajes$AÑO),FUN=sum) %>% 
+              rename(KM=x), by="Group.1") %>% 
+  mutate(Group.1=as.Date(paste0(Group.1,"-01-01")),EstanKm=x*1000000/KM) %>% 
+  group_by(Group.1 = floor_date(Accidentes.Fecha, unit = "year"),
+           Group.2 = Gravedad2,
+           Group.3 = Sexo) %>% 
+  summarise(n = n(),
+            sd_EstanKm = sd(EstanKm),
+            EstanKm = mean(EstanKm)) %>%
+  mutate(lwr = EstanKm - qt(0.975, df = n - 1) * sd_EstanKm / sqrt(n),
+         upr = EstanKm + qt(0.975, df = n - 1) * sd_EstanKm / sqrt(n),
+         n = NULL,
+         sd_EstanKm = NULL) %>% 
+  ungroup() %>% 
+  as.data.frame() %>% 
+  reshape(idvar = c("Group.1","Group.3"), timevar = "Group.2", direction= "wide") %>% 
+  mutate(lab.Dead = ifelse(year(Group.1) %in% c(2011, 2017),
+                           paste0("(", sprintf('%.3f', pmax(lwr.Dead, 0)),", ", sprintf('%.3f', upr.Dead),")"),
+                           NA),
+         `lab.Not Dead` = ifelse(year(Group.1) %in% c(2011, 2017),
+                                 paste0("(", sprintf('%.3f', pmax(`lwr.Not Dead`, 0)),", ", sprintf('%.3f', `upr.Not Dead`),")"),
+                                 NA))
+
+graph22_2 <- ggplot(data = aux, aes(x=Group.1)) + xlab("Year") + scale_x_date(date_labels = "%Y")+
+  geom_point(aes(y = EstanKm.Dead,colour="Dead"),show.legend = FALSE) +
+  geom_errorbar(aes(ymin = lwr.Dead,ymax=upr.Dead,colour="Dead"),show.legend = FALSE) +
+  geom_text(aes(y = upr.Dead,label=lab.Dead),size=3,vjust=-1,family="Helvetica Light",show.legend = FALSE) +
+  geom_point(aes(y = `EstanKm.Not Dead`,colour="Not Dead"),show.legend = TRUE) + 
+  geom_errorbar(aes(ymin = `lwr.Not Dead`,ymax=`upr.Not Dead`,colour="Not Dead"),show.legend = FALSE) + ylab("Bicyclists’ collisions per million VKmT") +
+  geom_text(aes(y = `upr.Not Dead`,label=`lab.Not Dead`),size=3,vjust=-1,family="Helvetica Light",show.legend = FALSE)+
+  scale_colour_manual(breaks=c("Dead","Not Dead"),values = c("orangered3","navy"),labels=c("Fatal","Nonfatal"))+
+  scale_linetype_manual(breaks=c("Tipo1","Tipo2"),values=c(1,3),labels=c("Fatal","Nonfatal"))+labs(colour="",linetype="")+
+  scale_y_continuous(expand = expand_scale(mult = 0.2)) +
+  theme_minimal() +
+  theme(text=element_text(family="Helvetica Light",size=12,color="grey40"))  +
+  facet_grid(Group.3~., scales = "free_y")
 
 #Total de accidentes durante los meses por género----
 aux <- aggregate(AccidentesBiciTotal$Accidente,by=list(getYear(AccidentesBiciTotal$Accidentes.Fecha),getMonth(AccidentesBiciTotal$Accidentes.Fecha),AccidentesBiciTotal$Gravedad2,AccidentesBiciTotal$Sexo),FUN=length) %>% mutate(Mes=as.Date(paste(Group.1,Group.2,"01",sep="/"),"%Y/%m/%d"))
@@ -831,14 +1103,21 @@ showtext_end()
 dev.off()
 
 #Tendencias de accidentalidad para publicación----
-svg("./GRAFICOS/AccidentTrends_Paper.svg",width = cmWidth, height = cmHeight*1.2)
+pdf("./GRAFICOS/AccidentTrends_Paper.pdf",width = cmWidth, height = cmHeight*1.2)
 showtext_begin()
 print(
-  ggarrange(graph11,graph12,graph21+ylab("Cyclists’ casualties per 1M Km cycled"),graph22+ylab("Cyclists’ casualties per 1M Km cycled"),labels=c("A","B","C","D"),common.legend = TRUE,legend = "bottom")
+  ggarrange(graph11,graph12,graph21,graph22,labels=c("A","B","C","D"),common.legend = TRUE,legend = "bottom")
 )
 showtext_end()
 dev.off()
-rm(graph11,graph12,graph21,graph22)
+
+pdf("./GRAFICOS/AccidentTrends_Paper_2.pdf",width = cmWidth, height = cmHeight*1.2)
+showtext_begin()
+print(
+  ggarrange(graph11_2,graph12_2,graph21_2,graph22_2,labels=c("A","B","C","D"),common.legend = TRUE,legend = "bottom")
+)
+showtext_end()
+dev.off()
 
 ########### TEMPORALIDAD ACCIDENTES ##################################################################
 #Total de accidentes durante los dias----

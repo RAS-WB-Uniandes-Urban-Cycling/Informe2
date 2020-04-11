@@ -57,8 +57,8 @@ despacio$Fallece<-NA
 despacio$Source<-"Despacio"
 
 #Nombres wri
-wri$Accidentes.Fecha<-as.POSIXct(as.character(wri$FECHA_OCUR), format="%Y-%m-%d")
-wri$Accidentes.HoraOcurrencia<-as.POSIXct(paste(wri$FECHA_OCUR,wri$HORA_OCURR))
+wri$Accidentes.Fecha<-as.Date(as.character(wri$FECHA_OCUR), format="%Y-%m-%d",tz = Sys.timezone())
+wri$Accidentes.HoraOcurrencia<-as.POSIXct(paste(wri$FECHA_OCUR,wri$HORA_OCURR),tz = Sys.timezone())
 wri$HORA_OCURR<-NULL
 wri$FECHA_OCUR<-NULL
 wri$OBJECTID_1<-NULL
@@ -179,8 +179,8 @@ SDM$`Victimas.Peaton-Pasajero?`<-NA
 SDM$Victimas.Sexo<-NA
 SDM$Adress<-NA
 SDM$Accidente.1<-NA
-SDM$Accidentes.Fecha<-as.POSIXct(as.character(SDM$Accidentes.FECHA_OCUR), format="%Y-%m-%d")
-SDM$Accidentes.HoraOcurrencia<-as.POSIXct(paste(SDM$Accidentes.FECHA_OCUR,SDM$Accidentes.HORA_OCURR))
+SDM$Accidentes.Fecha<-as.Date(as.character(SDM$Accidentes.FECHA_OCUR), format="%Y-%m-%d",tz = Sys.timezone())
+SDM$Accidentes.HoraOcurrencia<-as.POSIXct(paste(SDM$Accidentes.FECHA_OCUR,SDM$Accidentes.HORA_OCURR),tz = Sys.timezone())
 SDM$Accidentes.HORA_OCURR<-NULL
 SDM$Accidentes.FECHA_OCUR<-NULL
 SDM$Accidentes.ANO_OCURRE<-NULL
@@ -275,6 +275,46 @@ AccidentesBiciTotal<-st_join(AccidentesBiciTotal,Localidades[,c("LocNombre")],le
 AccidentesBiciTotal$Accidentes.Localidad<-AccidentesBiciTotal$LocNombre
 AccidentesBiciTotal$LocNombre<-NULL
 
+i=11
+UPZ<-st_read(paste0(carpetaRAS,"/BASES DE DATOS/Mapas de Referencia IDECA/MR10",i,".gdb"),layer="UPla") %>% 
+  st_transform(crs=4326)
+AccidentesBiciTotal2011<-st_join(AccidentesBiciTotal[getYear(AccidentesBiciTotal$Accidentes.Fecha)==2000+i,],UPZ[,("UPLCODIGO")],left=TRUE) %>% rename(UPlCodigo=UPLCODIGO)
+i=12
+UPZ<-st_read(paste0(carpetaRAS,"/BASES DE DATOS/Mapas de Referencia IDECA/MR12",i,".gdb"),layer="UPla") %>% 
+  st_transform(crs=4326)
+AccidentesBiciTotal2012<-st_join(AccidentesBiciTotal[getYear(AccidentesBiciTotal$Accidentes.Fecha)==2000+i,],UPZ[,("UPlCodigo")],left=TRUE)
+i=13
+UPZ<-st_read(paste0(carpetaRAS,"/BASES DE DATOS/Mapas de Referencia IDECA/MR12",i,".gdb"),layer="UPla") %>% 
+  st_transform(crs=4326)
+AccidentesBiciTotal2013<-st_join(AccidentesBiciTotal[getYear(AccidentesBiciTotal$Accidentes.Fecha)==2000+i,],UPZ[,("UPlCodigo")],left=TRUE)
+i=14
+UPZ<-st_read(paste0(carpetaRAS,"/BASES DE DATOS/Mapas de Referencia IDECA/MR12",i,".gdb"),layer="UPla") %>% 
+  st_transform(crs=4326)
+AccidentesBiciTotal2014<-st_join(AccidentesBiciTotal[getYear(AccidentesBiciTotal$Accidentes.Fecha)==2000+i,],UPZ[,("UPlCodigo")],left=TRUE)
+i=15
+UPZ<-st_read(paste0(carpetaRAS,"/BASES DE DATOS/Mapas de Referencia IDECA/MR12",i,".gdb"),layer="UPla") %>% 
+  st_transform(crs=4326)
+AccidentesBiciTotal2015<-st_join(AccidentesBiciTotal[getYear(AccidentesBiciTotal$Accidentes.Fecha)==2000+i,],UPZ[,("UPlCodigo")],left=TRUE)
+i=16
+UPZ<-st_read(paste0(carpetaRAS,"/BASES DE DATOS/Mapas de Referencia IDECA/MR12",i,".gdb"),layer="UPla") %>% 
+  st_transform(crs=4326)
+AccidentesBiciTotal2016<-st_join(AccidentesBiciTotal[getYear(AccidentesBiciTotal$Accidentes.Fecha)==2000+i,],UPZ[,("UPlCodigo")],left=TRUE)
+i=17
+UPZ<-st_read(paste0(carpetaRAS,"/BASES DE DATOS/Mapas de Referencia IDECA/MR12",i,".gdb"),layer="UPla") %>% 
+  st_transform(crs=4326)
+AccidentesBiciTotal2017<-st_join(AccidentesBiciTotal[getYear(AccidentesBiciTotal$Accidentes.Fecha)==2000+i,],UPZ[,("UPlCodigo")],left=TRUE)
+
+AccidentesBiciTotalOld<-AccidentesBiciTotal[getYear(AccidentesBiciTotal$Accidentes.Fecha)<2011,] %>% mutate(UPlCodigo=NA)
+
+AccidentesBiciTotal<-rbind(AccidentesBiciTotalOld,AccidentesBiciTotal2011,AccidentesBiciTotal2012,
+                            AccidentesBiciTotal2013,AccidentesBiciTotal2014,
+                            AccidentesBiciTotal2015,AccidentesBiciTotal2016,
+                            AccidentesBiciTotal2017)
+rm(AccidentesBiciTotalOld,AccidentesBiciTotal2011,AccidentesBiciTotal2012,
+   AccidentesBiciTotal2013,AccidentesBiciTotal2014,
+   AccidentesBiciTotal2015,AccidentesBiciTotal2016,
+   AccidentesBiciTotal2017)
+
 AccidentesBiciTotal$Accidentes.TipoDiseno2<-
   ifelse(AccidentesBiciTotal$Accidentes.TipoDiseno=="Cicloruta","Bikeway",
   ifelse(AccidentesBiciTotal$Accidentes.TipoDiseno=="Intersección","Intersection",
@@ -325,8 +365,8 @@ AccidentesTotales$Fallece<-NA
 AccidentesTotales$Source<-"Despacio"
 
 #Nombres wriTotales
-wriTotales$Accidentes.Fecha<-as.POSIXct(as.character(wriTotales$FECHA_OCUR), format="%Y-%m-%d")
-wriTotales$Accidentes.HoraOcurrencia<-as.POSIXct(paste(wriTotales$FECHA_OCUR,wriTotales$HORA_OCURR))
+wriTotales$Accidentes.Fecha<-as.Date(as.character(wriTotales$FECHA_OCUR), format="%Y-%m-%d",tz = Sys.timezone())
+wriTotales$Accidentes.HoraOcurrencia<-as.POSIXct(paste(wriTotales$FECHA_OCUR,wriTotales$HORA_OCURR),tz = Sys.timezone())
 wriTotales$HORA_OCURR<-NULL
 wriTotales$FECHA_OCUR<-NULL
 wriTotales$OBJECTID_1<-NULL
