@@ -42,7 +42,7 @@ ZAT_loca<-st_read(paste0(carpetaRAS,"/RESULTADOS/GENERAL/GEO-DATA/ZATs_Localidad
 UPZ_ZAT<-st_join(st_centroid(UPZ),ZAT_loca,left=TRUE,join=st_within) %>% st_set_geometry(NULL) %>% dplyr::select(UPZ=UPlCodigo,ZAT=Zn_Nm_N)
 UPZ_ZAT<-UPZ_ZAT[-grep(glob2rx("UPR*"),UPZ_ZAT$UPZ),]
 UPZ_ZAT$UPZ<-as.numeric(substr(UPZ_ZAT$UPZ,4,6))
-rm(UPZ)
+rm(UPZ,ZAT_loca)
 
 # Traducción de UPZ a ZAT
 viajes2005<-merge(viajes2005,UPZ_ZAT,by.x="D29_UPZ",by.y="UPZ",all.x=TRUE)
@@ -50,7 +50,7 @@ viajes2005<-merge(viajes2005,UPZ_ZAT,by.x="D32_UPZ",by.y="UPZ",suffixes = c("","
 rm(UPZ_ZAT)
 
 # Resumen
-viajes2005<-aggregate(viajes2005[,c("FACTRED_FI","DISTANCIA")],by=list(viajes2005$ZAT,viajes2005$ZAT_DST,viajes2005$C9_SEXO,viajes2005$GR_EDAD),FUN=sum,na.rm=TRUE) %>% dplyr::select(ZAT_SRC=Group.1,ZAT_DST=Group.2,SEXO=Group.3,GR_EDAD=Group.4,VIAJES=FACTRED_FI,DIST_TOTAL_KM=DISTANCIA)
+viajes2005<-aggregate(viajes2005[,c("FACTRED_FI","DISTANCIA")],by=list(viajes2005$ZAT,viajes2005$ZAT_DST,viajes2005$C9_SEXO,viajes2005$GR_EDAD),FUN=sum,na.rm=TRUE) %>% dplyr::select(ZAT_SRC=Group.1,ZAT_DST=Group.2,SEXO=Group.3,GR_EDAD=Group.4,VIAJES=FACTRED_FI)
 viajes2005$Año<-2005
 
 # Viajes por ZAT origen y ZAT destino de encuesta de movilidad 2011----
@@ -80,7 +80,6 @@ rm(personas2011,viajes2011usrs)
 # Resumen
 viajes2011<-aggregate(viajes2011$F_EXP,by=list(viajes2011$ZAT_ORIG,viajes2011$ZAT_DEST,viajes2011$P4_B,viajes2011$GR_EDAD),FUN=sum) %>% dplyr::select(ZAT_SRC=Group.1,ZAT_DST=Group.2,SEXO=Group.3,GR_EDAD=Group.4,VIAJES=x)
 viajes2011$Año<-2011
-viajes2011$DIST_TOTAL_KM<-NA
 
 # Viajes por ZAT origen y ZAT destino de encuesta de movilidad 2015----
 viajes2015<-read.csv(paste0(carpetaRAS,"/BASES DE DATOS/Encuesta de Movilidad/2015/Encuesta/encuesta 2015 - viajes.csv"),sep=";",fileEncoding = "Latin1",encoding = "Latin1",stringsAsFactors = FALSE)
@@ -122,65 +121,43 @@ rm(personas2015,viajes2015usrs)
 # Resumen
 viajes2015<-aggregate(viajes2015$PONDERADOR_CALIBRADO_VIAJES,by=list(viajes2015$ZAT_ORIGEN,viajes2015$ZAT_DESTINO,viajes2015$SEXO,viajes2015$GR_EDAD),FUN=sum) %>% dplyr::select(ZAT_SRC=Group.1,ZAT_DST=Group.2,SEXO=Group.3,GR_EDAD=Group.4,VIAJES=x)
 viajes2015$Año<-2015
-viajes2015$DIST_TOTAL_KM<-NA
 
 # Integración de la base de datos de viajes----
 viajes<-rbind(viajes2005,viajes2011,viajes2015)
 rm(viajes2005,viajes2011,viajes2015)
+rm(gruposEdad,encodeEdad2)
 
-# Lectura de la matriz de rutas más cortas entre centroides de ZAT----
-load(paste0(carpetaRAS,"/RESULTADOS/SEGURIDAD/Bases de datos/9. DistZat2Zat.Rdata"))
-
-# Extracción de la distancia recorrida por cada viaje entre pares ZAT Origen-Destino----
-viajes$id<-paste(viajes$ZAT_SRC,viajes$ZAT_DST,sep="_")
-bike_dist_zat2zat<-as.data.frame(bike_dist_zat2zat)
-bike_dist_zat2zat<-bike_dist_zat2zat[,c("id","distance")]
-viajes<-merge(viajes,bike_dist_zat2zat,by="id",all.x=TRUE)
-viajes$distance[viajes$ZAT_SRC==viajes$ZAT_DST]<-0
-rm(bike_dist_zat2zat)
-
-# Calculo de la distancia total recorrorrida por los biciusuarios en todos los viajes realizados----
-viajes$DIST_TOTAL_KM_EST<-viajes$VIAJES*viajes$distance/1000
-
-# Identificación de las localidades de origen y destino de los viajes y kilómetros recorridos----
-st_geometry(ZAT_loca)<-NULL 
-ZAT_loca<-ZAT_loca[,c("Zn_Nm_N","LocNmbr")]
-viajes<-merge(viajes,ZAT_loca,by.x="ZAT_SRC",by.y="Zn_Nm_N",all.x=TRUE)
-names(viajes)[grep("LocNmbr",names(viajes))]<-"LOC_SRC"
-viajes<-merge(viajes,ZAT_loca,by.x="ZAT_DST",by.y="Zn_Nm_N",all.x=TRUE)
-names(viajes)[grep("LocNmbr",names(viajes))]<-"LOC_DST"
-rm(ZAT_loca)
-
-# Resumen de los viajes y kilómetros recorridos por localidad de origen y localidad destino----
-viajes<-aggregate(viajes[,c("VIAJES","DIST_TOTAL_KM","DIST_TOTAL_KM_EST")],by=list(viajes$LOC_SRC, viajes$LOC_DST,viajes$Año,viajes$SEXO,viajes$GR_EDAD),FUN=sum) %>% rename(LOC_SRC=Group.1, LOC_DST=Group.2,AÑO=Group.3,SEXO=Group.4,GR_EDAD=Group.5)
-viajes$FECHA<-as.POSIXct(paste0(viajes$AÑO,"-01-01"),format="%F")
-viajes<-pad(viajes,interval="year", group=c("GR_EDAD","SEXO","LOC_SRC","LOC_DST"),start_val=as.Date("2005-01-01"),end_val=as.Date("2017-01-01"))
+# Padding de las fechas faltantes para hacer la interpolación de los viajes----
+viajes$FECHA<-as.POSIXct(paste0(viajes$Año,"-01-01"),format="%F")
+viajes<-pad(viajes,interval="year", group=c("GR_EDAD","SEXO","ZAT_SRC","ZAT_DST"),start_val=as.Date("2005-01-01"),end_val=as.Date("2017-01-01"))
 viajes$FECHA<-as.Date(viajes$FECHA)
 viajes$AÑO<-getYear(viajes$FECHA)
 viajes$VIAJES[viajes$AÑO==2005&is.na(viajes$VIAJES)]<-0
-viajes$DIST_TOTAL_KM_EST[viajes$AÑO==2005&is.na(viajes$DIST_TOTAL_KM_EST)]<-0
 viajes$VIAJES[viajes$AÑO==2011&is.na(viajes$VIAJES)]<-0
-viajes$DIST_TOTAL_KM_EST[viajes$AÑO==2011&is.na(viajes$DIST_TOTAL_KM_EST)]<-0
 viajes$VIAJES[viajes$AÑO==2015&is.na(viajes$VIAJES)]<-0
-viajes$DIST_TOTAL_KM_EST[viajes$AÑO==2015&is.na(viajes$DIST_TOTAL_KM_EST)]<-0
 
-# Interpolación lineal de valores faltantes----
+# Interpolación lineal de valores de viajes faltantes----
 #Interpolacion de años intermedios
 viajes %<>%
-  group_by(GR_EDAD,SEXO,LOC_SRC,LOC_DST) %>%
-  mutate(VIAJESINT = na.approx(VIAJES, na.rm=FALSE),DIST_TOTAL_KMINT = na.approx(DIST_TOTAL_KM_EST,na.rm=FALSE))
+  group_by(GR_EDAD,SEXO,ZAT_SRC,ZAT_DST) %>%
+  mutate(VIAJESINT = na.approx(VIAJES, na.rm=FALSE))
 viajes<-as.data.frame(viajes)
 
 #Interpolación de años fuera del rango
 viajes %<>%
-  group_by(GR_EDAD,SEXO,LOC_SRC,LOC_DST) %>%
-  mutate(VIAJESINT2 = pmax(0,cbind(rep(1,2),c(2005:2017))%*%as.matrix(lm(VIAJESINT[7:11]~c(2011:2015))$coefficients)),
-         DIST_TOTAL_KMINT2 = pmax(0,cbind(rep(1,2),c(2005:2017))%*%as.matrix(lm(DIST_TOTAL_KMINT[7:11]~c(2011:2015))$coefficients)))
+  group_by(GR_EDAD,SEXO,ZAT_SRC,ZAT_DST) %>%
+  mutate(VIAJESINT2 = pmax(0,cbind(rep(1,2),c(2005:2017))%*%as.matrix(lm(VIAJESINT[7:11]~c(2011:2015))$coefficients)))
 viajes<-as.data.frame(viajes)
 viajes$VIAJESINT[is.na(viajes$VIAJESINT)]<-viajes$VIAJESINT2[is.na(viajes$VIAJESINT)]
 viajes$VIAJESINT2<-NULL
-viajes$DIST_TOTAL_KMINT[is.na(viajes$DIST_TOTAL_KMINT)]<-viajes$DIST_TOTAL_KMINT2[is.na(viajes$DIST_TOTAL_KMINT)]
-viajes$DIST_TOTAL_KMINT2<-NULL
+
+# Lectura de la matriz de rutas más cortas entre centroides de ZAT----
+load(paste0(carpetaRAS,"/RESULTADOS/SEGURIDAD/Bases de datos/9. DistZat2Zat.Rdata"))
+
+# Asignación de la cantidad de viajes a las rutas----
+viajes$id<-paste(viajes$ZAT_SRC,viajes$ZAT_DST,sep="_")
+viajesRecorridos<-merge(bike_dist_zat2zat,viajes,by="id",all=TRUE)
+viajesRecorridos<-viajesRecorridos %>% filter(!is.na(ZAT_SRC)) %>% filter(!is.na(distance),VIAJESINT>0)
 
 # Guardado de los resultados de viajes y distancia recorrida entre localidades----
-save(viajes,file=paste0(carpetaRAS,"/RESULTADOS/SEGURIDAD/Bases de datos/10. Viajes_KilometrosRecorridos.Rdata"))
+save(viajesRecorridos,file=paste0(carpetaRAS,"/RESULTADOS/SEGURIDAD/Bases de datos/10.5 Viajes_Recorridos.Rdata"))

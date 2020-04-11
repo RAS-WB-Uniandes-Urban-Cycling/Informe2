@@ -23,7 +23,7 @@ load(paste0(carpetaRAS,"/RESULTADOS/SEGURIDAD/Bases de datos/3. AccidentesBiciTo
 load(paste(carpetaRAS,"/RESULTADOS/SEGURIDAD/Bases de datos/4. GruposEdadCodificacion.Rdata",sep=""))
 
 #Lectura de la base de datos de población estandar de referencia----
-stndpop<-as.data.frame(read_lines(paste0(carpetaRAS,"/BASES DE DATOs/National Cancer Institute - StandPop/stdpop.singleagesthru99.txt")))
+stndpop<-as.data.frame(read_lines(paste0(carpetaRAS,"/BASES DE DATOS/National Cancer Institute - StandPop/stdpop.singleagesthru99.txt")))
 names(stndpop)<-c("init")
 stndpop$Standard<-substr(stndpop$init,1,3)
 stndpop$Age<-as.numeric(substr(stndpop$init,4,6))
@@ -82,7 +82,7 @@ names(Poblacion_NLOC)<-c("GR_EDAD","AÑO","POBLACION")
 Poblacion_NLOC<-Poblacion_NLOC[Poblacion_NLOC$GR_EDAD!="0-4",]
 
 # Consolidación de las muertes de biciusuarios por edad y por sexo
-AccidentesBiciTotal_NLOC<-aggregate(AccidentesBiciTotal$EDAD,by=list(AccidentesBiciTotal$GR_EDAD,AccidentesBiciTotal$FECHA),FUN=length)
+AccidentesBiciTotal_NLOC<-aggregate(AccidentesBiciTotal$EDAD,by=list(AccidentesBiciTotal$GR_EDAD,getYear(AccidentesBiciTotal$FECHA)),FUN=length)
 names(AccidentesBiciTotal_NLOC)<-c("GR_EDAD","FECHA","MUERTES")
 
 #Consolidación de los biciusuarios por grupos de edad y sexo
@@ -90,9 +90,9 @@ biciusuarios_bogota<-aggregate(biciusuarios$BICIUSRSINT,by=list(biciusuarios$GR_
 names(biciusuarios_bogota)<-c("GR_EDAD","AÑO","BICIUSRSINT")
 
 #Consolidación de la tabla de defunciones totales, población total, muertes de biciusuarios, bicisusuarios y poblacion estandar por grupo de edad, sexo y més
-Agregado_aux<-aggregate(Agregado$DEFUNCIONES,by=list(Agregado$GR_EDAD,Agregado$ANO,Agregado$FECHA),FUN=sum) %>% select(GR_EDAD=Group.1,ANO=Group.2,FECHA=Group.3,DEFUNCIONES=x)
+Agregado_aux<-aggregate(Agregado$DEFUNCIONES,by=list(Agregado$GR_EDAD,Agregado$ANO,getYear(Agregado$FECHA)),FUN=sum) %>% select(GR_EDAD=Group.1,ANO=Group.2,FECHA=Group.3,DEFUNCIONES=x)
 Agregado_bogota<-merge(Agregado_aux,AccidentesBiciTotal_NLOC, by=c("GR_EDAD","FECHA"),all.x =TRUE)
-Agregado_bogota$AÑO<-as.numeric(getYear(Agregado_bogota$FECHA))
+Agregado_bogota$AÑO<-as.numeric(Agregado_bogota$FECHA)
 Agregado_bogota<-merge(Agregado_bogota,Poblacion_NLOC,by=c("GR_EDAD","AÑO"),all.x=TRUE)
 Agregado_bogota$MUERTES[is.na(Agregado_bogota$MUERTES)]<-0
 Agregado_bogota<-merge(Agregado_bogota, biciusuarios_bogota, by=c("GR_EDAD","AÑO"),all.x=TRUE)
@@ -140,7 +140,7 @@ Poblacion_NLOC<-aggregate(Poblacion$POBLACION,by=list(Poblacion$GR_EDAD,Poblacio
 names(Poblacion_NLOC)<-c("GR_EDAD","AÑO","POBLACION")
 
 # Consolidación de las muertes de biciusuarios por edad y por sexo
-AccidentesBiciTotal_NLOC<-aggregate(AccidentesBiciTotal$EDAD,by=list(AccidentesBiciTotal$GR_EDAD,AccidentesBiciTotal$FECHA),FUN=length)
+AccidentesBiciTotal_NLOC<-aggregate(AccidentesBiciTotal$EDAD,by=list(AccidentesBiciTotal$GR_EDAD,getYear(AccidentesBiciTotal$FECHA)),FUN=length)
 names(AccidentesBiciTotal_NLOC)<-c("GR_EDAD","FECHA","MUERTES")
 
 #Consolidación de los biciusuarios por grupos de edad y sexo
@@ -148,9 +148,9 @@ biciusuarios_bogota<-aggregate(biciusuarios$BICIUSRSINT,by=list(biciusuarios$GR_
 names(biciusuarios_bogota)<-c("GR_EDAD","AÑO","BICIUSRSINT")
 
 #Consolidación de la tabla de defunciones totales, población total, muertes de biciusuarios, bicisusuarios y poblacion estandar por grupo de edad, sexo y més
-Agregado_aux<-aggregate(Agregado$DEFUNCIONES,by=list(Agregado$GR_EDAD,Agregado$ANO,Agregado$FECHA),FUN=sum) %>% select(GR_EDAD=Group.1,ANO=Group.2,FECHA=Group.3,DEFUNCIONES=x)
+Agregado_aux<-aggregate(Agregado$DEFUNCIONES,by=list(Agregado$GR_EDAD,Agregado$ANO,getYear(Agregado$FECHA)),FUN=sum) %>% select(GR_EDAD=Group.1,ANO=Group.2,FECHA=Group.3,DEFUNCIONES=x)
 Agregado_bogota<-merge(Agregado_aux,AccidentesBiciTotal_NLOC, by=c("GR_EDAD","FECHA"),all.x =TRUE)
-Agregado_bogota$AÑO<-as.numeric(getYear(Agregado_bogota$FECHA))
+Agregado_bogota$AÑO<-as.numeric(Agregado_bogota$FECHA)
 Agregado_bogota<-merge(Agregado_bogota,Poblacion_NLOC,by=c("GR_EDAD","AÑO"),all.x=TRUE)
 Agregado_bogota$MUERTES[is.na(Agregado_bogota$MUERTES)]<-0
 Agregado_bogota<-merge(Agregado_bogota, biciusuarios_bogota, by=c("GR_EDAD","AÑO"),all.x=TRUE)
@@ -213,7 +213,7 @@ names(Poblacion_NLOC)<-c("GR_EDAD","SEXO","AÑO","POBLACION")
 Poblacion_NLOC<-Poblacion_NLOC[Poblacion_NLOC$GR_EDAD!="0-4",]
 
 # Consolidación de las muertes de biciusuarios por edad y por sexo
-AccidentesBiciTotal_NLOC<-aggregate(AccidentesBiciTotal$EDAD,by=list(AccidentesBiciTotal$GR_EDAD,AccidentesBiciTotal$SEXO,AccidentesBiciTotal$FECHA),FUN=length)
+AccidentesBiciTotal_NLOC<-aggregate(AccidentesBiciTotal$EDAD,by=list(AccidentesBiciTotal$GR_EDAD,AccidentesBiciTotal$SEXO,getYear(AccidentesBiciTotal$FECHA)),FUN=length)
 names(AccidentesBiciTotal_NLOC)<-c("GR_EDAD","SEXO","FECHA","MUERTES")
 
 #Consolidación de los biciusuarios por grupos de edad y sexo
@@ -221,8 +221,11 @@ biciusuarios_bogota<-aggregate(biciusuarios$BICIUSRSINT,by=list(biciusuarios$GR_
 names(biciusuarios_bogota)<-c("GR_EDAD","SEXO","AÑO","BICIUSRSINT")
 
 #Consolidación de la tabla de defunciones totales, población total, muertes de biciusuarios, bicisusuarios y poblacion estandar por grupo de edad, sexo y més
-Agregado_bogota<-merge(Agregado,AccidentesBiciTotal_NLOC, by=c("GR_EDAD","SEXO","FECHA"),all.x =TRUE)
-Agregado_bogota$AÑO<-as.numeric(getYear(Agregado_bogota$FECHA))
+Agregado_bogota<-merge(Agregado %>% 
+                         mutate(FECHA = getYear(FECHA)) %>% 
+                         group_by(GR_EDAD, SEXO, ANO, FECHA) %>% 
+                         summarise(DEFUNCIONES = sum(DEFUNCIONES)),AccidentesBiciTotal_NLOC, by=c("GR_EDAD","SEXO","FECHA"),all.x =TRUE)
+Agregado_bogota$AÑO<-as.numeric(Agregado_bogota$FECHA)
 Agregado_bogota<-merge(Agregado_bogota,Poblacion_NLOC,by=c("GR_EDAD","SEXO","AÑO"),all.x=TRUE)
 Agregado_bogota$MUERTES[is.na(Agregado_bogota$MUERTES)]<-0
 Agregado_bogota<-merge(Agregado_bogota, biciusuarios_bogota, by=c("GR_EDAD","SEXO","AÑO"),all.x=TRUE)
