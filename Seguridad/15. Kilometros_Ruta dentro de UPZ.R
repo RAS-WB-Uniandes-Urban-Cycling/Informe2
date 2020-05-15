@@ -127,8 +127,8 @@ map1 <- ggplot() +
                          pad_x = unit(0, "cm"), 
                          pad_y = unit(0.5, "cm"),
                          style = north_arrow_fancy_orienteering) +
-  xlab("Longitud") + 
-  ylab("Latitud") +
+  xlab("Longitude") + 
+  ylab("Latitude") +
   scale_fill_manual(breaks = c("d", "o"),
                     values = c("darkred", "forestgreen"),
                     labels = c("Destination" , "Origin"), 
@@ -162,8 +162,8 @@ map2 <- ggplot() +
                          pad_x = unit(0, "cm"), 
                          pad_y = unit(0.5, "cm"),
                          style = north_arrow_fancy_orienteering) +
-  xlab("Longitud") + 
-  ylab("Latitud") +
+  xlab("Longitude") + 
+  ylab("Latitude") +
   scale_fill_manual(breaks = c("d", "o"),
                     values = c("darkred", "forestgreen"),
                     labels = c("Destination" , "Origin"), 
@@ -226,8 +226,8 @@ map3 <- ggplot() +
                          pad_x = unit(0, "cm"), 
                          pad_y = unit(0.5, "cm"),
                          style = north_arrow_fancy_orienteering) +
-  xlab("Longitud") + 
-  ylab("Latitud") +
+  xlab("Longitude") + 
+  ylab("Latitude") +
   theme(panel.grid.major = element_line(color = gray(0.5), 
                                         linetype = "dashed", 
                                         size = 0.2), 

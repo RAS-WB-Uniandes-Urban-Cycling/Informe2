@@ -185,7 +185,7 @@ geo_effect_df <- function(model, hour, year = "2017") {
   return(data)
 }
 
-plotOneSmoothDF <- function(df, ylabs = "Odds of a fatal bicyclists' collision", xlabs = "x", min = 0, max = 24, minor = 2, major = 4) {
+plotOneSmoothDF <- function(df, ylabs = "Odds of a fatal collision", xlabs = "x", min = 0, max = 24, minor = 2, major = 4) {
   ggplot(df, aes_(~x, ~y)) + 
     geom_line(colour = "blue4", size = 1.1) + 
     geom_line(aes_(~x, ~se_upr), linetype = "dashed", colour = "black", size = 0.8, alpha=0.4) + 
@@ -307,14 +307,14 @@ plot_light_effect <- function(df) {
                     fontface="plain", fontfamily="", alpha=1))
 }
 
-plotOneSmooth <- function(gam, var, ylabs = "Odds of a fatal bicyclists' collision", xlabs = "x", min = 0, max = 24, minor = 2, major = 4, scale_x = 1) {
+plotOneSmooth <- function(gam, var, ylabs = "Odds of a fatal collision", xlabs = "x", min = 0, max = 24, minor = 2, major = 4, scale_x = 1) {
   df<-gam_to_df(gam, pred=var) %>% 
       mutate(se_upr=exp(se_upr), se_lwr=exp(se_lwr), y=exp(y)) %>% 
       mutate(x = scale_x * x)
   plotOneSmoothDF(df, xlabs = xlabs, min = min, max = max, minor = minor, major = major)
 }
 
-save_to_eps <- function(graphName, obj, height = 6, width = 6.83) {
+save_to_eps <- function(graphName, obj, height = 6, width = 3.415) {
   setEPS()
   postscript(paste0(graphName, ".eps"), height = height, width = width,
              paper = "special", onefile = FALSE,
@@ -327,7 +327,7 @@ save_to_eps <- function(graphName, obj, height = 6, width = 6.83) {
   file.remove(paste0(graphName, ".eps"))
 }
 
-save_to_pdf <- function(graphName, obj, height = 6, width = 6.83) {
+save_to_pdf <- function(graphName, obj, height = 6, width = 3.415) {
   pdf(paste0(graphName, ".pdf"), height = height, width = width)
   showtext_begin()
   print(obj)
@@ -363,7 +363,7 @@ plot_quadrat <- function(obj,window,mvi){
        ribsep = 0.05, ribwid = 0.02)
   plot(window, main = "", border = "gray45", col = NULL, box = F, edge = 0.01, add = T)
   plot(mvi, main = "", col = "gray60", show.window = F, lwd = 0.2, add = T)
-  plot(obj, entries = ifelse(round(as.numeric(intensity(obj))*1e6,1)!=-1,"",""), cex = 0.4, main="", add = T, border = "gray60", lwd = 0.1, dx = 0, dy = 0, 
+  plot(obj, entries = ifelse(round(as.numeric(intensity(obj))*1e6,1)!=-1,round(as.numeric(intensity(obj))*1e6,1),""), cex = 0.4, main="", add = T, border = "gray60", lwd = 0.1, dx = 0, dy = 0, 
        vfont = NULL, show.tiles = F)
 }
 
@@ -474,34 +474,34 @@ extract_linear_odds(baseModel)
 save_to_pdf("/Users/germancarvajal/Desktop/age",
             plotOneSmooth(baseModel, "Edad.L1", xlabs = "Bicyclist' age (year)", min = 0, max = 100, minor = 2.5, major = 5) +
               geom_vline(aes(xintercept=45), colour = "red", linetype = "dotted", size = 0.6), 
-            height = 5, width = 6.83)
+            height = 2.5, width = 3.415)
 save_to_pdf("/Users/germancarvajal/Desktop/slope",
             plotOneSmooth(baseModel, "Slope.L1", xlabs = "Terrain slope (%)", min = 0, max = .5, minor = 0.025, major = 0.05, scale_x = 100) +
               xlim(0,10) + ylim(0,6) + 
               geom_vline(aes(xintercept=3), colour = "red", linetype = "dotted", size = 0.6), 
-            height = 5, width = 6.83)
+            height = 2.5, width = 3.415)
 save_to_pdf("/Users/germancarvajal/Desktop/huecos",
             plotOneSmooth(baseModel, "HUECOS.L3", xlabs = "Road potholes (count within UPZ)", min = 0, max = 650, minor = 50, major = 100) + 
               geom_vline(aes(xintercept=260), colour = "red", linetype = "dotted", size = 0.6) +
               geom_vline(aes(xintercept=440), colour = "red", linetype = "dotted", size = 0.6), 
-            height = 5, width = 6.83)
+            height = 2.5, width = 3.415)
 save_to_pdf("/Users/germancarvajal/Desktop/biciusrs",
             plotOneSmooth(baseModel, "BICIUSURS.L2", xlabs = "Byciclists x1000 (count within UPZ)", min = 0, max = 50, minor = 5, major = 10), 
-            height = 5, width = 6.83)
+            height = 2.5, width = 3.415)
 save_to_pdf("/Users/germancarvajal/Desktop/time",
             plotOneSmoothDF(time_effect_df(baseModel), xlabs = "Time of occurrence (hour)", min = 0, max = 24, minor = 2, major = 4) +
               geom_vline(aes(xintercept=4), colour = "red", linetype = "dotted", size = 0.6) +
               geom_vline(aes(xintercept=22), colour = "red", linetype = "dotted", size = 0.6), 
-            height = 5, width = 6.83)
+            height = 2.5, width = 3.415)
 save_to_pdf("/Users/germancarvajal/Desktop/lanewidth", 
             plotOneSmooth(baseModel, "Ancho.L1", xlabs = "Lane width (m)", min = 0, max = 8, minor = 0.5, major = 1),
-            height = 5, width = 6.83)
+            height = 2.5, width = 3.415)
 save_to_pdf("/Users/germancarvajal/Desktop/lanes", 
             plotOneSmooth(baseModel, "Carriles.L1", xlabs = "Number of lanes (count)", min = 0, max = 5, minor = 1, major = 1),
-            height = 5, width = 6.83)
+            height = 2.5, width = 3.415)
 save_to_pdf("/Users/germancarvajal/Desktop/speed", 
             plotOneSmooth(baseModel, "Velocidad.L1", xlabs = "Average motor vehicle's speed (Km/h)", min = 0, max = 70, minor = 5, major = 10),
-            height = 5, width = 6.83)
+            height = 2.5, width = 3.415)
 
 categorical_margins("Sexo.L1", total, baseModel)
 categorical_margins("Vehiculo.L1", total, baseModel, "Car", "BRT")
@@ -561,7 +561,7 @@ extract_linear_odds(antiguedadModel)
 save_to_pdf("/Users/germancarvajal/Desktop/antiguedad", 
             plotOneSmooth(antiguedadModel, "AntiguedadBici.L1", xlabs = "Byciclists x1000 (count within UPZ)", min = 0, max = 5, minor = 0.5, major = 1) +
             xlim(0,5) + ylim(0,3),
-            height = 5, width = 6.83)
+            height = 2.5, width = 3.415)
 
 # Modelo con efectos aleatorios por UPZ y Year, con todas las variables + Clima.L1----
 set.seed(123)
@@ -663,34 +663,34 @@ extract_linear_odds(menModel)
 save_to_pdf("/Users/germancarvajal/Desktop/males_age",
             plotOneSmooth(menModel, "Edad.L1", xlabs = "Bicyclist' age (year)", min = 0, max = 100, minor = 2.5, major = 5) + 
               geom_vline(aes(xintercept=40), colour = "red", linetype = "dotted", size = 0.6), 
-            height = 5, width = 6.83)
+            height = 2.5, width = 3.415)
 save_to_pdf("/Users/germancarvajal/Desktop/males_slope",
             plotOneSmooth(menModel, "Slope.L1", xlabs = "Terrain slope (%)", min = 0, max = .5, minor = 0.025, major = 0.05, scale_x = 100) +
               xlim(0,10) + ylim(0,6) + 
               geom_vline(aes(xintercept=3), colour = "red", linetype = "dotted", size = 0.6), 
-            height = 5, width = 6.83)
+            height = 2.5, width = 3.415)
 save_to_pdf("/Users/germancarvajal/Desktop/males_huecos",
             plotOneSmooth(menModel, "HUECOS.L3", xlabs = "Road potholes (count within UPZ)", min = 0, max = 650, minor = 50, major = 100) +
               geom_vline(aes(xintercept=260), colour = "red", linetype = "dotted", size = 0.6) +
               geom_vline(aes(xintercept=430), colour = "red", linetype = "dotted", size = 0.6), 
-            height = 5, width = 6.83)
+            height = 2.5, width = 3.415)
 save_to_pdf("/Users/germancarvajal/Desktop/males_biciusrs",
             plotOneSmooth(menModel, "BICIUSURS.L2", xlabs = "Byciclists x1000 (count within UPZ)", min = 0, max = 50, minor = 5, major = 10), 
-            height = 5, width = 6.83)
+            height = 2.5, width = 3.415)
 save_to_pdf("/Users/germancarvajal/Desktop/males_time",
             plotOneSmoothDF(time_effect_df(menModel), xlabs = "Time of occurrence (hour)", min = 0, max = 24, minor = 2, major = 4) +
               geom_vline(aes(xintercept=4), colour = "red", linetype = "dotted", size = 0.6) +
               geom_vline(aes(xintercept=22), colour = "red", linetype = "dotted", size = 0.6), 
-            height = 5, width = 6.83)
+            height = 2.5, width = 3.415)
 save_to_pdf("/Users/germancarvajal/Desktop/males_lanewidth", 
             plotOneSmooth(menModel, "Ancho.L1", xlabs = "Lane width (m)", min = 0, max = 8, minor = 0.5, major = 1),
-            height = 5, width = 6.83)
+            height = 2.5, width = 3.415)
 save_to_pdf("/Users/germancarvajal/Desktop/males_lanes", 
             plotOneSmooth(menModel, "Carriles.L1", xlabs = "Number of lanes (count)", min = 0, max = 5, minor = 1, major = 1),
-            height = 5, width = 6.83)
+            height = 2.5, width = 3.415)
 save_to_pdf("/Users/germancarvajal/Desktop/males_speed", 
             plotOneSmooth(menModel, "Velocidad.L1", xlabs = "Average motor vehicle's speed (Km/h)", min = 0, max = 70, minor = 5, major = 10),
-            height = 5, width = 6.83)
+            height = 2.5, width = 3.415)
 
 categorical_margins("Vehiculo.L1", total %>% filter(Sexo.L1==1), menModel, "Car", "BRT")
 categorical_margins("Vehiculo.L1", total %>% filter(Sexo.L1==1), menModel, "Car", "Cargo")
@@ -735,30 +735,30 @@ extract_linear_odds(womenModel)
 save_to_pdf("/Users/germancarvajal/Desktop/females_age",
             plotOneSmooth(womenModel, "Edad.L1", xlabs = "Bicyclist' age (year)", min = 0, max = 100, minor = 2.5, major = 5) +
               ylim(0,11), 
-            height = 5, width = 6.83)
+            height = 2.5, width = 3.415)
 save_to_pdf("/Users/germancarvajal/Desktop/females_slope",
             plotOneSmooth(womenModel, "Slope.L1", xlabs = "Terrain slope (%)", min = 0, max = .5, minor = 0.025, major = 0.05, scale_x = 100) +
-              xlim(0,10) + ylim(0,6) + 
+              xlim(0   ,10) + ylim(0,6) + 
               geom_vline(aes(xintercept=2.5), colour = "red", linetype = "dotted", size = 0.6), 
-            height = 5, width = 6.83)
+            height = 2.5, width = 3.415)
 save_to_pdf("/Users/germancarvajal/Desktop/females_huecos",
             plotOneSmooth(womenModel, "HUECOS.L3", xlabs = "Road potholes (count within UPZ)", min = 0, max = 650, minor = 50, major = 100), 
-            height = 5, width = 6.83)
+            height = 2.5, width = 3.415)
 save_to_pdf("/Users/germancarvajal/Desktop/females_biciusrs",
             plotOneSmooth(womenModel, "BICIUSURS.L2", xlabs = "Byciclists x1000 (count within UPZ)", min = 0, max = 50, minor = 5, major = 10), 
-            height = 5, width = 6.83)
+            height = 2.5, width = 3.415)
 save_to_pdf("/Users/germancarvajal/Desktop/females_time",
             plotOneSmoothDF(time_effect_df(womenModel), xlabs = "Time of occurrence (hour)", min = 0, max = 24, minor = 2, major = 4), 
-            height = 5, width = 6.83)
+            height = 2.5, width = 3.415)
 save_to_pdf("/Users/germancarvajal/Desktop/females_lanewidth", 
             plotOneSmooth(womenModel, "Ancho.L1", xlabs = "Lane width (m)", min = 0, max = 8, minor = 0.5, major = 1),
-            height = 5, width = 6.83)
+            height = 2.5, width = 3.415)
 save_to_pdf("/Users/germancarvajal/Desktop/females_lanes", 
             plotOneSmooth(womenModel, "Carriles.L1", xlabs = "Number of lanes (count)", min = 0, max = 5, minor = 1, major = 1),
-            height = 5, width = 6.83)
+            height = 2.5, width = 3.415)
 save_to_pdf("/Users/germancarvajal/Desktop/females_speed", 
             plotOneSmooth(womenModel, "Velocidad.L1", xlabs = "Average motor vehicle's speed (Km/h)", min = 0, max = 70, minor = 5, major = 10),
-            height = 5, width = 6.83)
+            height = 2.5, width = 3.415)
 
 categorical_margins("Vehiculo.L1", total %>% filter(Sexo.L1==0), womenModel, "Car", "BRT")
 categorical_margins("Vehiculo.L1", total %>% filter(Sexo.L1==0), womenModel, "Car", "Cargo")
@@ -822,29 +822,29 @@ extract_linear_odds(balancedModel)
 save_to_pdf("/Users/germancarvajal/Desktop/balanced_age",
             plotOneSmooth(balancedModel, "Edad.L1", xlabs = "Bicyclist' age (year)", min = 0, max = 100, minor = 2.5, major = 5) +
               ylim(0,11), 
-            height = 5, width = 6.83)
+            height = 2.5, width = 3.415)
 save_to_pdf("/Users/germancarvajal/Desktop/balanced_slope",
             plotOneSmooth(balancedModel, "Slope.L1", xlabs = "Terrain slope (%)", min = 0, max = .5, minor = 0.025, major = 0.05, scale_x = 100) +
               xlim(0,10) + ylim(0,8), 
-            height = 5, width = 6.83)
+            height = 2.5, width = 3.415)
 save_to_pdf("/Users/germancarvajal/Desktop/balanced_huecos",
             plotOneSmooth(balancedModel, "HUECOS.L3", xlabs = "Road potholes (count within UPZ)", min = 0, max = 650, minor = 50, major = 100), 
-            height = 5, width = 6.83)
+            height = 2.5, width = 3.415)
 save_to_pdf("/Users/germancarvajal/Desktop/balanced_biciusrs",
             plotOneSmooth(balancedModel, "BICIUSURS.L2", xlabs = "Byciclists x1000 (count within UPZ)", min = 0, max = 50, minor = 5, major = 10), 
-            height = 5, width = 6.83)
+            height = 2.5, width = 3.415)
 save_to_pdf("/Users/germancarvajal/Desktop/balanced_time",
             plotOneSmoothDF(time_effect_df(balancedModel), xlabs = "Time of occurrence (hour)", min = 0, max = 24, minor = 2, major = 4), 
-            height = 5, width = 6.83)
+            height = 2.5, width = 3.415)
 save_to_pdf("/Users/germancarvajal/Desktop/balanced_lanewidth", 
             plotOneSmooth(balancedModel, "Ancho.L1", xlabs = "Lane width (m)", min = 0, max = 8, minor = 0.5, major = 1),
-            height = 5, width = 6.83)
+            height = 2.5, width = 3.415)
 save_to_pdf("/Users/germancarvajal/Desktop/balanced_lanes", 
             plotOneSmooth(balancedModel, "Carriles.L1", xlabs = "Number of lanes (count)", min = 0, max = 5, minor = 1, major = 1),
-            height = 5, width = 6.83)
+            height = 2.5, width = 3.415)
 save_to_pdf("/Users/germancarvajal/Desktop/balanced_speed", 
             plotOneSmooth(balancedModel, "Velocidad.L1", xlabs = "Average motor vehicle's speed (Km/h)", min = 0, max = 70, minor = 5, major = 10),
-            height = 5, width = 6.83)
+            height = 2.5, width = 3.415)
 
 categorical_margins("Sexo.L1", total, balancedModel)
 categorical_margins("Vehiculo.L1", total, balancedModel, "Car", "BRT")
@@ -909,7 +909,7 @@ save_to_pdf("/Users/germancarvajal/Desktop/fatal_k",
             height = 4.8, width = 4.8)
 
 #Density analysis
-spatial_analysis$fatal$sigma = bw.ppl(split(spatial_analysis$pp)$Fatal)
+spatial_analysis$fatal$sigma <- bw.ppl(split(spatial_analysis$pp)$Fatal)
 spatial_analysis$fatal$den <- density(split(spatial_analysis$pp)$Fatal, sigma = spatial_analysis$fatal$sigma)
 save_to_pdf("/Users/germancarvajal/Desktop/fatal_density", 
             plot_density(spatial_analysis$fatal$den,spatial_analysis$window,spatial_analysis$mvi), 
@@ -922,6 +922,14 @@ spatial_analysis$fatal$Q <- quadratcount(split(spatial_analysis$pp)$Fatal, nx = 
 save_to_pdf("/Users/germancarvajal/Desktop/fatal_quadrat", 
             plot_quadrat(spatial_analysis$fatal$Q,spatial_analysis$window,spatial_analysis$mvi), 
             height = 6.83, width = 4.8)
+
+quantile(x = as.numeric(intensity(spatial_analysis$fatal$Q))*1e6, p = 0.96)
+
+intensity(spatial_analysis$fatal$Q) %>% 
+  as.data.frame() %>% 
+  mutate(Freq = Freq * 1e6) %>% 
+  filter(Freq > quantile(x = as.numeric(intensity(spatial_analysis$fatal$Q))*1e6, p = 0.96)) %>% 
+  View()
 
 # Quadrat test
 spatial_analysis$fatal$M<-quadrat.test(split(spatial_analysis$pp)$Fatal, nx = spatial_analysis$fatal$nx, ny = spatial_analysis$fatal$ny, 

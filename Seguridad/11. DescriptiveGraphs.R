@@ -223,6 +223,23 @@ dev.off()
 
 ########### VIAJES Y KILÓMETROS RECORRIDOS ###########################################################
 #Kilómetros recorridos totales por año y validación----
+viajes %>% 
+  filter(!is.na(DIST_TOTAL_KM)) %>% 
+  nrow()
+
+viajes %>% 
+  select(DIST_TOTAL_KM, DIST_TOTAL_KM_EST) %>% 
+  filter(!is.na(DIST_TOTAL_KM), DIST_TOTAL_KM > 0) %>% 
+  mutate(ERROR = (DIST_TOTAL_KM_EST - DIST_TOTAL_KM)/DIST_TOTAL_KM) %>% 
+  summarise(ERROR_mean = mean(ERROR),
+            ERROR_sd = sd(ERROR))
+
+viajes %>% 
+  filter(!is.na(DIST_TOTAL_KM)) %>%
+  summarise(DIST_TOTAL_KM = sum(DIST_TOTAL_KM),
+            DIST_TOTAL_KM_EST = sum(DIST_TOTAL_KM_EST)) %>% 
+  mutate(ERROR = (DIST_TOTAL_KM_EST-DIST_TOTAL_KM)/DIST_TOTAL_KM)
+
 aux<-aggregate(viajes[,c("DIST_TOTAL_KM","DIST_TOTAL_KM_EST","DIST_TOTAL_KMINT")],by=list(viajes$AÑO),FUN=sum,na.rm=TRUE) %>% na_if(0) %>% mutate(Fecha=as.Date(paste0(Group.1,"-01-01"))) %>% select(Fecha,DIST_TOTAL_KM_EST,DIST_TOTAL_KM,DIST_TOTAL_KMINT)
 svg("./GRAFICOS/TraveledKM_Time.svg",width = cmWidth,height = cmHeight)
 showtext_begin()
@@ -369,6 +386,10 @@ dev.off()
 
 #SMR de los ciclistas contra la población de Bogotá----
 aux<-WorkTable_bogotaAg_of[,c("FECHA","SMRbic_bog")] %>% mutate(FECHA=as.Date(paste0(FECHA,"-12-31")))
+
+print("SMR total")
+t.test(SMRbic_bog~FECHA, data = aux %>% mutate(FECHA = year(FECHA)) %>% filter(FECHA %in% c(2011, 2016)))
+
 summary(lm(formula = SMRbic_bog~FECHA, data =aux))
 svg("./GRAFICOS/SMR_BogotaCyclists_Time.svg",width = cmWidth,height = cmHeight)
 showtext_begin()
@@ -465,6 +486,10 @@ dev.off()
 
 #SMR de los ciclistas contra la población de Bogotá por género----
 aux<-WorkTable_bogota_of[,c("FECHA","SEXO","SMRbic_bog")] %>% mutate(FECHA=as.Date(paste0(FECHA, "-12-31")))
+
+print("SMR female vs. male")
+summary(lm(SMRbic_bog~FECHA*SEXO, data = aux %>% mutate(FECHA = as.factor(year(FECHA))) %>% filter(FECHA %in% c(2011, 2016))))
+
 summary(lm(formula = SMRbic_bog~FECHA, data =aux %>% filter(SEXO=="Male")))
 summary(lm(formula = SMRbic_bog~FECHA, data =aux %>% filter(SEXO=="Female")))
 svg("./GRAFICOS/SMR_Cyclists_Gender_Time.svg",width = cmWidth,height = cmHeight)
@@ -936,8 +961,9 @@ aux <- AccidentesBiciTotal %>%
       end_val = as.Date("2017-12-01")) %>% 
   mutate(x = ifelse(is.na(x), 0, x),
          Group.1 = getYear(Accidentes.Fecha)) %>%
-  left_join(aggregate(biciusuarios$BICIUSRSINT,by=list(getYear(biciusuarios$FECHA)),FUN=sum) %>% 
-              rename(BICIUSRS=x), by="Group.1") %>% 
+  left_join(aggregate(biciusuarios$BICIUSRSINT,by=list(getYear(biciusuarios$FECHA), biciusuarios$SEXO),FUN=sum) %>% 
+              rename(BICIUSRS=x,
+                     Sexo=Group.2), by=c("Group.1", "Sexo")) %>% 
   mutate(Group.1=as.Date(paste0(Group.1,"-01-01")),EstanBici=x*1000/BICIUSRS) %>% {
     data <- .
     
@@ -968,9 +994,13 @@ aux <- AccidentesBiciTotal %>%
         data %>% 
           filter(year(Accidentes.Fecha) %in% c(2011, 2017),
                  Gravedad2 == "Not Dead",
-                 Sexo=="Female") %>% 
+                 Sexo=="Male") %>% 
           t.test(EstanBici~Group.1, data = .) %>% 
           print()
+        print("Biciusuarios - Female vs. Male reduction - Dead")
+        print(summary(lm(EstanBici~Accidentes.Fecha*Sexo, data = data %>% filter(year(Accidentes.Fecha) %in% c(2011, 2017), Gravedad2 == "Dead") %>% mutate(Accidentes.Fecha = as.factor(year(Accidentes.Fecha))))))
+        print("Biciusuarios - Female vs. Male reduction - Not Dead")
+        print(summary(lm(EstanBici~Accidentes.Fecha*Sexo, data = data %>% filter(year(Accidentes.Fecha) %in% c(2011, 2017), Gravedad2 == "Not Dead") %>% mutate(Accidentes.Fecha = as.factor(year(Accidentes.Fecha))))))
       })
     }, file = "./GRAFICOS/estadisticas.txt", append = T)
     
@@ -995,7 +1025,7 @@ graph12_2 <- ggplot(data = aux, aes(x=Group.1)) + xlab("Year") + scale_x_date(da
   geom_errorbar(aes(ymin = lwr.Dead,ymax=upr.Dead,colour="Dead"),show.legend = FALSE) +
   geom_text(aes(y = upr.Dead,label=sprintf('%.3f', EstanBici.Dead)),size=3,vjust=-1,family="Helvetica Light",show.legend = FALSE) +
   geom_point(aes(y = `EstanBici.Not Dead`,colour="Not Dead"),show.legend = TRUE) + 
-  geom_errorbar(aes(ymin = `lwr.Not Dead`,ymax=`upr.Not Dead`,colour="Not Dead"),show.legend = FALSE) + ylab("Bicyclists’ collisions per 1,000 bicyclists") +
+  geom_errorbar(aes(ymin = `lwr.Not Dead`,ymax=`upr.Not Dead`,colour="Not Dead"),show.legend = FALSE) + ylab("Collisions per 1,000 bicyclists") +
   geom_text(aes(y = `upr.Not Dead`,label=sprintf('%.3f',`EstanBici.Not Dead`)),size=3,vjust=-1,family="Helvetica Light",show.legend = FALSE)+
   scale_colour_manual(breaks=c("Dead","Not Dead"),values = c("orangered3","navy"),labels=c("Fatal","Nonfatal"))+
   scale_linetype_manual(breaks=c("Tipo1","Tipo2"),values=c(1,3),labels=c("Fatal","Nonfatal"))+labs(colour="",linetype="")+
@@ -1064,11 +1094,12 @@ aux <- AccidentesBiciTotal %>%
       end_val = as.Date("2017-12-01")) %>% 
   mutate(x = ifelse(is.na(x), 0, x),
          Group.1 = getYear(Accidentes.Fecha)) %>%
-  left_join(aggregate(viajes$DIST_TOTAL_KMINT,by=list(viajes$AÑO),FUN=sum) %>% 
-              rename(KM=x), by="Group.1") %>% 
+  left_join(aggregate(viajes$DIST_TOTAL_KMINT,by=list(viajes$AÑO, viajes$SEXO),FUN=sum) %>% 
+              rename(KM=x,
+                     Sexo=Group.2), by=c("Group.1", "Sexo")) %>% 
   mutate(days = days_in_month(Accidentes.Fecha),
          Group.1=as.Date(paste0(Group.1,"-01-01")),
-         EstanKm=(x/(KM*days))*100e6)  %>% {
+         EstanKm=(x/(KM*days))*100e6) %>% {
     data <- .
     
     capture.output({
@@ -1098,9 +1129,13 @@ aux <- AccidentesBiciTotal %>%
         data %>% 
           filter(year(Accidentes.Fecha) %in% c(2011, 2017),
                  Gravedad2 == "Not Dead",
-                 Sexo=="Female") %>% 
+                 Sexo=="Male") %>% 
           t.test(EstanKm~Group.1, data = .) %>% 
           print()
+        print("Km - Female vs. Male reduction - Dead")
+        print(summary(lm(EstanKm~Accidentes.Fecha*Sexo, data = data %>% filter(year(Accidentes.Fecha) %in% c(2011, 2017), Gravedad2 == "Dead") %>% mutate(Accidentes.Fecha = as.factor(year(Accidentes.Fecha))))))
+        print("Km - Female vs. Male reduction - Not Dead")
+        print(summary(lm(EstanKm~Accidentes.Fecha*Sexo, data = data %>% filter(year(Accidentes.Fecha) %in% c(2011, 2017), Gravedad2 == "Not Dead") %>% mutate(Accidentes.Fecha = as.factor(year(Accidentes.Fecha))))))
       })
     }, file = "./GRAFICOS/estadisticas.txt", append = T)
     
